@@ -17,6 +17,16 @@ npm run preview    # serve dist/ at http://localhost:4173
 Wider than 900px, the app uses the tablet layout (side rail); narrower, it uses the
 phone layout (bottom bar with the raised Ask Bayani button).
 
+## Website (GitHub Pages)
+
+Every push to `main` builds the app and publishes it with
+`.github/workflows/deploy.yml`. In the repository's **Settings → Pages**, set
+**Source** to **GitHub Actions** (once). The app is then at
+https://eaadionido4ai-ui.github.io/bayanihandagamelibrary/.
+
+Opening `index.html` straight from the repository won't work: it is the
+development entry point and needs the build step.
+
 ## Android
 
 The web build is wrapped with Capacitor. You need Android Studio and the Android SDK.
