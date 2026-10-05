@@ -1,0 +1,8 @@
+{
+  "appId": "com.bayanihanda.gamelibrary",
+  "appName": "BAYANIHanda",
+  "webDir": "dist",
+  "android": {
+    "backgroundColor": "#d9650a"
+  }
+}

@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:ital,wght@0,600;0,700;0,800;0,900;1,800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:#dde6ea;font-family:Nunito,system-ui,sans-serif;color:#16303f}
+a{color:#a84d04}a:hover{color:#d9650a}
+button{font-family:inherit;cursor:pointer;border:none;padding:0;background:none;color:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+input,select{font-family:inherit}
+@keyframes bh-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes bh-jump{0%{transform:translateY(0) scale(1,1)}20%{transform:translateY(0) scale(1.1,.88)}50%{transform:translateY(-16px) scale(.95,1.06)}75%{transform:translateY(0) scale(1.05,.95)}100%{transform:translateY(0) scale(1,1)}}
+@keyframes bh-wave{0%,100%{transform:rotate(-140deg)}50%{transform:rotate(-172deg)}}
+@keyframes bh-blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+@keyframes bh-fall{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(1000px) rotate(560deg)}}
+@keyframes bh-flicker{0%,100%{transform:scale(1,1)}50%{transform:scale(.93,1.08)}}
+@keyframes bh-dot{0%,80%,100%{transform:scale(.55);opacity:.5}40%{transform:scale(1);opacity:1}}
+@keyframes bh-up{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes bh-fade{from{opacity:0}to{opacity:1}}
+@keyframes bh-pop{0%{transform:scale(0) rotate(-20deg);opacity:0}60%{transform:scale(1.25) rotate(6deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes bh-pulse{0%{box-shadow:0 0 0 0 rgba(255,197,61,.8)}70%{box-shadow:0 0 0 16px rgba(255,197,61,0)}100%{box-shadow:0 0 0 0 rgba(255,197,61,0)}}
+@keyframes bh-rain{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;background:#dde6ea">
+  <div style="width:100%;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 14px;padding:12px 16px 8px">
+    <div style="font:800 15px/1 'Baloo 2',sans-serif;padding-top:3px">BAYANIHanda · Android prototype</div>
+    <div style="display:flex;background:#fff;border-radius:999px;padding:3px;gap:2px;box-shadow:0 1px 2px rgba(0,0,0,.08)">
+      <sc-if value="{{ tb.phone }}"><button onClick="{{ tb.setPhone }}" style="padding:7px 14px;border-radius:999px;background:#16303f;color:#fff;font-weight:800;font-size:13px">Phone</button><button onClick="{{ tb.setTablet }}" style="padding:7px 14px;border-radius:999px;font-weight:800;font-size:13px;color:#4f6572">Tablet</button></sc-if>
+      <sc-if value="{{ tb.tablet }}"><button onClick="{{ tb.setPhone }}" style="padding:7px 14px;border-radius:999px;font-weight:800;font-size:13px;color:#4f6572">Phone</button><button onClick="{{ tb.setTablet }}" style="padding:7px 14px;border-radius:999px;background:#16303f;color:#fff;font-weight:800;font-size:13px">Tablet</button></sc-if>
+    </div>
+    <select value="{{ tb.jumpVal }}" onChange="{{ tb.onJump }}" style="padding:8px 12px;border-radius:999px;border:none;background:#fff;font-weight:800;font-size:13px;color:#16303f;box-shadow:0 1px 2px rgba(0,0,0,.08);cursor:pointer">
+      <option value="">Jump to a screen…</option>
+      <sc-for list="{{ tb.jumps }}" as="j"><option value="{{ j.v }}">{{ j.l }}</option></sc-for>
+    </select>
+    <button onClick="{{ tb.restart }}" style="padding:8px 14px;border-radius:999px;background:#fff;font-weight:800;font-size:13px;box-shadow:0 1px 2px rgba(0,0,0,.08)">↺ Restart</button>
+  </div>
+  <div style="flex:1;width:100%;display:flex;align-items:center;justify-content:center;padding:6px 16px 20px">
+    <div style="width:{{ dv.w }}px;height:{{ dv.h }}px;position:relative;flex:none">
+      <div style="position:absolute;left:0;top:0;width:{{ dv.ow }}px;height:{{ dv.oh }}px;transform:scale({{ dv.scale }});transform-origin:0 0;background:#1b262e;border-radius:{{ dv.r }}px;padding:{{ dv.b }}px;box-shadow:0 30px 80px rgba(14,34,51,.3),inset 0 0 0 2px #33424d">
+        <div style="position:relative;width:100%;height:100%;border-radius:{{ dv.sr }}px;overflow:hidden;background:#eef6fa;font-family:Nunito,system-ui,sans-serif;color:#16303f">
+
+          <div style="position:absolute;left:0;right:0;top:0;height:32px;z-index:95;pointer-events:none;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font:600 13px Roboto,system-ui,sans-serif;color:{{ sb.c }}">
+            <span>9:30</span>
+            <sc-if value="{{ dv.phone }}"><span style="position:absolute;left:50%;top:8px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:#10181d"></span></sc-if>
+            <span style="display:flex;gap:5px;align-items:center"><span style="width:13px;height:11px;background:{{ sb.c }};clip-path:polygon(50% 100%,0 25%,100% 25%)"></span><span style="width:11px;height:11px;background:{{ sb.c }};clip-path:polygon(100% 0,100% 100%,0 100%)"></span><span style="width:8px;height:13px;border-radius:2px;background:{{ sb.c }}"></span></span>
+          </div>
+
+          <div style="position:absolute;inset:0;display:flex;flex-direction:{{ dv.dir }}">
+            <sc-if value="{{ nav.rail }}">
+              <div style="flex:none;width:100px;height:100%;background:#fff;border-right:1px solid #d5e3ea;display:flex;flex-direction:column;align-items:center;gap:4px;padding:46px 0 22px;z-index:20">
+                <div style="width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,#ffd76a,#f2760c);box-shadow:0 4px 12px rgba(242,118,12,.35);display:flex;align-items:flex-end;justify-content:center;padding-bottom:9px;margin-bottom:18px"><div style="width:18px;height:24px;border-radius:50% 50% 50% 50%/70% 70% 30% 30%;background:linear-gradient(#fff3c4,#ffd24d 45%,#fff6d6)"></div></div>
+                <sc-for list="{{ nav.left }}" as="t">
+                  <button onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;width:84px;padding:6px 0">
+                    <sc-if value="{{ t.on }}"><span style="width:58px;height:34px;border-radius:17px;background:#ffe4c4;display:flex;align-items:center;justify-content:center;font-size:21px">{{ t.icon }}</span><span style="font-size:13px;font-weight:900;color:#a84d04">{{ t.label }}</span></sc-if>
+                    <sc-if value="{{ t.off }}"><span style="width:58px;height:34px;display:flex;align-items:center;justify-content:center;font-size:21px;filter:grayscale(.45);opacity:.85">{{ t.icon }}</span><span style="font-size:13px;font-weight:700;color:#4f6572">{{ t.label }}</span></sc-if>
+                  </button>
+                </sc-for>
+                <button onClick="{{ nav.ask }}" aria-label="Ask Bayani" style="display:flex;flex-direction:column;align-items:center;gap:4px;margin:8px 0">
+                  <span style="width:68px;height:68px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe58a,#ffc53d 60%,#eaa100);border:4px solid #fff;box-shadow:0 4px 0 #c99400,0 6px 14px rgba(14,34,51,.16);display:flex;align-items:flex-end;justify-content:center;overflow:hidden">{{ nav.mascot }}</span>
+                  <span style="font-size:12.5px;font-weight:900">Ask Bayani</span>
+                </button>
+                <sc-for list="{{ nav.right }}" as="t">
+                  <button onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;width:84px;padding:6px 0">
+                    <sc-if value="{{ t.on }}"><span style="width:58px;height:34px;border-radius:17px;background:#ffe4c4;display:flex;align-items:center;justify-content:center;font-size:21px">{{ t.icon }}</span><span style="font-size:13px;font-weight:900;color:#a84d04">{{ t.label }}</span></sc-if>
+                    <sc-if value="{{ t.off }}"><span style="width:58px;height:34px;display:flex;align-items:center;justify-content:center;font-size:21px;filter:grayscale(.45);opacity:.85">{{ t.icon }}</span><span style="font-size:13px;font-weight:700;color:#4f6572">{{ t.label }}</span></sc-if>
+                  </button>
+                </sc-for>
+                <div style="flex:1"></div>
+                <button onClick="{{ nav.settings }}" aria-label="Settings" style="width:48px;height:48px;border-radius:16px;background:#eef6fa;font-size:20px;display:flex;align-items:center;justify-content:center">⚙️</button>
+              </div>
+            </sc-if>
+
+            <div style="flex:1;min-width:0;min-height:0;position:relative;overflow:hidden">
+
+              <sc-if value="{{ sc.splash }}">
+                <div data-screen-label="Splash" onClick="{{ splash.skip }}" style="position:absolute;inset:0;background:radial-gradient(130% 90% at 50% 30%,#f58a1f 0%,#d9650a 50%,#9c4504 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;color:#fff;text-align:center;padding:40px 24px;cursor:pointer">
+                  <div style="width:128px;height:128px;border-radius:38px;background:#fff;box-shadow:0 10px 0 rgba(120,50,0,.35);display:flex;align-items:flex-end;justify-content:center;padding-bottom:24px">{{ splash.flame }}</div>
+                  <div>
+                    <div style="font:800 46px/1 'Baloo 2',sans-serif;padding-top:6px">BAYANIHanda</div>
+                    <div style="font-size:15px;font-weight:900;letter-spacing:5px;text-transform:uppercase;margin-top:6px">Game Library</div>
+                  </div>
+                  <p style="margin:0;font-weight:800;font-size:20px;font-style:italic">“Play, learn, and be ready.”</p>
+                  {{ splash.dots }}
+                  <div style="position:absolute;left:0;right:0;bottom:40px;font-size:12px;font-weight:800;letter-spacing:.6px">University of the Philippines Resilience Institute</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ sc.welcome }}">
+                <div data-screen-label="Welcome" style="position:absolute;inset:0;display:flex;flex-direction:column;background:radial-gradient(120% 70% at 50% 0%,#fff5df,#cfe6ef 75%);padding:44px 24px 36px">
+                  <div style="display:flex;justify-content:flex-end;min-height:40px">
+                    <sc-if value="{{ wl.showSkip }}"><button onClick="{{ wl.skip }}" style="font-weight:800;font-size:15px;color:#4f6572;padding:8px 12px">Skip</button></sc-if>
+                  </div>
+                  <div style="flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;max-width:520px;width:100%;margin:0 auto">
+                    <sc-if value="{{ wl.s0 }}">
+                      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+                        <div style="background:#fff;border:2px solid #d5e3ea;border-radius:22px;padding:8px 18px 6px;font:800 21px 'Baloo 2',sans-serif;box-shadow:0 4px 0 rgba(20,48,66,.08)">Hello! 👋</div>
+                        {{ wl.mascot }}
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <div style="font:800 32px/1.05 'Baloo 2',sans-serif">Hi! I'm Bayani.</div>
+                        <p style="margin:0;font-size:17px;font-weight:700;color:#3d5563;line-height:1.45;text-wrap:pretty">I'm a young hero, and I'll help you learn to stay safe, one game at a time.</p>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ wl.s1 }}">
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:320px">
+                        <div style="background:#fff;border:2px solid #bfe0ef;border-radius:20px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 4px 0 rgba(20,48,66,.08)"><span style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#6db4d6,#2a6b8f);display:flex;align-items:center;justify-content:center;font-size:27px">🛡️</span><span style="font:800 15px/1.1 'Baloo 2',sans-serif">Stop Hazards Early</span></div>
+                        <div style="background:#fff;border:2px solid #bfe9d4;border-radius:20px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 4px 0 rgba(20,48,66,.08)"><span style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#5fd39b,#128253);display:flex;align-items:center;justify-content:center;font-size:27px">🎒</span><span style="font:800 15px/1.1 'Baloo 2',sans-serif">Get Ready</span></div>
+                        <div style="background:#fff;border:2px solid #ffd9ad;border-radius:20px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 4px 0 rgba(20,48,66,.08)"><span style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#ffb04d,#f2760c);display:flex;align-items:center;justify-content:center;font-size:27px">🚨</span><span style="font:800 15px/1.1 'Baloo 2',sans-serif">Act Fast</span></div>
+                        <div style="background:#fff;border:2px solid #ddcdfa;border-radius:20px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 4px 0 rgba(20,48,66,.08)"><span style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#c3a6ff,#7a53c6);display:flex;align-items:center;justify-content:center;font-size:27px">🏘️</span><span style="font:800 15px/1.1 'Baloo 2',sans-serif">Bounce Back</span></div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <div style="font:800 32px/1.05 'Baloo 2',sans-serif">Four adventures</div>
+                        <p style="margin:0;font-size:17px;font-weight:700;color:#3d5563;line-height:1.45;text-wrap:pretty">Stop hazards early, get ready, act fast, and bounce back. Each adventure has its own games.</p>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ wl.s2 }}">
+                      <div style="width:260px;background:#fff;border-radius:22px;overflow:hidden;border:3px solid #f2760c;box-shadow:0 8px 0 rgba(20,48,66,.1);transform:rotate(-3deg)">
+                        <div style="background:linear-gradient(135deg,#d9650a,#c62f22);color:#fff;padding:10px 10px 6px;text-align:center;font:800 22px/1 'Baloo 2',sans-serif">BAYANIHanda</div>
+                        <div style="padding:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+                          <span style="height:48px;border-radius:12px;background:#eafaf1;border:2px solid #7fd8a8;display:flex;align-items:center;justify-content:center;font-size:22px">🎒</span>
+                          <span style="height:48px;border-radius:12px;background:#eafaf1;border:2px solid #7fd8a8;display:flex;align-items:center;justify-content:center;font-size:22px">🧯</span>
+                          <span style="height:48px;border-radius:12px;background:#f6f9fb;border:2px solid #d5e3ea;display:flex;align-items:center;justify-content:center;font-size:22px;filter:grayscale(1);opacity:.45">🗺️</span>
+                          <span style="height:48px;border-radius:12px;background:#f6f9fb;border:2px solid #d5e3ea;display:flex;align-items:center;justify-content:center;font-size:22px;filter:grayscale(1);opacity:.45">🧭</span>
+                        </div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <div style="font:800 32px/1.05 'Baloo 2',sans-serif">Earn badges</div>
+                        <p style="margin:0;font-size:17px;font-weight:700;color:#3d5563;line-height:1.45;text-wrap:pretty">Finish a game with flying colors to earn a badge for your Champion ID. Then save it, share it, or print it!</p>
+                      </div>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:18px;max-width:420px;width:100%;margin:0 auto">
+                    <div style="display:flex;gap:8px"><sc-for list="{{ wl.dots }}" as="d"><sc-if value="{{ d.on }}"><span style="display:block;width:26px;height:10px;border-radius:5px;background:#d9650a"></span></sc-if><sc-if value="{{ d.off }}"><span style="display:block;width:10px;height:10px;border-radius:5px;background:#b9ccd8"></span></sc-if></sc-for></div>
+                    <button onClick="{{ wl.next }}" style="width:100%;background:#d9650a;color:#fff;font:800 21px 'Baloo 2',sans-serif;padding:14px 24px 11px;border-radius:999px;box-shadow:0 6px 0 #a34a05" style-active="transform:translateY(4px);box-shadow:0 2px 0 #a34a05">{{ wl.cta }}</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ sc.addPlayer }}">
+                <div data-screen-label="Add player" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;background:radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef);padding:{{ dv.pad }}">
+                  <div style="max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <button onClick="{{ ap.back }}" aria-label="Back" style="width:48px;height:48px;border-radius:16px;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center;flex:none">←</button>
+                      <div style="font:800 26px/1 'Baloo 2',sans-serif;padding-top:4px">{{ ap.title }}</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin:6px 0 2px">
+                      <span style="width:112px;height:112px;border-radius:50%;background:{{ ap.av.bg }};font-size:62px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -5px 0 rgba(0,0,0,.1),0 6px 0 rgba(20,48,66,.1)">{{ ap.av.e }}</span>
+                      <span style="font:800 23px/1.1 'Baloo 2',sans-serif;min-height:26px;color:{{ ap.previewColor }}">{{ ap.previewName }}</span>
+                    </div>
+                    <div style="font:800 19px/1 'Baloo 2',sans-serif">Choose your avatar</div>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;justify-items:center">
+                      <sc-for list="{{ ap.avatars }}" as="a">
+                        <button onClick="{{ a.pick }}" aria-label="{{ a.id }}" style="position:relative;width:70px;height:70px;border-radius:50%;background:{{ a.bg }};font-size:36px;display:flex;align-items:center;justify-content:center;border:4px solid {{ a.ring }};box-shadow:inset 0 -3px 0 rgba(0,0,0,.08)">{{ a.e }}<sc-if value="{{ a.on }}"><span style="position:absolute;right:-6px;bottom:-4px;width:26px;height:26px;border-radius:50%;background:#d9650a;color:#fff;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border:3px solid #fff">✓</span></sc-if></button>
+                      </sc-for>
+                    </div>
+                    <div style="font:800 19px/1 'Baloo 2',sans-serif;margin-top:6px">Your nickname</div>
+                    <div style="position:relative">
+                      <input value="{{ ap.nick }}" onChange="{{ ap.onNick }}" maxlength="14" placeholder="Your nickname" autocomplete="off" style="width:100%;border:3px solid #d5e3ea;border-radius:18px;padding:15px 64px 15px 16px;font-size:19px;font-weight:800;color:#16303f;background:#fff;outline:none" style-focus="border-color:#f2760c">
+                      <span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:800;color:#4f6572">{{ ap.counter }}</span>
+                    </div>
+                    <p style="margin:0;background:#eef6fa;border:1px solid #d5e3ea;border-radius:14px;padding:12px 14px;color:#2f5d77;font-weight:700;font-size:14px;line-height:1.45">🔒 We only save a nickname and a picture, right here on this device. No full names, no birthdays, nothing is uploaded.</p>
+                    <div style="display:flex;flex-direction:column;gap:12px;margin-top:6px">
+                      <sc-if value="{{ ap.ok }}"><button onClick="{{ ap.save }}" style="width:100%;background:#d9650a;color:#fff;font:800 21px 'Baloo 2',sans-serif;padding:14px 24px 11px;border-radius:999px;box-shadow:0 6px 0 #a34a05" style-active="transform:translateY(4px);box-shadow:0 2px 0 #a34a05">{{ ap.cta }}</button></sc-if>
+                      <sc-if value="{{ ap.notOk }}"><div style="width:100%;text-align:center;background:#c9d6dd;color:#4f6572;font:800 21px 'Baloo 2',sans-serif;padding:14px 24px 11px;border-radius:999px;box-shadow:0 6px 0 #b3c3cc">{{ ap.cta }}</div></sc-if>
+                      <sc-if value="{{ ap.editing }}"><button onClick="{{ ap.remove }}" style="width:100%;background:#fff;color:#c62f22;font-weight:900;font-size:16px;padding:13px 20px;border-radius:999px;border:2px solid #f3c9c4;box-shadow:0 4px 0 #f3c9c4">Remove this player</button></sc-if>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ sc.players }}">
+                <div data-screen-label="Who's playing" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;background:radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef);padding:{{ dv.pad }}">
+                  <div style="max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:18px">
+                    <div style="display:flex;align-items:flex-start;gap:12px">
+                      <div style="flex:1;min-width:0">
+                        <div style="font:800 31px/1.05 'Baloo 2',sans-serif;padding-top:4px">Who is playing?</div>
+                        <div style="font-size:16px;font-weight:800;font-style:italic;color:#4f6572;margin-top:4px">“Tap your picture to play.”</div>
+                      </div>
+                      <button onClick="{{ pl.toggleEdit }}" style="flex:none;background:#fff;border:2px solid #d5e3ea;box-shadow:0 3px 0 #d5e3ea;border-radius:999px;padding:9px 14px;font-weight:900;font-size:14px">{{ pl.editLabel }}</button>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:16px">
+                      <sc-for list="{{ pl.list }}" as="p" hint-placeholder-count="3">
+                        <div style="position:relative">
+                          <button onClick="{{ p.tap }}" style="width:100%;background:#fff;border:3px solid {{ p.border }};border-style:{{ p.bstyle }};border-radius:24px;padding:18px 10px 14px;box-shadow:0 5px 0 rgba(20,48,66,.1);display:flex;flex-direction:column;align-items:center;gap:6px" style-active="transform:translateY(3px)">
+                            <span style="width:84px;height:84px;border-radius:50%;background:{{ p.bg }};display:flex;align-items:center;justify-content:center;font-size:46px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.1)">{{ p.e }}</span>
+                            <span style="font:800 19px/1.1 'Baloo 2',sans-serif;padding-top:3px">{{ p.nick }}</span>
+                            <span style="font-size:13px;font-weight:800;color:#4f6572">{{ p.meta }}</span>
+                          </button>
+                          <sc-if value="{{ p.active }}"><span style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:#d9650a;color:#fff;font-size:11px;font-weight:900;letter-spacing:.6px;padding:3px 10px;border-radius:999px">PLAYING</span></sc-if>
+                          <sc-if value="{{ pl.editing }}">
+                            <button onClick="{{ p.remove }}" aria-label="Remove player" style="position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;background:#c62f22;color:#fff;font-weight:900;font-size:15px;display:flex;align-items:center;justify-content:center">✕</button>
+                            <span style="position:absolute;top:8px;left:8px;width:32px;height:32px;border-radius:50%;background:#e3eff4;color:#2a6b8f;font-size:15px;display:flex;align-items:center;justify-content:center;pointer-events:none">✎</span>
+                          </sc-if>
+                        </div>
+                      </sc-for>
+                      <sc-if value="{{ pl.canAdd }}">
+                        <button onClick="{{ pl.add }}" style="background:transparent;border:3px dashed #9fb6c4;border-radius:24px;padding:18px 10px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;color:#2f5d77">
+                          <span style="width:84px;height:84px;border-radius:50%;background:#eef6fa;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:700">+</span>
+                          <span style="font:800 19px/1.1 'Baloo 2',sans-serif;padding-top:3px">Add player</span>
+                          <span style="font-size:13px;font-weight:800">New hero</span>
+                        </button>
+                      </sc-if>
+                    </div>
+                    <p style="margin:0;background:#eef6fa;border:1px solid #d5e3ea;border-radius:14px;padding:12px 14px;color:#2f5d77;font-weight:700;font-size:14px;line-height:1.45">You can have up to 10 players on this device for now.</p>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ sc.home }}">
+                <div data-screen-label="Home" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;background:radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef);padding:{{ dv.pad }}">
+                  <div style="max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:16px">
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <div style="width:42px;height:42px;border-radius:13px;flex:none;background:linear-gradient(135deg,#ffd76a,#f2760c);box-shadow:0 4px 10px rgba(242,118,12,.35);display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px"><div style="width:16px;height:21px;border-radius:50% 50% 50% 50%/70% 70% 30% 30%;background:linear-gradient(#fff3c4,#ffd24d 45%,#fff6d6)"></div></div>
+                      <div style="flex:1;min-width:0">
+                        <div style="font:800 22px/1 'Baloo 2',sans-serif;padding-top:4px">BAYANIHanda</div>
+                        <div style="font-size:12px;font-weight:800;color:#4f6572;letter-spacing:.4px">Game Library</div>
+                      </div>
+                      <sc-if value="{{ dv.phone }}"><button onClick="{{ home.goSettings }}" aria-label="Settings" style="width:44px;height:44px;border-radius:15px;background:#fff;border:2px solid #d5e3ea;box-shadow:0 3px 0 #d5e3ea;font-size:18px;display:flex;align-items:center;justify-content:center;flex:none">⚙️</button></sc-if>
+                      <button onClick="{{ home.goPlayers }}" style="display:flex;align-items:center;gap:7px;background:#fff;border:2px solid #d5e3ea;border-radius:999px;padding:3px 12px 3px 3px;font-weight:900;font-size:15px;box-shadow:0 3px 0 #d5e3ea;flex:none">
+                        <span style="width:34px;height:34px;border-radius:50%;background:{{ home.avBg }};display:flex;align-items:center;justify-content:center;font-size:19px">{{ home.avE }}</span>{{ home.nick }}
+                      </button>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:18px;align-items:start">
+                      <div style="display:flex;flex-direction:column;gap:16px">
+                        <div style="display:flex;align-items:flex-end;gap:12px;background:#fff;border-radius:24px;padding:14px 14px 12px;border:2px solid #d5e3ea;box-shadow:0 5px 0 rgba(20,48,66,.08)">
+                          <button onClick="{{ home.tapMascot }}" aria-label="Tap Bayani" style="flex:none;display:flex;flex-direction:column;align-items:center;gap:4px">
+                            {{ home.mascot }}
+                            <span style="font-size:11.5px;font-weight:900;color:#a84d04;background:#fff1e3;border-radius:999px;padding:2px 9px">Tap me!</span>
+                          </button>
+                          <div style="flex:1;min-width:0;align-self:stretch;background:#eef6fa;border-radius:18px;padding:12px 40px 12px 14px;position:relative;display:flex;flex-direction:column;justify-content:center">
+                            <p style="margin:0;font:800 20px/1.15 'Baloo 2',sans-serif">{{ home.line.t }}</p>
+                            <p style="margin:4px 0 0;font-size:14.5px;color:#3d5563;font-weight:700;line-height:1.4;text-wrap:pretty">{{ home.line.s }}</p>
+                            <button onClick="{{ home.speak }}" aria-label="Read aloud" style="position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:#fff;font-size:14px;box-shadow:0 2px 0 #d5e3ea;display:flex;align-items:center;justify-content:center">🔊</button>
+                          </div>
+                        </div>
+                        <div style="background:#fff5df;border:2px solid #ffe2a8;border-radius:24px;padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px">
+                          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap"><span style="font-size:12px;font-weight:900;letter-spacing:1px;color:#7a5400">💡 TODAY'S SAFETY TIP</span><span style="font-size:12px;font-weight:800;color:#7a5400">{{ home.date }}</span></div>
+                          <p style="margin:0;font-weight:800;font-size:16.5px;line-height:1.4;text-wrap:pretty">{{ home.tip.text }}</p>
+                          <button onClick="{{ home.tip.open }}" style="align-self:flex-start;display:flex;align-items:center;gap:8px;background:#128253;color:#fff;font-weight:900;font-size:15px;padding:10px 16px;border-radius:999px;box-shadow:0 4px 0 #0b5e3b" style-active="transform:translateY(3px);box-shadow:0 1px 0 #0b5e3b">{{ home.tip.icon }} Play {{ home.tip.name }}</button>
+                        </div>
+                        <button onClick="{{ home.goId }}" style="display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:linear-gradient(135deg,#ffd76a,#f7a23a);color:#4a2a00;border-radius:22px;box-shadow:0 5px 0 #c85e07;padding:14px 16px" style-active="transform:translateY(3px);box-shadow:0 2px 0 #c85e07">
+                          <span style="font-size:32px;flex:none">🏆</span>
+                          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+                            <span style="font:800 18px/1.1 'Baloo 2',sans-serif;padding-top:2px">My Champion ID</span>
+                            <span style="display:block;height:10px;background:rgba(255,255,255,.65);border-radius:999px;overflow:hidden"><span style="display:block;height:100%;width:{{ home.idPct }}%;background:#128253;border-radius:999px"></span></span>
+                            <span style="font-size:13px;font-weight:900">{{ home.idLine }} · {{ home.rank }}</span>
+                          </span>
+                          <span style="font-size:26px;font-weight:900;flex:none">›</span>
+                        </button>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:12px">
+                        <div><div style="font:800 22px/1.1 'Baloo 2',sans-serif">Pick an adventure</div><div style="font-size:14px;font-weight:700;color:#4f6572;margin-top:2px">Tap a card to see its games.</div></div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                          <sc-for list="{{ home.pillars }}" as="p" hint-placeholder-count="4">
+                            <button onClick="{{ p.open }}" style="position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:#fff;border:2px solid {{ p.border }};border-radius:22px;padding:14px 13px 12px;box-shadow:0 5px 0 rgba(20,48,66,.1);min-height:176px" style-active="transform:translateY(3px);box-shadow:0 2px 0 rgba(20,48,66,.1)">
+                              <span style="width:58px;height:58px;border-radius:18px;background:{{ p.grad }};display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)">{{ p.icon }}</span>
+                              <span style="font-size:10.5px;font-weight:900;letter-spacing:.4px;text-transform:uppercase;color:#4f6572;line-height:1.2">{{ p.sub }}</span>
+                              <span style="font:800 19px/1.05 'Baloo 2',sans-serif">{{ p.name }}</span>
+                              <span style="margin-top:auto;font-size:12.5px;font-weight:900;background:#e3eff4;border-radius:999px;padding:4px 10px">{{ p.countLabel }}</span>
+                              <span style="position:absolute;top:12px;right:12px;width:40px;height:40px">
+                                <svg width="40" height="40" viewBox="0 0 40 40" style="transform:rotate(-90deg);display:block"><circle cx="20" cy="20" r="15" fill="none" stroke="#d5e3ea" stroke-width="4"></circle><circle cx="20" cy="20" r="15" fill="none" stroke="{{ p.ring }}" stroke-width="4" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="{{ p.dash }}"></circle></svg>
+                                <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900">{{ p.prog }}</span>
+                              </span>
+                            </button>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ sc.games }}">
+                <div data-screen-label="Games" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;background:radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef);padding:{{ dv.pad }}">
+                  <div style="max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:14px">
+                    <div><div style="font:800 31px/1.05 'Baloo 2',sans-serif;padding-top:4px">Games</div><div style="font-size:14.5px;font-weight:700;color:#4f6572;margin-top:2px">{{ games.sub }}</div></div>
+                    <div style="display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none">
+                      <sc-for list="{{ games.chips }}" as="c">
+                        <button onClick="{{ c.pick }}" style="flex:none">
+                          <sc-if value="{{ c.on }}"><span style="display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;background:{{ c.bg }};color:#fff;font-weight:900;font-size:14px;box-shadow:0 3px 0 rgba(0,0,0,.2);white-space:nowrap">{{ c.icon }} {{ c.label }}</span></sc-if>
+                          <sc-if value="{{ c.off }}"><span style="display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#fff;border:2px solid #d5e3ea;font-weight:800;font-size:14px;white-space:nowrap">{{ c.icon }} {{ c.label }}</span></sc-if>
+                        </button>
+                      </sc-for>
+                    </div>
+                    <sc-if value="{{ games.hasBanner }}">
+                      <div style="border-radius:24px;background:{{ games.banner.banner }};color:#fff;padding:16px 18px;display:flex;gap:14px;align-items:center;box-shadow:0 5px 0 rgba(0,0,0,.12)">
+                        <span style="width:62px;height:62px;border-radius:20px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:33px;flex:none">{{ games.banner.icon }}</span>
+                        <div style="flex:1;min-width:0">
+                          <span style="display:inline-block;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;background:rgba(0,0,0,.22);border-radius:999px;padding:3px 9px">{{ games.banner.sub }} Pillar</span>
+                          <div style="font:800 23px/1.1 'Baloo 2',sans-serif;margin-top:5px">{{ games.banner.name }}</div>
+                          <p style="margin:3px 0 0;font-size:14.5px;font-weight:700;line-height:1.4">{{ games.banner.lead }}</p>
+                          <p style="margin:6px 0 0;font-size:13px;font-weight:900">🏅 {{ games.banner.prog }}</p>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-for list="{{ games.groups }}" as="gr">
+                      <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px">
+                        <sc-if value="{{ gr.showHead }}"><div style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:{{ gr.text }}"><span>{{ gr.icon }} {{ gr.name }}</span><span style="flex:1;height:2px;background:#c8d9e2;border-radius:2px"></span></div></sc-if>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:12px">
+                          <sc-for list="{{ gr.games }}" as="gm">
+                            <sc-if value="{{ gm.live }}">
+                              <button onClick="{{ gm.open }}" style="position:relative;display:flex;gap:14px;align-items:center;text-align:left;width:100%;background:#fff;border-radius:22px;padding:14px;box-shadow:0 5px 0 rgba(20,48,66,.1)" style-active="transform:translateY(3px);box-shadow:0 2px 0 rgba(20,48,66,.1)">
+                                <span style="width:66px;height:66px;border-radius:20px;flex:none;background:{{ gm.grad }};display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)">{{ gm.icon }}</span>
+                                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+                                  <span style="font:800 18.5px/1.1 'Baloo 2',sans-serif;padding:3px 30px 0 0">{{ gm.name }}</span>
+                                  <span style="font-size:13.5px;font-weight:700;color:#4f6572;line-height:1.35">{{ gm.short }}</span>
+                                  <span style="display:flex;gap:6px;flex-wrap:wrap;margin-top:3px">
+                                    <span style="font-size:11px;font-weight:900;letter-spacing:.5px;background:#e6f3f9;color:#1f5675;border-radius:999px;padding:3px 8px">3D · PLAY NOW</span>
+                                    <sc-if value="{{ gm.earned }}"><span style="font-size:11px;font-weight:900;letter-spacing:.5px;background:#e5f6ee;color:#0c5c3a;border-radius:999px;padding:3px 8px">✓ BADGE EARNED</span></sc-if>
+                                  </span>
+                                </span>
+                                <span onClick="{{ gm.credit }}" role="button" aria-label="Who made this game" style="position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:1.5px solid #d5e3ea;color:#4f6572;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;background:#fff">i</span>
+                              </button>
+                            </sc-if>
+                            <sc-if value="{{ gm.soon }}">
+                              <div onClick="{{ gm.soonTap }}" style="display:flex;gap:14px;align-items:center;background:rgba(255,255,255,.55);border:2px dashed #b9ccd8;border-radius:22px;padding:14px;cursor:pointer">
+                                <span style="width:66px;height:66px;border-radius:20px;flex:none;background:#b9c6cf;display:flex;align-items:center;justify-content:center;font-size:34px;filter:grayscale(.6)">{{ gm.icon }}</span>
+                                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+                                  <span style="font:800 18.5px/1.1 'Baloo 2',sans-serif;padding-top:3px;color:#3d5563">{{ gm.name }}</span>
+                                  <span style="font-size:13.5px;font-weight:700;color:#4f6572;line-height:1.35">{{ gm.short }}</span>
+                                  <span style="align-self:flex-start;font-size:11px;font-weight:900;letter-spacing:.5px;background:#eef2f4;color:#4f6572;border-radius:999px;padding:3px 8px;margin-top:3px">COMING SOON</span>
+                                </span>
+                              </div>
+                            </sc-if>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ sc.intro }}">
+                <div data-screen-label="Game intro" style="position:absolute;inset:0;display:flex;flex-direction:column;background:radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef)">
+                  <div style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;padding:{{ dv.pad }}">
+                    <div style="max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:16px">
+                      <div style="display:flex;align-items:center;gap:10px">
+                        <button onClick="{{ intro.back }}" aria-label="Back" style="width:48px;height:48px;border-radius:16px;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center;flex:none">←</button>
+                        <div style="flex:1"></div>
+                        <sc-if value="{{ intro.earned }}"><span style="font-size:12px;font-weight:900;background:#e5f6ee;color:#0c5c3a;border-radius:999px;padding:6px 11px">✓ {{ intro.badge }} badge</span></sc-if>
+                        <button onClick="{{ intro.credit }}" style="background:#fff;border:2px solid #d5e3ea;border-radius:999px;padding:7px 12px;font-weight:800;font-size:13px;color:#3d5563;white-space:nowrap">ⓘ Credits</button>
+                      </div>
+                      <div style="border-radius:28px;background:{{ intro.p.banner }};color:#fff;padding:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;box-shadow:0 6px 0 rgba(0,0,0,.12)">
+                        <span style="width:86px;height:86px;border-radius:26px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:48px;flex:none;box-shadow:0 4px 0 rgba(0,0,0,.15)">{{ intro.g.icon }}</span>
+                        <div style="flex:1 1 220px;min-width:0">
+                          <span style="display:inline-block;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;background:rgba(0,0,0,.24);border-radius:999px;padding:4px 10px;white-space:nowrap">{{ intro.p.icon }} {{ intro.p.name }}</span>
+                          <div style="font:800 28px/1.05 'Baloo 2',sans-serif;margin-top:8px">{{ intro.g.name }}</div>
+                          <p style="margin:6px 0 0;font-size:15px;font-weight:700;line-height:1.45;text-wrap:pretty">{{ intro.g.desc }}</p>
+                        </div>
+                      </div>
+                      <div style="display:flex;align-items:flex-end;gap:10px">
+                        <span style="flex:none">{{ intro.mascot }}</span>
+                        <div style="flex:1;min-width:0;background:#fff;border:2px solid #d5e3ea;border-radius:20px 20px 20px 6px;padding:12px 46px 12px 14px;position:relative">
+                          <div style="font-size:11.5px;font-weight:900;letter-spacing:1px;color:#7a5400">💬 BAYANI'S TIP</div>
+                          <p style="margin:3px 0 0;font-weight:700;font-size:15px;line-height:1.45;text-wrap:pretty">{{ intro.g.tip }}</p>
+                          <button onClick="{{ intro.speakTip }}" aria-label="Read aloud" style="position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:#eef6fa;font-size:14px;display:flex;align-items:center;justify-content:center">🔊</button>
+                        </div>
+                      </div>
+                      <sc-if value="{{ intro.hasModes }}">
+                        <div style="font:800 21px/1 'Baloo 2',sans-serif;margin-top:4px">{{ intro.modesLabel }}</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px">
+                          <sc-for list="{{ intro.modes }}" as="m">
+                            <button onClick="{{ m.pick }}" style="display:flex;gap:12px;align-items:center;text-align:left;background:#fff;border-radius:20px;padding:12px;border:3px solid {{ m.border }};box-shadow:0 4px 0 rgba(20,48,66,.08)">
+                              <span style="width:54px;height:54px;border-radius:16px;background:{{ m.tint }};display:flex;align-items:center;justify-content:center;font-size:28px;flex:none">{{ m.icon }}</span>
+                              <span style="flex:1;min-width:0"><span style="display:block;font:800 16.5px/1.15 'Baloo 2',sans-serif;padding-top:2px">{{ m.name }}</span><span style="display:block;font-size:13px;font-weight:700;color:#4f6572;line-height:1.35;margin-top:2px">{{ m.desc }}</span></span>
+                              <sc-if value="{{ m.on }}"><span style="width:28px;height:28px;border-radius:50%;background:{{ m.color }};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;flex:none">✓</span></sc-if>
+                            </button>
+                          </sc-for>
+                        </div>
+                      </sc-if>
+                      <div style="font:800 21px/1 'Baloo 2',sans-serif;margin-top:4px">{{ intro.stepsTitle }}</div>
+                      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px">
+                        <sc-for list="{{ intro.steps }}" as="stp">
+                          <div style="background:#fff;border-radius:18px;padding:14px;box-shadow:0 4px 0 rgba(20,48,66,.08);display:flex;flex-direction:column;gap:6px">
+                            <span style="width:40px;height:40px;border-radius:50%;background:{{ stp.color }};color:#fff;display:flex;align-items:center;justify-content:center;font:800 19px/1 'Baloo 2',sans-serif;padding-top:3px">{{ stp.n }}</span>
+                            <b style="font-size:16px;font-weight:900">{{ stp.t }}</b>
+                            <span style="font-size:13.5px;font-weight:700;color:#4f6572;line-height:1.4">{{ stp.d }}</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                      <sc-if value="{{ intro.hasNote }}"><p style="margin:0;font-size:13.5px;color:#3d5563;font-weight:700;font-style:italic;line-height:1.45">{{ intro.note }}</p></sc-if>
+                    </div>
+                  </div>
+                  <div style="flex:none;padding:12px 18px 30px;background:linear-gradient(rgba(207,230,239,0),#cfe6ef 35%);display:flex;justify-content:center">
+                    <button onClick="{{ intro.start }}" style="width:100%;max-width:440px;background:#d9650a;color:#fff;font:800 22px 'Baloo 2',sans-serif;padding:14px 24px 11px;border-radius:999px;box-shadow:0 6px 0 #a34a05" style-active="transform:translateY(4px);box-shadow:0 2px 0 #a34a05">▶ {{ intro.startLabel }}</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ sc.play }}">
+                <div data-screen-label="Gameplay" style="position:absolute;inset:0;background:#0e2233;overflow:hidden;color:#fff;user-select:none;-webkit-user-select:none">
+                  <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,#11293b 0 22px,#143146 22px 44px)"></div>
+                  <sc-if value="{{ hud.showLabel }}"><div style="position:absolute;left:0;right:0;bottom:24%;text-align:center;font:700 11.5px ui-monospace,Menlo,monospace;letter-spacing:1.5px;text-transform:uppercase;color:#8fb0c6;pointer-events:none">3D scene · {{ hud.name }} · {{ hud.scene }}</div></sc-if>
+
+                  <sc-if value="{{ hud.fire }}">
+                    <div style="position:absolute;top:100px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5"><sc-for list="{{ hud.f.chips }}" as="c"><span style="padding:7px 10px;border-radius:999px;font-weight:900;font-size:12px;letter-spacing:1px;background:{{ c.bg }};border:2px solid {{ c.bd }}">{{ c.t }}</span></sc-for></div>
+                    <div style="position:absolute;top:150px;left:50%;transform:translateX(-50%);width:min(72%,360px);display:flex;flex-direction:column;gap:14px;z-index:5">
+                      <div><div style="font-size:11px;font-weight:900;letter-spacing:1px;margin-bottom:3px">🔥 FIRE</div><div style="height:12px;background:rgba(255,255,255,.2);border-radius:999px;overflow:hidden"><div style="height:100%;width:{{ hud.f.fireW }};background:linear-gradient(90deg,#ffd24d,#f2760c,#e2382b);transition:width .12s linear"></div></div></div>
+                      <sc-if value="{{ hud.f.hard }}"><div><div style="font-size:11px;font-weight:900;letter-spacing:1px;margin-bottom:3px">🧯 EXTINGUISHER</div><div style="height:12px;background:rgba(255,255,255,.2);border-radius:999px;overflow:hidden"><div style="height:100%;width:{{ hud.f.agentW }};background:linear-gradient(90deg,#8fe3ff,#2aa7d6);transition:width .12s linear"></div></div></div></sc-if>
+                    </div>
+                    <div style="position:absolute;left:50%;bottom:30%;transform:translateX(-50%) scale({{ hud.f.flame }});transform-origin:50% 100%;font-size:120px;line-height:1;transition:transform .15s;filter:drop-shadow(0 0 30px rgba(255,140,0,.7));pointer-events:none">🔥</div>
+                    <sc-if value="{{ hud.f.spraying }}"><div style="position:absolute;right:104px;bottom:150px;width:46%;height:30px;background:linear-gradient(90deg,rgba(225,242,255,0),rgba(225,242,255,.85));border-radius:20px;transform:rotate(-22deg);transform-origin:100% 50%;pointer-events:none"></div></sc-if>
+                    <div style="position:absolute;top:50%;left:50%;width:30px;height:30px;transform:translate(-50%,-50%);pointer-events:none"><span style="position:absolute;left:14px;top:0;width:2px;height:30px;background:rgba(255,255,255,.85)"></span><span style="position:absolute;top:14px;left:0;height:2px;width:30px;background:rgba(255,255,255,.85)"></span></div>
+                    <div style="position:absolute;left:16px;bottom:34px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;z-index:6">
+                      <span style="font-size:11.5px;font-weight:900;background:{{ hud.f.distBg }};border-radius:999px;padding:3px 9px">{{ hud.f.dist }}</span>
+                      <button onClick="{{ hud.f.fwd }}" aria-label="Step forward" style="width:60px;height:56px;border-radius:16px;background:rgba(255,255,255,.92);color:#16303f;font-weight:900;font-size:20px;box-shadow:0 5px 0 rgba(0,0,0,.25)">↑</button>
+                      <button onClick="{{ hud.f.back }}" aria-label="Step back" style="width:60px;height:56px;border-radius:16px;background:rgba(255,255,255,.92);color:#16303f;font-weight:900;font-size:20px;box-shadow:0 5px 0 rgba(0,0,0,.25)">↓</button>
+                    </div>
+                    <sc-if value="{{ hud.f.noPin }}"><button onClick="{{ hud.f.pull }}" style="position:absolute;left:50%;bottom:176px;transform:translateX(-50%);background:linear-gradient(#ffdd6b,#ffc53d);color:#4a3200;font-weight:900;font-size:17px;padding:15px 24px;border-radius:999px;box-shadow:0 6px 0 #c99400;z-index:6;white-space:nowrap;animation:bh-pulse 1.6s infinite">📌 Pull the pin</button></sc-if>
+                    <button onPointerDown="{{ hud.f.down }}" onPointerUp="{{ hud.f.up }}" onPointerLeave="{{ hud.f.up }}" onPointerCancel="{{ hud.f.up }}" onContextMenu="{{ hud.f.noMenu }}" style="position:absolute;right:18px;bottom:34px;width:118px;height:118px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#3ee39b,#1aa46a 60%,#128253);color:#03321e;font-weight:900;font-size:16px;line-height:1.15;box-shadow:0 8px 0 #0b5e3b;z-index:6;touch-action:none" style-active="transform:translateY(5px);box-shadow:0 3px 0 #0b5e3b">Hold to<br>Spray</button>
+                  </sc-if>
+
+                  <sc-if value="{{ hud.gobag }}">
+                    <div style="position:absolute;inset:0;transform:scale({{ hud.zoom }});transition:transform .2s">
+                      <sc-for list="{{ hud.gb.items }}" as="it">
+                        <button onClick="{{ it.tap }}" style="position:absolute;left:{{ it.x }}%;top:{{ it.y }}%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;opacity:{{ it.op }}" style-active="transform:translate(-50%,-46%)">
+                          <span style="width:64px;height:64px;border-radius:20px;background:rgba(255,255,255,.96);display:flex;align-items:center;justify-content:center;font-size:33px;box-shadow:0 5px 0 rgba(0,0,0,.3)">{{ it.e }}</span>
+                          <span style="font-size:11.5px;font-weight:900;background:rgba(14,34,51,.8);padding:2px 8px;border-radius:999px;white-space:nowrap">{{ it.n }}</span>
+                        </button>
+                      </sc-for>
+                    </div>
+                    <div style="position:absolute;left:16px;top:52%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:6">
+                      <button onClick="{{ hud.zoomIn }}" aria-label="Zoom in" style="width:48px;height:48px;border-radius:14px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.2);font-size:22px;font-weight:900">+</button>
+                      <button onClick="{{ hud.zoomOut }}" aria-label="Zoom out" style="width:48px;height:48px;border-radius:14px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.2);font-size:22px;font-weight:900">−</button>
+                      <button onClick="{{ hud.gb.top }}" aria-label="Top view" style="width:48px;height:48px;border-radius:14px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.2);font-size:18px">⬍</button>
+                    </div>
+                    <div style="position:absolute;left:16px;right:178px;bottom:36px;z-index:6">
+                      <div style="font-size:11.5px;font-weight:900;letter-spacing:1px;margin-bottom:4px">🎒 GO BAG</div>
+                      <div style="height:14px;background:rgba(255,255,255,.2);border-radius:999px;overflow:hidden"><div style="height:100%;width:{{ hud.gb.capW }};background:linear-gradient(90deg,#3ee39b,#1aa46a);transition:width .2s"></div></div>
+                      <div style="font-size:12.5px;font-weight:800;margin-top:5px">{{ hud.gb.count }}</div>
+                      <div style="font-size:18px;margin-top:2px;min-height:22px">{{ hud.gb.icons }}</div>
+                    </div>
+                    <button onClick="{{ hud.gb.zip }}" style="position:absolute;right:16px;bottom:44px;background:#d9650a;color:#fff;font-weight:900;font-size:16px;padding:15px 18px;border-radius:999px;box-shadow:0 6px 0 #a34a05;z-index:6;white-space:nowrap" style-active="transform:translateY(4px);box-shadow:0 2px 0 #a34a05">Zip up my bag</button>
+                  </sc-if>
+
+                  <sc-if value="{{ hud.quake }}">
+                    <div style="position:absolute;top:100px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 14px;z-index:5;white-space:nowrap">
+                      <span style="font-weight:900;font-size:14px">{{ hud.q.round }}</span>
+                      <span style="display:flex;gap:6px"><sc-for list="{{ hud.q.dots }}" as="d"><sc-if value="{{ d.on }}"><span style="display:block;width:12px;height:12px;border-radius:50%;background:#1aa46a"></span></sc-if><sc-if value="{{ d.off }}"><span style="display:block;width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.3)"></span></sc-if></sc-for></span>
+                    </div>
+                    <div style="position:absolute;left:12px;right:12px;bottom:36px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:620px;margin:0 auto;z-index:6">
+                      <sc-for list="{{ hud.q.btns }}" as="b">
+                        <button onClick="{{ b.tap }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:88px;border-radius:20px;background:{{ b.bg }};border:2px solid {{ b.bd }};box-shadow:0 5px 0 rgba(0,0,0,.3);font-weight:900;font-size:14px;transition:background .15s" style-active="transform:translateY(3px)"><span style="font-size:28px">{{ b.e }}</span>{{ b.n }}</button>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ hud.path }}">
+                    <div style="position:absolute;top:100px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 14px;z-index:5;white-space:nowrap;font-weight:900;font-size:13.5px"><span style="letter-spacing:1px">{{ hud.pa.hearts }}</span><span>{{ hud.pa.steps }}</span><span style="opacity:.85">{{ hud.pa.map }}</span></div>
+                    <div style="position:absolute;left:50%;top:206px;transform:translateX(-50%) scale({{ hud.zoom }});transform-origin:50% 0;transition:transform .2s;display:grid;grid-template-columns:repeat(6,46px);gap:5px;padding:10px;background:rgba(255,255,255,.08);border-radius:20px;z-index:4">
+                      <sc-for list="{{ hud.pa.cells }}" as="c">
+                        <button onClick="{{ c.tap }}" style="position:relative;width:46px;height:46px;border-radius:12px;background:{{ c.bg }};border:3px solid {{ c.bd }};font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.15)">{{ c.e }}<sc-if value="{{ c.risky }}"><span style="position:absolute;top:-7px;right:-7px;font-size:13px">⚠️</span></sc-if></button>
+                      </sc-for>
+                    </div>
+                    <div style="position:absolute;left:16px;bottom:40px;display:flex;flex-direction:column;gap:10px;z-index:6">
+                      <button onClick="{{ hud.zoomIn }}" aria-label="Zoom in" style="width:48px;height:48px;border-radius:14px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.2);font-size:22px;font-weight:900">+</button>
+                      <button onClick="{{ hud.zoomOut }}" aria-label="Zoom out" style="width:48px;height:48px;border-radius:14px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.2);font-size:22px;font-weight:900">−</button>
+                      <button onClick="{{ hud.pa.reveal }}" aria-label="Reveal a safe route" style="width:48px;height:48px;border-radius:14px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.2);font-size:20px">👁️</button>
+                    </div>
+                    <div style="position:absolute;right:16px;bottom:40px;display:flex;align-items:center;gap:12px;z-index:6">
+                      <sc-if value="{{ hud.pa.rollOn }}"><button onClick="{{ hud.pa.roll }}" style="background:#d9650a;color:#fff;font-weight:900;font-size:15.5px;padding:13px 18px;border-radius:999px;box-shadow:0 5px 0 #a34a05;white-space:nowrap;animation:bh-pulse 1.6s infinite">Roll the die</button></sc-if>
+                      <sc-if value="{{ hud.pa.rollOff }}"><span style="background:#7d8b94;color:#fff;font-weight:900;font-size:15.5px;padding:13px 18px;border-radius:999px;box-shadow:0 5px 0 #5f6c74;white-space:nowrap;opacity:.85">Roll the die</span></sc-if>
+                      <div style="width:78px;height:78px;border-radius:18px;background:#fff;box-shadow:0 6px 0 rgba(0,0,0,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#16303f"><span style="font-size:32px;line-height:1">{{ hud.pa.die }}</span><span style="font-size:10.5px;font-weight:900;color:#4f6572;margin-top:3px">{{ hud.pa.dieLab }}</span></div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ hud.hazard }}">
+                    <div onClick="{{ hud.hz.miss }}" style="position:absolute;inset:0;z-index:2"></div>
+                    <div style="position:absolute;top:100px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 14px;z-index:5;white-space:nowrap;font-weight:900;font-size:13.5px"><span>📍 {{ hud.hz.place }}</span><span style="color:#ffc53d">{{ hud.hz.count }}</span></div>
+                    <div style="position:absolute;inset:0;transform:scale({{ hud.zoom }});transition:transform .2s;z-index:3;pointer-events:none">
+                      <sc-for list="{{ hud.hz.spots }}" as="sp">
+                        <sc-if value="{{ sp.notFound }}"><button onClick="{{ sp.tap }}" style="position:absolute;left:{{ sp.x }}%;top:{{ sp.y }}%;transform:translate(-50%,-50%);width:66px;height:66px;border-radius:20px;background:rgba(255,255,255,.14);border:2px dashed rgba(255,255,255,.55);font-size:32px;display:flex;align-items:center;justify-content:center;pointer-events:auto">{{ sp.e }}</button></sc-if>
+                        <sc-if value="{{ sp.found }}"><span style="position:absolute;left:{{ sp.x }}%;top:{{ sp.y }}%;transform:translate(-50%,-50%);width:66px;height:66px;border-radius:20px;background:rgba(242,118,12,.3);border:3px solid #f2760c;font-size:32px;display:flex;align-items:center;justify-content:center"><span>{{ sp.e }}</span><span style="position:absolute;top:-10px;right:-10px;width:28px;height:28px;border-radius:50%;background:#f2760c;font-size:14px;display:flex;align-items:center;justify-content:center">⚠️</span></span></sc-if>
+                      </sc-for>
+                    </div>
+                    <div style="position:absolute;left:16px;bottom:40px;display:flex;flex-direction:column;gap:10px;z-index:6">
+                      <button onClick="{{ hud.zoomIn }}" aria-label="Zoom in" style="width:48px;height:48px;border-radius:14px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.2);font-size:22px;font-weight:900">+</button>
+                      <button onClick="{{ hud.zoomOut }}" aria-label="Zoom out" style="width:48px;height:48px;border-radius:14px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.2);font-size:22px;font-weight:900">−</button>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ hud.sapa }}">
+                    <div style="position:absolute;top:100px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 8px 6px 14px;z-index:5;white-space:nowrap;font-weight:900;font-size:13px"><span>❤️❤️❤️</span><span>{{ hud.sa.channel }}</span><span style="opacity:.85">{{ hud.sa.puzzle }}</span><sc-if value="{{ hud.sa.conn }}"><span style="background:#1aa46a;border-radius:999px;padding:3px 9px">Connected!</span></sc-if><sc-if value="{{ hud.sa.notConn }}"><span style="background:rgba(255,255,255,.16);border-radius:999px;padding:3px 9px">Not yet connected</span></sc-if></div>
+                    <div style="position:absolute;left:50%;top:206px;transform:translateX(-50%) scale({{ hud.zoom }});transform-origin:50% 0;transition:transform .2s;display:grid;grid-template-columns:repeat(7,44px);gap:5px;padding:10px;background:rgba(255,255,255,.08);border-radius:20px;z-index:4">
+                      <sc-for list="{{ hud.sa.cells }}" as="c">
+                        <button onClick="{{ c.tap }}" style="width:44px;height:44px;border-radius:11px;background:{{ c.bg }};font-size:21px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.15);animation:{{ c.anim }}">{{ c.e }}</button>
+                      </sc-for>
+                    </div>
+                    <div style="position:absolute;left:16px;bottom:40px;display:flex;flex-direction:column;gap:10px;z-index:6">
+                      <button onClick="{{ hud.zoomIn }}" aria-label="Zoom in" style="width:48px;height:48px;border-radius:14px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.2);font-size:22px;font-weight:900">+</button>
+                      <button onClick="{{ hud.zoomOut }}" aria-label="Zoom out" style="width:48px;height:48px;border-radius:14px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.2);font-size:22px;font-weight:900">−</button>
+                    </div>
+                    <sc-if value="{{ hud.sa.canRain }}"><button onClick="{{ hud.sa.rain }}" style="position:absolute;right:16px;bottom:44px;background:#2a6b8f;color:#fff;font-weight:900;font-size:17px;padding:15px 22px;border-radius:999px;box-shadow:0 6px 0 #1f5675;z-index:6;animation:bh-pulse 1.6s infinite">🌧️ Let it rain</button></sc-if>
+                    <sc-if value="{{ hud.sa.cantRain }}"><span style="position:absolute;right:16px;bottom:44px;background:#7d8b94;color:#fff;font-weight:900;font-size:17px;padding:15px 22px;border-radius:999px;box-shadow:0 6px 0 #5f6c74;z-index:6;opacity:.85">🌧️ Let it rain</span></sc-if>
+                  </sc-if>
+
+                  <sc-if value="{{ hud.cleanup }}">
+                    <div style="position:absolute;top:100px;left:50%;transform:translateX(-50%);background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 14px;z-index:5;white-space:nowrap;font-weight:900;font-size:13.5px">🧹 {{ hud.cl.prog }}</div>
+                    <div style="position:absolute;inset:0;transform:scale({{ hud.zoom }});transition:transform .2s">
+                      <sc-for list="{{ hud.cl.items }}" as="it">
+                        <sc-if value="{{ it.todo }}"><button onClick="{{ it.tap }}" style="position:absolute;left:{{ it.x }}%;top:{{ it.y }}%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px"><span style="width:64px;height:64px;border-radius:20px;background:rgba(255,255,255,.96);display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 5px 0 rgba(0,0,0,.3)">{{ it.e }}</span><span style="font-size:11.5px;font-weight:900;background:rgba(14,34,51,.8);padding:2px 8px;border-radius:999px;white-space:nowrap">{{ it.n }}</span></button></sc-if>
+                        <sc-if value="{{ it.done }}"><span style="position:absolute;left:{{ it.x }}%;top:{{ it.y }}%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;opacity:.6"><span style="width:64px;height:64px;border-radius:20px;background:#1aa46a;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900">✓</span><span style="font-size:11.5px;font-weight:900;background:rgba(14,34,51,.8);padding:2px 8px;border-radius:999px;white-space:nowrap">{{ it.n }}</span></span></sc-if>
+                      </sc-for>
+                    </div>
+                    <div style="position:absolute;left:16px;bottom:40px;display:flex;flex-direction:column;gap:10px;z-index:6">
+                      <button onClick="{{ hud.zoomIn }}" aria-label="Zoom in" style="width:48px;height:48px;border-radius:14px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.2);font-size:22px;font-weight:900">+</button>
+                      <button onClick="{{ hud.zoomOut }}" aria-label="Zoom out" style="width:48px;height:48px;border-radius:14px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.2);font-size:22px;font-weight:900">−</button>
+                    </div>
+                    <sc-if value="{{ hud.cl.gearGlow }}"><button onClick="{{ hud.cl.tools }}" style="position:absolute;right:16px;bottom:44px;background:linear-gradient(#ffdd6b,#ffc53d);color:#4a3200;font-weight:900;font-size:16px;padding:14px 20px;border-radius:999px;box-shadow:0 6px 0 #c99400;z-index:6;animation:bh-pulse 1.6s infinite">🧰 Tools box</button></sc-if>
+                    <sc-if value="{{ hud.cl.gearGlowOff }}"><button onClick="{{ hud.cl.tools }}" style="position:absolute;right:16px;bottom:44px;background:rgba(14,34,51,.82);border:2px solid rgba(255,255,255,.3);font-weight:900;font-size:16px;padding:13px 18px;border-radius:999px;z-index:6">🧰 Tools box</button></sc-if>
+                  </sc-if>
+
+                  <sc-if value="{{ hud.cares }}">
+                    <div style="position:absolute;top:100px;left:50%;transform:translateX(-50%);display:flex;gap:12px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 14px;z-index:5;white-space:nowrap;font-weight:900;font-size:13.5px"><span>👥 {{ hud.ca.people }}</span><span style="opacity:.85">{{ hud.ca.placing }}</span></div>
+                    <div style="position:absolute;top:144px;left:50%;transform:translateX(-50%);display:flex;gap:6px;background:rgba(14,34,51,.65);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:5px;z-index:5">
+                      <sc-if value="{{ hud.ca.flood }}"><span style="background:#c62f22;font-weight:900;font-size:13px;padding:6px 12px;border-radius:9px;white-space:nowrap">🌊 Flood</span><button onClick="{{ hud.ca.setStorm }}" style="font-weight:800;font-size:13px;padding:6px 12px;border-radius:9px;color:#d6e3ea;white-space:nowrap">🌀 Stronger storm</button></sc-if>
+                      <sc-if value="{{ hud.ca.storm }}"><button onClick="{{ hud.ca.setFlood }}" style="font-weight:800;font-size:13px;padding:6px 12px;border-radius:9px;color:#d6e3ea;white-space:nowrap">🌊 Flood</button><span style="background:#c62f22;font-weight:900;font-size:13px;padding:6px 12px;border-radius:9px;white-space:nowrap">🌀 Stronger storm</span></sc-if>
+                    </div>
+                    <div style="position:absolute;left:50%;top:252px;transform:translateX(-50%) scale({{ hud.zoom }});transform-origin:50% 0;transition:transform .2s;display:grid;grid-template-columns:repeat(7,44px);gap:4px;margin-top:10px;padding:10px;background:rgba(255,255,255,.08);border-radius:20px;z-index:4">
+                      <sc-for list="{{ hud.ca.cells }}" as="c">
+                        <button onClick="{{ c.tap }}" style="position:relative;width:44px;height:44px;border-radius:10px;background:{{ c.bg }};font-size:21px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.15);transition:background .5s">{{ c.e }}<sc-if value="{{ c.wet }}"><span style="position:absolute;top:-6px;right:-6px;font-size:13px">❌</span></sc-if></button>
+                      </sc-for>
+                    </div>
+                    <div style="position:absolute;left:0;right:0;bottom:96px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:0 10px;z-index:6">
+                      <sc-for list="{{ hud.ca.tools }}" as="t">
+                        <button onClick="{{ t.pick }}" style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:56px;padding:6px 6px;border-radius:12px;background:rgba(14,34,51,.82);border:2px solid {{ t.bd }}"><span style="font-size:19px;line-height:1">{{ t.e }}</span><span style="font-size:10.5px;font-weight:800">{{ t.n }}</span><sc-if value="{{ t.on }}"><span style="width:18px;height:3px;border-radius:2px;background:#ffc53d"></span></sc-if></button>
+                      </sc-for>
+                    </div>
+                    <sc-if value="{{ hud.ca.canSim }}"><button onClick="{{ hud.ca.sim }}" style="position:absolute;left:50%;bottom:30px;transform:translateX(-50%);background:#d9650a;color:#fff;font-weight:900;font-size:17px;padding:13px 26px;border-radius:999px;box-shadow:0 6px 0 #a34a05;z-index:6;animation:bh-pulse 1.6s infinite">▶ Simulate</button></sc-if>
+                    <sc-if value="{{ hud.ca.cantSim }}"><span style="position:absolute;left:50%;bottom:30px;transform:translateX(-50%);background:#7d8b94;color:#fff;font-weight:900;font-size:17px;padding:13px 26px;border-radius:999px;box-shadow:0 6px 0 #5f6c74;z-index:6;opacity:.85;white-space:nowrap">▶ Simulate</span></sc-if>
+                  </sc-if>
+
+                  <div style="position:absolute;top:42px;left:14px;display:flex;gap:8px;z-index:10">
+                    <button onClick="{{ hud.quit }}" aria-label="Back" style="width:48px;height:48px;border-radius:15px;background:rgba(255,255,255,.94);color:#16303f;font-size:20px;font-weight:900;box-shadow:0 4px 0 rgba(0,0,0,.3)">←</button>
+                    <button onClick="{{ hud.restart }}" aria-label="Restart" style="width:48px;height:48px;border-radius:15px;background:rgba(255,255,255,.94);color:#16303f;font-size:20px;font-weight:900;box-shadow:0 4px 0 rgba(0,0,0,.3)">↻</button>
+                  </div>
+                  <div style="position:absolute;top:42px;right:14px;display:flex;gap:8px;z-index:10">
+                    <button onClick="{{ hud.howto }}" aria-label="How to play" style="width:48px;height:48px;border-radius:15px;background:rgba(255,255,255,.94);color:#16303f;font-size:19px;font-weight:900;box-shadow:0 4px 0 rgba(0,0,0,.3)">ⓘ</button>
+                    <button onClick="{{ hud.settings }}" aria-label="Settings" style="width:48px;height:48px;border-radius:15px;background:rgba(255,255,255,.94);color:#16303f;font-size:19px;box-shadow:0 4px 0 rgba(0,0,0,.3)">⚙️</button>
+                  </div>
+                  <div style="position:absolute;top:{{ hud.hintTop }};left:50%;transform:translateX(-50%);width:max-content;max-width:88%;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.96);color:#16303f;border-radius:20px;padding:5px 14px 5px 6px;z-index:7;box-shadow:0 6px 18px rgba(0,0,0,.25);pointer-events:none">
+                    <span style="width:42px;height:42px;border-radius:50%;background:#ffe58a;flex:none;display:flex;align-items:flex-end;justify-content:center;overflow:hidden">{{ hud.mascot }}</span>
+                    <span style="font-weight:800;font-size:14.5px;line-height:1.3">{{ hud.hint }}</span>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ sc.result }}">
+                <div data-screen-label="Results" style="position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;scrollbar-width:none;background:radial-gradient(120% 90% at 50% -10%,#eaf7f0,#cdeedd);padding:{{ dv.pad }}">
+                  {{ res.confetti }}
+                  <div style="position:relative;z-index:4;max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:14px">
+                    <div style="background:#fff;border-radius:28px;box-shadow:0 10px 28px rgba(18,48,63,.15);padding:24px 20px 22px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px">
+                      <div style="display:flex;gap:6px;font-size:50px;line-height:1">
+                        <sc-if value="{{ res.s1 }}"><span style="display:inline-block;color:#ffc53d;text-shadow:0 3px 0 #d99a00;animation:bh-pop .5s both">★</span></sc-if><sc-if value="{{ res.s1off }}"><span style="color:#d5e3ea">★</span></sc-if>
+                        <sc-if value="{{ res.s2 }}"><span style="display:inline-block;color:#ffc53d;text-shadow:0 3px 0 #d99a00;animation:bh-pop .5s .15s both">★</span></sc-if><sc-if value="{{ res.s2off }}"><span style="color:#d5e3ea">★</span></sc-if>
+                        <sc-if value="{{ res.s3 }}"><span style="display:inline-block;color:#ffc53d;text-shadow:0 3px 0 #d99a00;animation:bh-pop .5s .3s both">★</span></sc-if><sc-if value="{{ res.s3off }}"><span style="color:#d5e3ea">★</span></sc-if>
+                      </div>
+                      <div style="font:800 31px/1.05 'Baloo 2',sans-serif;margin-top:8px">{{ res.title }}</div>
+                      <div style="font-weight:800;color:#4f6572;font-size:15px;line-height:1.4">{{ res.line }}</div>
+                      <sc-if value="{{ res.newB }}">
+                        <div style="margin-top:12px;display:flex;align-items:center;gap:12px;background:#fff5df;border:2px solid #ffe2a8;border-radius:20px;padding:12px 14px;text-align:left;width:100%">
+                          <span style="width:64px;height:64px;border-radius:50%;background:{{ res.badgeGrad }};display:flex;align-items:center;justify-content:center;font-size:32px;flex:none;border:3px solid #fff;box-shadow:0 0 0 3px #ffc53d;animation:bh-pop .6s .45s both">{{ res.badgeIcon }}</span>
+                          <span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;font-weight:900;letter-spacing:1px;color:#7a5400;text-transform:uppercase">New badge · {{ res.badgeName }}</span><span style="display:block;font-weight:800;font-size:15px;margin-top:2px">New badge earned for your Champion ID!</span></span>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ res.had }}"><div style="margin-top:10px;font-size:14px;font-weight:800;color:#0c5c3a;background:#e5f6ee;border-radius:999px;padding:6px 14px">✓ The {{ res.badgeName }} badge is already on your Champion ID</div></sc-if>
+                      <sc-if value="{{ res.noB }}"><div style="margin-top:10px;font-size:14px;font-weight:800;color:#2f5d77;background:#eef6fa;border-radius:999px;padding:6px 14px">{{ res.tryLine }}</div></sc-if>
+                    </div>
+                    <div style="display:flex;align-items:flex-end;gap:10px">
+                      <span style="flex:none">{{ res.mascot }}</span>
+                      <div style="flex:1;min-width:0;background:#fff6ef;border:2px solid #ffd9bf;border-radius:20px 20px 20px 6px;padding:12px 46px 12px 14px;position:relative">
+                        <div style="font-size:11.5px;font-weight:900;letter-spacing:1px;color:#8a3d0c">REAL LIFE REMINDER</div>
+                        <p style="margin:3px 0 0;font-weight:700;font-size:14.5px;line-height:1.45;color:#5c2f0e;text-wrap:pretty">{{ res.remind }}</p>
+                        <button onClick="{{ res.speak }}" aria-label="Read aloud" style="position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:#fff;font-size:14px;display:flex;align-items:center;justify-content:center">🔊</button>
+                      </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px">
+                      <button onClick="{{ res.again }}" style="width:100%;background:#d9650a;color:#fff;font:800 21px 'Baloo 2',sans-serif;padding:13px 24px 10px;border-radius:999px;box-shadow:0 6px 0 #a34a05" style-active="transform:translateY(4px);box-shadow:0 2px 0 #a34a05">↻ Play again</button>
+                      <sc-if value="{{ res.hasNext }}"><button onClick="{{ res.next }}" style="width:100%;background:#128253;color:#fff;font:800 20px 'Baloo 2',sans-serif;padding:12px 24px 9px;border-radius:999px;box-shadow:0 5px 0 #0b5e3b" style-active="transform:translateY(4px);box-shadow:0 1px 0 #0b5e3b">{{ res.nextLabel }} →</button></sc-if>
+                      <div style="display:flex;gap:10px">
+                        <sc-if value="{{ res.newB }}"><button onClick="{{ res.seeId }}" style="flex:1;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;border-radius:999px;padding:12px;font-weight:900;font-size:15px">🏆 My ID</button></sc-if>
+                        <button onClick="{{ res.home }}" style="flex:1;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;border-radius:999px;padding:12px;font-weight:900;font-size:15px">🏠 Home</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ sc.id }}">
+                <div data-screen-label="Champion ID" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;background:radial-gradient(120% 70% at 50% -10%,#fff5df,#cfe6ef 70%);padding:{{ dv.pad }}">
+                  <div style="max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:16px">
+                    <div><div style="font:800 31px/1.05 'Baloo 2',sans-serif;padding-top:4px">My Champion ID</div><div style="font-size:14.5px;font-weight:700;color:#4f6572;margin-top:2px">Earn a badge for every game you finish with flying colors.</div></div>
+                    <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;justify-content:center">
+                      <div style="flex:1 1 330px;max-width:440px;background:#fff;border-radius:24px;overflow:hidden;border:3px solid #f2760c;box-shadow:0 10px 28px rgba(18,48,63,.15)">
+                        <div style="background:linear-gradient(135deg,#d9650a,#c62f22);color:#fff;padding:14px 16px 12px;text-align:center">
+                          <div style="font:800 29px/1 'Baloo 2',sans-serif;letter-spacing:1px;padding-top:4px">BAYANIHanda</div>
+                          <span style="display:inline-block;margin-top:5px;font-size:11.5px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase;background:rgba(0,0,0,.2);border-radius:999px;padding:3px 10px">Young DRRM Champion</span>
+                        </div>
+                        <div style="padding:16px">
+                          <div style="display:flex;gap:14px;align-items:center">
+                            <button onClick="{{ idc.photoTap }}" aria-label="Photo" style="width:96px;height:96px;border-radius:18px;flex:none;overflow:hidden">
+                              <sc-if value="{{ idc.hasPhoto }}"><span style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:58px;background:{{ idc.avBg }}">{{ idc.avE }}</span></sc-if>
+                              <sc-if value="{{ idc.noPhoto }}"><span style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#eef3f6;border:2px dashed #b9ccd8;border-radius:18px;color:#4f6572;font-size:12px;font-weight:900;line-height:1.2;text-align:center"><span style="font-size:24px">📷</span>Tap to add photo</span></sc-if>
+                            </button>
+                            <div style="flex:1;min-width:0">
+                              <div style="font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:#4f6572">Name</div>
+                              <input value="{{ idc.name }}" onChange="{{ idc.onName }}" maxlength="28" placeholder="Type your name" style="width:100%;border:none;border-bottom:2px solid #d5e3ea;font-size:21px;font-weight:900;color:#16303f;padding:4px 2px;background:transparent;outline:none" style-focus="border-bottom-color:#f2760c">
+                              <span style="display:inline-block;margin-top:9px;background:#fff5df;color:#7a5400;font-weight:900;border-radius:999px;padding:4px 12px;font-size:13px">🏅 {{ idc.rank }}</span>
+                            </div>
+                          </div>
+                          <div style="margin-top:16px">
+                            <div style="font-size:11.5px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#4f6572;margin-bottom:8px">Badges · {{ idc.count }} of 8</div>
+                            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+                              <sc-for list="{{ idc.badges }}" as="b">
+                                <sc-if value="{{ b.earned }}"><div style="border-radius:14px;padding:9px 3px 7px;text-align:center;background:#eafaf1;border:2px solid #7fd8a8;box-shadow:0 3px 0 #bfe6d5"><div style="font-size:24px;line-height:1.1">{{ b.icon }}</div><div style="font-size:10.5px;font-weight:900;color:#0c5c3a;line-height:1.1;margin-top:3px">{{ b.name }}</div></div></sc-if>
+                                <sc-if value="{{ b.locked }}"><div style="border-radius:14px;padding:9px 3px 7px;text-align:center;background:#f6f9fb;border:2px solid #d5e3ea"><div style="font-size:24px;line-height:1.1;filter:grayscale(1);opacity:.4">{{ b.icon }}</div><div style="font-size:10.5px;font-weight:800;color:#4f6572;line-height:1.1;margin-top:3px">{{ b.name }}</div></div></sc-if>
+                                <sc-if value="{{ b.soon }}"><div style="border-radius:14px;padding:9px 3px 7px;text-align:center;background:transparent;border:2px dashed #c8d6de"><div style="font-size:24px;line-height:1.1;filter:grayscale(1);opacity:.3">{{ b.icon }}</div><div style="font-size:10.5px;font-weight:800;color:#5b7280;line-height:1.1;margin-top:3px">Soon</div></div></sc-if>
+                              </sc-for>
+                            </div>
+                          </div>
+                          <div style="margin-top:14px;border-top:1px solid #d5e3ea;padding-top:10px;color:#4f6572;font-size:11.5px;font-weight:700;text-align:center;line-height:1.4">University of the Philippines Resilience Institute<br>Awarded for learning to prevent, prepare, respond, and recover.</div>
+                        </div>
+                      </div>
+                      <div style="flex:1 1 280px;max-width:440px;width:100%;display:flex;flex-direction:column;gap:14px">
+                        <div style="background:#fff;border-radius:22px;padding:16px;box-shadow:0 5px 0 rgba(20,48,66,.08);display:flex;flex-direction:column;gap:10px">
+                          <div style="font:800 18px/1.15 'Baloo 2',sans-serif;padding-top:2px">{{ idc.nextTitle }}</div>
+                          <span style="display:block;height:12px;background:#e3eff4;border-radius:999px;overflow:hidden"><span style="display:block;height:100%;width:{{ idc.pct }}%;background:linear-gradient(90deg,#5fd39b,#128253);border-radius:999px"></span></span>
+                          <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+                            <sc-for list="{{ idc.ladder }}" as="r">
+                              <div style="display:flex;align-items:center;gap:10px">
+                                <sc-if value="{{ r.reached }}"><span style="width:22px;height:22px;border-radius:50%;background:#128253;color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex:none">✓</span><span style="flex:1;font-weight:900;font-size:14.5px">{{ r.name }}</span></sc-if>
+                                <sc-if value="{{ r.notReached }}"><span style="width:22px;height:22px;border-radius:50%;border:2px solid #b9ccd8;flex:none"></span><span style="flex:1;font-weight:700;font-size:14.5px;color:#4f6572">{{ r.name }}</span></sc-if>
+                                <sc-if value="{{ r.current }}"><span style="font-size:10.5px;font-weight:900;letter-spacing:.6px;background:#d9650a;color:#fff;border-radius:999px;padding:2px 8px">{{ r.current }}</span></sc-if>
+                                <span style="font-size:12.5px;font-weight:800;color:#4f6572">{{ r.min }}</span>
+                              </div>
+                            </sc-for>
+                          </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                          <button onClick="{{ idc.save }}" style="grid-column:1 / -1;display:flex;align-items:center;justify-content:center;gap:8px;background:#128253;color:#fff;font-weight:900;font-size:16px;padding:14px;border-radius:999px;box-shadow:0 5px 0 #0b5e3b" style-active="transform:translateY(4px);box-shadow:0 1px 0 #0b5e3b">⬇️ Save to gallery</button>
+                          <button onClick="{{ idc.share }}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#2a6b8f;color:#fff;font-weight:900;font-size:16px;padding:13px;border-radius:999px;box-shadow:0 5px 0 #1f5675" style-active="transform:translateY(4px);box-shadow:0 1px 0 #1f5675">↗️ Share</button>
+                          <button onClick="{{ idc.print }}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;border:2px solid #d5e3ea;font-weight:900;font-size:16px;padding:12px;border-radius:999px;box-shadow:0 5px 0 #d5e3ea" style-active="transform:translateY(4px);box-shadow:0 1px 0 #d5e3ea">🖨️ Print</button>
+                        </div>
+                        <p style="margin:0;background:#eef6fa;border:1px solid #d5e3ea;border-radius:14px;padding:12px 14px;color:#2f5d77;font-weight:700;font-size:13.5px;line-height:1.45"><b style="font-weight:900">Ask a grown-up before you share.</b> Your name and photo stay on this device only. They are never saved or sent anywhere. Only your badges are kept on this device so your progress is remembered.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ sc.settings }}">
+                <div data-screen-label="Settings" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;background:radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef);padding:{{ dv.pad }}">
+                  <div style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <button onClick="{{ st.back }}" aria-label="Back" style="width:48px;height:48px;border-radius:16px;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center;flex:none">←</button>
+                      <div style="font:800 28px/1 'Baloo 2',sans-serif;padding-top:4px">Settings</div>
+                    </div>
+                    <div style="font-size:12px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#4f6572;margin:6px 4px 0">Sound</div>
+                    <div style="background:#fff;border-radius:22px;box-shadow:0 4px 0 rgba(20,48,66,.08);overflow:hidden">
+                      <button onClick="{{ st.tSound }}" style="display:flex;align-items:center;gap:12px;width:100%;padding:16px;text-align:left;border-bottom:1px solid #e3ecf1">
+                        <span style="font-size:22px">🔈</span><span style="flex:1;font-weight:900;font-size:16px">Sound and voice</span>
+                        <sc-if value="{{ st.sound }}"><span style="width:52px;height:32px;border-radius:16px;background:#128253;position:relative;flex:none"><span style="position:absolute;top:4px;left:24px;width:24px;height:24px;border-radius:50%;background:#fff;color:#128253;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center">✓</span></span></sc-if>
+                        <sc-if value="{{ st.soundOff }}"><span style="width:52px;height:32px;border-radius:16px;background:#e3eaee;border:2px solid #8fa3b0;position:relative;flex:none"><span style="position:absolute;top:6px;left:6px;width:16px;height:16px;border-radius:50%;background:#8fa3b0"></span></span></sc-if>
+                      </button>
+                      <button onClick="{{ st.tVoice }}" style="display:flex;align-items:center;gap:12px;width:100%;padding:16px;text-align:left">
+                        <span style="font-size:22px">🗣️</span><span style="flex:1;font-weight:900;font-size:16px">Read tips and hints aloud</span>
+                        <sc-if value="{{ st.voice }}"><span style="width:52px;height:32px;border-radius:16px;background:#128253;position:relative;flex:none"><span style="position:absolute;top:4px;left:24px;width:24px;height:24px;border-radius:50%;background:#fff;color:#128253;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center">✓</span></span></sc-if>
+                        <sc-if value="{{ st.voiceOff }}"><span style="width:52px;height:32px;border-radius:16px;background:#e3eaee;border:2px solid #8fa3b0;position:relative;flex:none"><span style="position:absolute;top:6px;left:6px;width:16px;height:16px;border-radius:50%;background:#8fa3b0"></span></span></sc-if>
+                      </button>
+                    </div>
+                    <div style="font-size:12px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#4f6572;margin:6px 4px 0">Players</div>
+                    <div style="background:#fff;border-radius:22px;box-shadow:0 4px 0 rgba(20,48,66,.08);overflow:hidden">
+                      <button onClick="{{ st.players }}" style="display:flex;align-items:center;gap:12px;width:100%;padding:16px;text-align:left;border-bottom:1px solid #e3ecf1"><span style="font-size:22px">👥</span><span style="flex:1;font-weight:900;font-size:16px">Who is playing?</span><span style="font-size:22px;font-weight:900;color:#8fa3b0">›</span></button>
+                      <button onClick="{{ st.reset }}" style="display:flex;align-items:center;gap:12px;width:100%;padding:16px;text-align:left"><span style="font-size:22px">🔄</span><span style="flex:1;font-weight:900;font-size:16px;color:#c62f22">Reset badges for {{ st.nick }}</span></button>
+                    </div>
+                    <div style="font-size:12px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#4f6572;margin:6px 4px 0">About</div>
+                    <div style="background:#fff;border-radius:22px;box-shadow:0 4px 0 rgba(20,48,66,.08);padding:18px">
+                      <span style="display:inline-block;background:#fff5df;color:#7a5400;font-weight:900;padding:5px 11px;border-radius:999px;font-size:12px;letter-spacing:.5px">ABOUT</span>
+                      <div style="font:800 20px/1.1 'Baloo 2',sans-serif;margin-top:10px;color:#b35205">What is this app?</div>
+                      <p style="margin:6px 0 0;line-height:1.55;color:#25404e;font-weight:600;font-size:15px">BAYANIHanda Game Library turns everyday safety lessons into short, playable adventures for children. The games are grouped around the four parts of disaster risk reduction and management: preventing and reducing hazards, preparing before a disaster, responding when one strikes, and recovering afterward.</p>
+                      <sc-if value="{{ st.aboutMore }}">
+                        <p style="margin:8px 0 0;line-height:1.55;color:#25404e;font-weight:600;font-size:15px">The concepts behind each pillar are turned into short, hands-on games so learning about disasters becomes fun instead of frightening. The playful approach draws young learners in and helps the lessons stick. Every game runs fully offline on a phone or tablet, keeps no personal data, and speaks its tips aloud so younger and older children can play side by side.</p>
+                        <p style="margin:8px 0 0;line-height:1.55;color:#25404e;font-weight:600;font-size:15px">Finish a game with flying colors and you earn a badge for your Champion ID. Together the games build the calm, ready habits that help a child act well in the first minutes of an emergency.</p>
+                      </sc-if>
+                      <button onClick="{{ st.toggleAbout }}" style="margin-top:8px;color:#b35205;font-weight:900;font-size:15px;padding:4px 0">{{ st.moreLabel }}</button>
+                    </div>
+                    <button onClick="{{ st.behind }}" style="display:flex;align-items:center;gap:12px;width:100%;padding:16px;text-align:left;background:#fff;border-radius:22px;box-shadow:0 4px 0 rgba(20,48,66,.08)"><span style="font-size:22px">🔥</span><span style="flex:1;font-weight:900;font-size:16px">Behind BAYANIHanda</span><span style="font-size:22px;font-weight:900;color:#8fa3b0">›</span></button>
+                    <p style="margin:4px 0 0;text-align:center;font-size:12.5px;font-weight:700;color:#4f6572">Works offline · Version 1.0</p>
+                  </div>
+                </div>
+              </sc-if>
+
+            </div>
+
+            <sc-if value="{{ nav.bottom }}">
+              <div style="flex:none;position:relative;z-index:20;background:#fff;border-top:1px solid #d5e3ea;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding:8px 2px 22px">
+                <sc-for list="{{ nav.left }}" as="t">
+                  <button onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;min-height:56px">
+                    <sc-if value="{{ t.on }}"><span style="width:54px;height:32px;border-radius:16px;background:#ffe4c4;display:flex;align-items:center;justify-content:center;font-size:20px">{{ t.icon }}</span><span style="font-size:12.5px;font-weight:900;color:#a84d04">{{ t.label }}</span></sc-if>
+                    <sc-if value="{{ t.off }}"><span style="width:54px;height:32px;display:flex;align-items:center;justify-content:center;font-size:20px;filter:grayscale(.45);opacity:.85">{{ t.icon }}</span><span style="font-size:12.5px;font-weight:700;color:#4f6572">{{ t.label }}</span></sc-if>
+                  </button>
+                </sc-for>
+                <button onClick="{{ nav.ask }}" aria-label="Ask Bayani" style="display:flex;flex-direction:column;align-items:center;gap:3px;margin-top:-36px">
+                  <span style="width:72px;height:72px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe58a,#ffc53d 60%,#eaa100);border:4px solid #fff;box-shadow:0 5px 0 #c99400,0 8px 18px rgba(14,34,51,.18);display:flex;align-items:flex-end;justify-content:center;overflow:hidden">{{ nav.mascot }}</span>
+                  <span style="font-size:12.5px;font-weight:900">Ask Bayani</span>
+                </button>
+                <sc-for list="{{ nav.right }}" as="t">
+                  <button onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;min-height:56px">
+                    <sc-if value="{{ t.on }}"><span style="width:54px;height:32px;border-radius:16px;background:#ffe4c4;display:flex;align-items:center;justify-content:center;font-size:20px">{{ t.icon }}</span><span style="font-size:12.5px;font-weight:900;color:#a84d04">{{ t.label }}</span></sc-if>
+                    <sc-if value="{{ t.off }}"><span style="width:54px;height:32px;display:flex;align-items:center;justify-content:center;font-size:20px;filter:grayscale(.45);opacity:.85">{{ t.icon }}</span><span style="font-size:12.5px;font-weight:700;color:#4f6572">{{ t.label }}</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+
+          <sc-if value="{{ ask.open }}">
+            <div style="position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;justify-content:flex-end;align-items:center">
+              <div onClick="{{ ask.close }}" style="position:absolute;inset:0;background:rgba(14,34,51,.5);animation:bh-fade .2s both"></div>
+              <div data-screen-label="Ask Bayani" style="position:relative;width:100%;max-width:540px;background:#fff;border-radius:30px 30px 0 0;padding:12px 18px 36px;display:flex;flex-direction:column;gap:12px;animation:bh-up .3s cubic-bezier(.2,.9,.3,1.15) both">
+                <span style="align-self:center;width:40px;height:5px;border-radius:3px;background:#d5e3ea"></span>
+                <button onClick="{{ ask.close }}" aria-label="Close" style="position:absolute;top:14px;right:14px;width:40px;height:40px;border-radius:12px;background:#eef3f6;font-weight:900;font-size:16px;color:#4f6572">✕</button>
+                <div style="display:flex;align-items:flex-end;gap:12px;margin-top:-4px">
+                  <span style="flex:none">{{ ask.mascot }}</span>
+                  <div style="flex:1;min-width:0;padding-bottom:10px"><div style="font:800 26px/1.05 'Baloo 2',sans-serif">{{ ask.hello }}</div><div style="font-size:15px;font-weight:700;color:#4f6572;margin-top:2px">What do you want to know?</div></div>
+                </div>
+                <div style="display:flex;background:#eef3f6;border-radius:999px;padding:4px;gap:4px">
+                  <sc-if value="{{ ask.tip }}"><span style="flex:1;text-align:center;padding:10px;border-radius:999px;background:#d9650a;color:#fff;font-weight:900;font-size:15px;box-shadow:0 3px 0 #a34a05">💡 Safety tip</span></sc-if>
+                  <sc-if value="{{ ask.tipOff }}"><button onClick="{{ ask.setTip }}" style="flex:1;padding:10px;border-radius:999px;font-weight:800;font-size:15px;color:#3d5563">💡 Safety tip</button></sc-if>
+                  <sc-if value="{{ ask.trivia }}"><span style="flex:1;text-align:center;padding:10px;border-radius:999px;background:#d9650a;color:#fff;font-weight:900;font-size:15px;box-shadow:0 3px 0 #a34a05">❓ Fun fact</span></sc-if>
+                  <sc-if value="{{ ask.triviaOff }}"><button onClick="{{ ask.setTrivia }}" style="flex:1;padding:10px;border-radius:999px;font-weight:800;font-size:15px;color:#3d5563">❓ Fun fact</button></sc-if>
+                </div>
+                <div style="background:#fff5df;border:2px solid #ffe2a8;border-radius:22px;padding:14px 48px 16px 16px;position:relative;min-height:110px">
+                  <div style="font-size:12px;font-weight:900;letter-spacing:1px;color:#7a5400">{{ ask.kind }}</div>
+                  <p style="margin:5px 0 0;font-weight:800;font-size:17.5px;line-height:1.42;text-wrap:pretty">{{ ask.text }}</p>
+                  <button onClick="{{ ask.speak }}" aria-label="Read aloud" style="position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;background:#fff;font-size:16px;box-shadow:0 2px 0 #ffe2a8;display:flex;align-items:center;justify-content:center">🔊</button>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                  <button onClick="{{ ask.another }}" style="flex:1 1 140px;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;border-radius:999px;padding:12px 16px;font-weight:900;font-size:15px" style-active="transform:translateY(3px)">🔁 Another one</button>
+                  <sc-if value="{{ ask.hasGame }}"><button onClick="{{ ask.play }}" style="flex:1 1 180px;background:#128253;color:#fff;box-shadow:0 4px 0 #0b5e3b;border-radius:999px;padding:12px 16px;font-weight:900;font-size:15px" style-active="transform:translateY(3px)">{{ ask.gameIcon }} Play {{ ask.gameName }}</button></sc-if>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ sh.open }}">
+            <div style="position:absolute;inset:0;z-index:70;display:flex;flex-direction:column;justify-content:flex-end;align-items:center">
+              <div onClick="{{ sh.close }}" style="position:absolute;inset:0;background:rgba(14,34,51,.5);animation:bh-fade .2s both"></div>
+              <div style="position:relative;width:100%;max-width:560px;max-height:88%;overflow-y:auto;scrollbar-width:none;background:#fff;border-radius:30px 30px 0 0;padding:12px 20px 36px;display:flex;flex-direction:column;gap:14px;animation:bh-up .26s ease-out both">
+                <span style="align-self:center;width:40px;height:5px;border-radius:3px;background:#d5e3ea;flex:none"></span>
+
+                <sc-if value="{{ sh.credit }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px"><span style="font-size:48px">{{ sh.cr.icon }}</span><div style="font:800 23px/1.1 'Baloo 2',sans-serif">{{ sh.cr.name }}</div></div>
+                  <p style="margin:0;text-align:center;font-weight:700;line-height:1.5;color:#25404e">{{ sh.cr.lead }}</p>
+                  <sc-if value="{{ sh.cr.hasNote }}"><p style="margin:0;text-align:center;font-weight:700;font-style:italic;line-height:1.5;color:#3d5563">{{ sh.cr.note }}</p></sc-if>
+                  <button onClick="{{ sh.close }}" style="background:#16303f;color:#fff;font-weight:900;font-size:16px;padding:13px;border-radius:999px">Close</button>
+                </sc-if>
+
+                <sc-if value="{{ sh.share }}">
+                  <div style="font:800 22px/1.1 'Baloo 2',sans-serif">Share your Champion ID</div>
+                  <div style="display:flex;align-items:center;gap:12px;background:#f4f8fa;border-radius:18px;padding:10px">
+                    <div style="width:74px;height:96px;border-radius:10px;overflow:hidden;border:2px solid #f2760c;background:#fff;flex:none;display:flex;flex-direction:column"><span style="height:18px;background:linear-gradient(135deg,#d9650a,#c62f22)"></span><span style="flex:1;display:flex;align-items:center;justify-content:center;font-size:28px;background:{{ sh.avBg }}">{{ sh.avE }}</span><span style="height:22px;font-size:8px;font-weight:900;display:flex;align-items:center;justify-content:center">🏅 {{ sh.count }} badges</span></div>
+                    <div style="min-width:0"><div style="font-weight:900;font-size:15px">Champion ID · {{ sh.idName }}.png</div><div style="font-size:13px;font-weight:700;color:#4f6572;margin-top:2px">{{ sh.rank }}</div></div>
+                  </div>
+                  <p style="margin:0;background:#fff5df;border-radius:12px;padding:10px 12px;font-weight:800;font-size:14px;color:#5c4000">👪 Ask a grown-up before you share.</p>
+                  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px 6px">
+                    <sc-for list="{{ sh.targets }}" as="t"><button onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:56px;height:56px;border-radius:50%;background:{{ t.bg }};display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#3d5563">{{ t.e }}</span><span style="font-size:12px;font-weight:800;color:#25404e;text-align:center">{{ t.n }}</span></button></sc-for>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ sh.print }}">
+                  <div style="font:800 22px/1.1 'Baloo 2',sans-serif">Print my ID</div>
+                  <div style="background:#e9eef1;border-radius:18px;padding:16px;display:flex;justify-content:center">
+                    <div style="width:170px;height:240px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.15);display:flex;align-items:flex-start;justify-content:center;padding-top:18px">
+                      <div style="width:120px;border-radius:10px;overflow:hidden;border:2px solid #f2760c"><div style="background:linear-gradient(135deg,#d9650a,#c62f22);color:#fff;font:800 12px/1 'Baloo 2',sans-serif;text-align:center;padding:5px 0 3px">BAYANIHanda</div><div style="padding:6px;display:flex;gap:6px;align-items:center"><span style="width:34px;height:34px;border-radius:7px;background:{{ sh.avBg }};display:flex;align-items:center;justify-content:center;font-size:20px">{{ sh.avE }}</span><span style="font-size:9px;font-weight:900;line-height:1.2">{{ sh.idName }}<br><span style="color:#7a5400">{{ sh.rank }}</span></span></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px;padding:0 6px 6px"><span style="height:14px;border-radius:3px;background:#eafaf1;border:1px solid #7fd8a8"></span><span style="height:14px;border-radius:3px;background:#eafaf1;border:1px solid #7fd8a8"></span><span style="height:14px;border-radius:3px;background:#f6f9fb;border:1px solid #d5e3ea"></span><span style="height:14px;border-radius:3px;background:#f6f9fb;border:1px solid #d5e3ea"></span></div></div>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;border:1px solid #e3ecf1;border-radius:16px;overflow:hidden">
+                    <div style="display:flex;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #e3ecf1;font-weight:800;font-size:14.5px"><span style="color:#4f6572">Printer</span><span>School printer ▾</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #e3ecf1;font-weight:800;font-size:14.5px"><span style="color:#4f6572">Paper size</span><span>A4</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:12px 14px;font-weight:800;font-size:14.5px"><span style="color:#4f6572">Copies</span><span>1</span></div>
+                  </div>
+                  <div style="display:flex;gap:10px"><button onClick="{{ sh.doPdf }}" style="flex:1;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;border-radius:999px;padding:12px;font-weight:900;font-size:15px">Save as PDF</button><button onClick="{{ sh.doPrint }}" style="flex:1;background:#d9650a;color:#fff;box-shadow:0 4px 0 #a34a05;border-radius:999px;padding:12px;font-weight:900;font-size:15px">🖨️ Print</button></div>
+                </sc-if>
+
+                <sc-if value="{{ sh.photo }}">
+                  <div style="font:800 22px/1.1 'Baloo 2',sans-serif">Add a photo</div>
+                  <button onClick="{{ sh.setPhoto }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:#f4f8fa;font-weight:900;font-size:16px;text-align:left"><span style="font-size:24px">📷</span>Take a photo</button>
+                  <button onClick="{{ sh.setPhoto }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:#f4f8fa;font-weight:900;font-size:16px;text-align:left"><span style="font-size:24px">🖼️</span>Choose from gallery</button>
+                  <button onClick="{{ sh.setPhoto }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:#f4f8fa;font-weight:900;font-size:16px;text-align:left"><span style="width:32px;height:32px;border-radius:50%;background:{{ sh.avBg }};display:flex;align-items:center;justify-content:center;font-size:19px">{{ sh.avE }}</span>Use my avatar</button>
+                  <sc-if value="{{ sh.hasPhoto }}"><button onClick="{{ sh.delPhoto }}" style="padding:12px;font-weight:900;font-size:15px;color:#c62f22">Remove photo</button></sc-if>
+                  <p style="margin:0;font-size:13.5px;font-weight:700;color:#4f6572;text-align:center">Your photo stays on this device only.</p>
+                </sc-if>
+
+                <sc-if value="{{ sh.remove }}">
+                  <div style="font:800 23px/1.1 'Baloo 2',sans-serif;text-align:center">Remove {{ sh.rmNick }}?</div>
+                  <p style="margin:0;text-align:center;font-weight:700;color:#3d5563;line-height:1.45">Their badges will be removed from this device too.</p>
+                  <div style="display:flex;gap:10px"><button onClick="{{ sh.close }}" style="flex:1;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;border-radius:999px;padding:12px;font-weight:900;font-size:15px">Keep</button><button onClick="{{ sh.rmYes }}" style="flex:1;background:#c62f22;color:#fff;box-shadow:0 4px 0 #922a20;border-radius:999px;padding:12px;font-weight:900;font-size:15px">Remove</button></div>
+                </sc-if>
+
+                <sc-if value="{{ sh.reset }}">
+                  <div style="font:800 23px/1.1 'Baloo 2',sans-serif;text-align:center">Reset badges for {{ sh.nick }}?</div>
+                  <p style="margin:0;text-align:center;font-weight:700;color:#3d5563;line-height:1.45">All badges on this Champion ID will be cleared.</p>
+                  <div style="display:flex;gap:10px"><button onClick="{{ sh.close }}" style="flex:1;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;border-radius:999px;padding:12px;font-weight:900;font-size:15px">Cancel</button><button onClick="{{ sh.resetYes }}" style="flex:1;background:#c62f22;color:#fff;box-shadow:0 4px 0 #922a20;border-radius:999px;padding:12px;font-weight:900;font-size:15px">Reset</button></div>
+                </sc-if>
+
+                <sc-if value="{{ sh.behind }}">
+                  <div style="font:800 23px/1.1 'Baloo 2',sans-serif">Behind BAYANIHanda</div>
+                  <p style="margin:0;font-weight:900;font-size:19px;line-height:1.3;color:#b35205">BAYANIHanda</p>
+                  <p style="margin:-6px 0 0;font-weight:700;line-height:1.5;color:#25404e"><b style="color:#b35205;font-weight:900">B</b>uilding <b style="color:#b35205;font-weight:900">A</b>wareness in <b style="color:#b35205;font-weight:900">Y</b>outh <b style="color:#b35205;font-weight:900">A</b>gainst <b style="color:#b35205;font-weight:900">N</b>atural-hazards and DRRM concepts through <b style="color:#b35205;font-weight:900">I</b>nteractive Games towards Enhanced Preparedness and Resilience.</p>
+                  <p style="margin:0;font-weight:600;line-height:1.55;color:#33505e">The name plays on three Filipino words: bayani, a hero; handa, meaning ready; and bayanihan, the spirit of neighbors helping neighbors.</p>
+                  <p style="margin:0;font-weight:600;line-height:1.55;color:#33505e">BAYANIHanda is also meant to grow as a shared library. It gives educators and developers a place to contribute their own preparedness games and lessons and have that work reach more classrooms and communities. In the spirit of bayanihan, the collection is managed and shared as an open resource, so good ideas for disaster readiness can spread freely.</p>
+                  <div style="height:1px;background:#d5e3ea"></div>
+                  <p style="margin:0;font-weight:700;font-size:14px;line-height:1.5;color:#4f6572">Lead developer: Edward Andrew A. Dionido, Lead Science Research Specialist II, University of the Philippines Resilience Institute. Built with the assistance of AI.</p>
+                  <button onClick="{{ sh.close }}" style="background:#16303f;color:#fff;font-weight:900;font-size:16px;padding:13px;border-radius:999px">Close</button>
+                </sc-if>
+
+                <sc-if value="{{ sh.howto }}">
+                  <div style="font:800 23px/1.1 'Baloo 2',sans-serif">{{ sh.howTitle }}</div>
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <sc-for list="{{ sh.howItems }}" as="hi"><div style="display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px;line-height:1.4"><span style="width:36px;height:36px;border-radius:12px;background:#eef6fa;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;flex:none">{{ hi.e }}</span>{{ hi.t }}</div></sc-for>
+                  </div>
+                  <button onClick="{{ sh.close }}" style="background:#d9650a;color:#fff;font-weight:900;font-size:16px;padding:13px;border-radius:999px;box-shadow:0 4px 0 #a34a05">Got it</button>
+                </sc-if>
+
+                <sc-if value="{{ sh.sound }}">
+                  <div style="font:800 23px/1.1 'Baloo 2',sans-serif">Settings</div>
+                  <button onClick="{{ sh.st.tSound }}" style="display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;text-align:left;border-bottom:1px solid #e3ecf1"><span style="flex:1;font-weight:900;font-size:16px">Sound and voice</span><sc-if value="{{ sh.st.sound }}"><span style="width:52px;height:32px;border-radius:16px;background:#128253;position:relative;flex:none"><span style="position:absolute;top:4px;left:24px;width:24px;height:24px;border-radius:50%;background:#fff"></span></span></sc-if><sc-if value="{{ sh.st.soundOff }}"><span style="width:52px;height:32px;border-radius:16px;background:#e3eaee;border:2px solid #8fa3b0;position:relative;flex:none"><span style="position:absolute;top:6px;left:6px;width:16px;height:16px;border-radius:50%;background:#8fa3b0"></span></span></sc-if></button>
+                  <button onClick="{{ sh.st.tVoice }}" style="display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;text-align:left"><span style="flex:1;font-weight:900;font-size:16px">Read tips and hints aloud</span><sc-if value="{{ sh.st.voice }}"><span style="width:52px;height:32px;border-radius:16px;background:#128253;position:relative;flex:none"><span style="position:absolute;top:4px;left:24px;width:24px;height:24px;border-radius:50%;background:#fff"></span></span></sc-if><sc-if value="{{ sh.st.voiceOff }}"><span style="width:52px;height:32px;border-radius:16px;background:#e3eaee;border:2px solid #8fa3b0;position:relative;flex:none"><span style="position:absolute;top:6px;left:6px;width:16px;height:16px;border-radius:50%;background:#8fa3b0"></span></span></sc-if></button>
+                  <button onClick="{{ sh.close }}" style="background:#16303f;color:#fff;font-weight:900;font-size:16px;padding:13px;border-radius:999px">Done</button>
+                </sc-if>
+
+                <sc-if value="{{ sh.gb }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px"><span style="width:92px;height:92px;border-radius:28px;background:#eef6fa;display:flex;align-items:center;justify-content:center;font-size:50px">{{ sh.item.e }}</span><div style="font:800 24px/1.1 'Baloo 2',sans-serif;margin-top:4px">{{ sh.item.n }}</div><p style="margin:0;font-weight:700;font-size:16px;line-height:1.45;color:#3d5563">{{ sh.item.info }}</p></div>
+                  <div style="display:flex;gap:10px"><button onClick="{{ sh.leave }}" style="flex:1;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;border-radius:999px;padding:13px;font-weight:900;font-size:16px">Leave it</button><button onClick="{{ sh.pack }}" style="flex:1;background:#128253;color:#fff;box-shadow:0 4px 0 #0b5e3b;border-radius:999px;padding:13px;font-weight:900;font-size:16px">🎒 Pack it</button></div>
+                </sc-if>
+
+                <sc-if value="{{ sh.hz }}">
+                  <div style="display:flex;align-items:center;gap:10px"><span style="width:40px;height:40px;border-radius:50%;background:#f2760c;display:flex;align-items:center;justify-content:center;font-size:20px">⚠️</span><div style="font:800 23px/1.1 'Baloo 2',sans-serif;padding-top:3px">Hazard spotted</div></div>
+                  <div style="display:flex;align-items:center;gap:14px;background:#fff1e3;border-radius:18px;padding:12px"><span style="font-size:44px">{{ sh.item.e }}</span><div><div style="font-weight:900;font-size:17px">{{ sh.item.n }}</div><div style="font-weight:700;font-size:15px;color:#5c2f0e;margin-top:2px;line-height:1.4">{{ sh.item.why }}</div></div></div>
+                  <div style="background:#e5f6ee;border-radius:18px;padding:12px 14px"><div style="font-size:12px;font-weight:900;letter-spacing:1px;color:#0c5c3a">✓ HOW TO MAKE IT SAFE</div><div style="font-weight:800;font-size:15.5px;margin-top:3px;line-height:1.4">{{ sh.item.fix }}</div></div>
+                  <button onClick="{{ sh.hzGot }}" style="background:#d9650a;color:#fff;font-weight:900;font-size:17px;padding:13px;border-radius:999px;box-shadow:0 4px 0 #a34a05">Got it</button>
+                </sc-if>
+
+                <sc-if value="{{ sh.clFuse }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px"><span style="font-size:50px">⚡</span><div style="font:800 23px/1.1 'Baloo 2',sans-serif">Main power</div><p style="margin:0;font-weight:700;font-size:15.5px;line-height:1.45;color:#3d5563">Switch off the main power at the fusebox before you start cleaning.</p></div>
+                  <button onClick="{{ sh.clPower }}" style="background:#d9650a;color:#fff;font-weight:900;font-size:17px;padding:13px;border-radius:999px;box-shadow:0 4px 0 #a34a05">Switch off the power</button>
+                </sc-if>
+
+                <sc-if value="{{ sh.clTools }}">
+                  <div style="font:800 23px/1.1 'Baloo 2',sans-serif">Safety gear and tools</div>
+                  <div style="display:flex;flex-direction:column;gap:10px;font-weight:700;font-size:15.5px">
+                    <div style="display:flex;align-items:center;gap:12px"><span style="font-size:26px">🧤</span>Rubber gloves, protect your hands</div>
+                    <div style="display:flex;align-items:center;gap:12px"><span style="font-size:26px">🥾</span>Rubber boots, keep your feet safe and dry</div>
+                    <div style="display:flex;align-items:center;gap:12px"><span style="font-size:26px">🧹</span>Broom and dustpan to sweep the mess</div>
+                  </div>
+                  <button onClick="{{ sh.clGear }}" style="background:#128253;color:#fff;font-weight:900;font-size:17px;padding:13px;border-radius:999px;box-shadow:0 4px 0 #0b5e3b">Put on gear</button>
+                </sc-if>
+
+                <sc-if value="{{ sh.clAct }}">
+                  <div style="display:flex;align-items:center;gap:12px"><span style="font-size:44px">{{ sh.item.e }}</span><div><div style="font:800 22px/1.1 'Baloo 2',sans-serif;padding-top:3px">{{ sh.item.n }}</div><div style="font-weight:700;color:#4f6572;font-size:14.5px">What should you do?</div></div></div>
+                  <button onClick="{{ sh.keep }}" style="background:#2a6b8f;color:#fff;font-weight:900;font-size:16px;padding:13px;border-radius:999px;box-shadow:0 4px 0 #1f5675">🧽 Clean and keep</button>
+                  <button onClick="{{ sh.toss }}" style="background:#128253;color:#fff;font-weight:900;font-size:16px;padding:13px;border-radius:999px;box-shadow:0 4px 0 #0b5e3b">🗑️ Throw away</button>
+                  <button onClick="{{ sh.tell }}" style="background:#c62f22;color:#fff;font-weight:900;font-size:16px;padding:13px;border-radius:999px;box-shadow:0 4px 0 #922a20">✋ Do not touch, tell an adult</button>
+                  <button onClick="{{ sh.close }}" style="padding:8px;font-weight:900;font-size:15px;color:#4f6572">Cancel</button>
+                </sc-if>
+
+                <sc-if value="{{ sh.clBin }}">
+                  <div style="display:flex;align-items:center;gap:12px"><span style="font-size:44px">{{ sh.item.e }}</span><div><div style="font:800 22px/1.1 'Baloo 2',sans-serif;padding-top:3px">{{ sh.item.n }}</div><div style="font-weight:700;color:#4f6572;font-size:14.5px">Which bin does it go in?</div></div></div>
+                  <button onClick="{{ sh.bio }}" style="background:#2e9c53;color:#fff;font-weight:900;font-size:16px;padding:13px;border-radius:999px;box-shadow:0 4px 0 #1f7a3d">🟢 Biodegradable</button>
+                  <button onClick="{{ sh.recy }}" style="background:#2f7fc0;color:#fff;font-weight:900;font-size:16px;padding:13px;border-radius:999px;box-shadow:0 4px 0 #205f92">🔵 Recyclable</button>
+                  <button onClick="{{ sh.spec }}" style="background:#c0392b;color:#fff;font-weight:900;font-size:16px;padding:13px;border-radius:999px;box-shadow:0 4px 0 #922a20">🔴 Hazardous or special</button>
+                  <button onClick="{{ sh.binBack }}" style="padding:8px;font-weight:900;font-size:15px;color:#4f6572">Back</button>
+                </sc-if>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ snack.on }}">
+            <div style="position:absolute;left:16px;right:16px;bottom:{{ snack.bottom }}px;z-index:85;display:flex;justify-content:center;pointer-events:none">
+              <div style="background:#16303f;color:#fff;font-weight:800;font-size:15px;padding:13px 18px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:bh-up .2s ease-out both;max-width:440px">{{ snack.text }}</div>
+            </div>
+          </sc-if>
+
+          <div style="position:absolute;left:0;right:0;bottom:7px;display:flex;justify-content:center;pointer-events:none;z-index:96"><span style="width:110px;height:4px;border-radius:2px;background:{{ dv.pill }}"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;phone&quot;, &quot;tablet&quot;], &quot;default&quot;: &quot;phone&quot;, &quot;tsType&quot;: &quot;'phone' | 'tablet'&quot;}, &quot;startAs&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;first&quot;, &quot;returning&quot;], &quot;default&quot;: &quot;first&quot;, &quot;tsType&quot;: &quot;'first' | 'returning'&quot;}}">
+class Component extends DCLogic {
+  D = {
+    AV: [
+      { id: 'turtle', e: '🐢', bg: '#cdebe0' }, { id: 'eagle', e: '🦅', bg: '#ffe1c4' }, { id: 'dragon', e: '🐉', bg: '#d9ccf6' }, { id: 'butterfly', e: '🦋', bg: '#ffd9df' },
+      { id: 'whale', e: '🐋', bg: '#d6ecff' }, { id: 'frog', e: '🐸', bg: '#e4f0c4' }, { id: 'cat', e: '🐱', bg: '#ffe9b8' }, { id: 'fox', e: '🦊', bg: '#ffd9c4' },
+    ],
+    P: {
+      mit: { id: 'mit', name: 'Stop Hazards Early', sub: 'Prevention and Mitigation', icon: '🛡️', text: '#2a6b8f', ring: '#2a6b8f', grad: 'linear-gradient(135deg,#6db4d6,#2a6b8f)', banner: 'linear-gradient(135deg,#3f8fb5,#1f5675)', border: '#bfe0ef', tint: '#e6f3f9', lead: 'Spot dangers before they happen and stop them from turning into disasters.' },
+      prep: { id: 'prep', name: 'Get Ready', sub: 'Preparedness', icon: '🎒', text: '#128253', ring: '#128253', grad: 'linear-gradient(135deg,#5fd39b,#128253)', banner: 'linear-gradient(135deg,#1e9c66,#0c5c3a)', border: '#bfe9d4', tint: '#e5f6ee', lead: 'Get your family and your go bag ready before anything happens.' },
+      resp: { id: 'resp', name: 'Act Fast', sub: 'Response', icon: '🚨', text: '#b35205', ring: '#e8700b', grad: 'linear-gradient(135deg,#ffb04d,#f2760c)', banner: 'linear-gradient(135deg,#e06a0a,#a84d04)', border: '#ffd9ad', tint: '#fff1e3', lead: 'Learn what to do in the first minutes when a disaster strikes.' },
+      rec: { id: 'rec', name: 'Bounce Back', sub: 'Recovery and Rehabilitation', icon: '🏘️', text: '#7a53c6', ring: '#7a53c6', grad: 'linear-gradient(135deg,#c3a6ff,#7a53c6)', banner: 'linear-gradient(135deg,#8c66d9,#5a3a9e)', border: '#ddcdfa', tint: '#f1ebfd', lead: 'After a disaster, help your home and your community bounce back.' },
+    },
+    PO: ['mit', 'prep', 'resp', 'rec'],
+    G: [
+      { id: 'sapa', p: 'mit', name: 'Guide the Stream', icon: '🏞️', short: 'Open a channel so the creek reaches the sea instead of flooding homes.', desc: 'Clear the silt and open a channel so the creek reaches the sea instead of flooding homes. Inspired by Ang Sapa.', badge: ['Water Warden', '💧'], modesLabel: 'Pick a puzzle', modes: [['🏞️', 'Puzzle 1 · Clear the creek', 'Clear the silt and route the creek past the rock to the sea.'], ['🏠', 'Puzzle 2 · Around the barangay', 'A whole barangay sits in the way. Guide the water safely around it.'], ['💧', 'Puzzle 3 · The blocked culvert', 'The waterway is plugged with silt. Clear it so the creek can flow.']], steps: [['1', 'Clear', 'Tap silt and garbage to clear the waterway.'], ['2', 'Build', 'Tap ground to lay a channel from the creek toward the sea.'], ['3', 'Route', 'Guide it around the houses and the rock. Tap a channel again to remove it.'], ['4', 'Let it rain', 'When the channel reaches the sea, release the rain. The water flows out and homes stay dry.']], tip: 'Small creeks are branches of the river system. When we block or build over them, the water overflows into homes.', note: 'Inspired by the "Ang Sapa" series of Dr. Alfredo Mahar Lagmay of Project NOAH and the UP Resilience Institute.', next: 'Next puzzle', result: ['The barangay stays dry!', 'The creek reached the sea.', 'Keep the waterway open and let the water find its path to the sea.'], legend: [['🏞️', 'Creek, where the water starts'], ['🌊', 'Sea, guide the water here'], ['🏠', 'House, keep the water away'], ['🪨', 'Rock, you cannot build here'], ['🗑️', 'Silt, tap to clear the waterway'], ['💧', 'Channel, tap ground to build, tap again to remove']] },
+      { id: 'hazard', p: 'mit', name: 'Hazard Hunt', icon: '🗺️', short: 'Spot the things that turn dangerous in an earthquake or a typhoon.', desc: 'Pick a place, then spot the things that turn dangerous in an earthquake or a typhoon, and learn how to fix them.', badge: ['Hazard Hunt', '🗺️'], modesLabel: 'Pick a place', modes: [['🏠', 'At home', 'Hunt for hazards in the living room, from tall cabinets to overloaded outlets.', 'Living room'], ['🏫', 'At school', 'Hunt for hazards in the classroom, from tall shelves to blocked exits.', 'Classroom'], ['🏙️', 'On the street', 'See how the same street changes: something helpful on a calm day can turn risky in a typhoon or a flood.', 'Street']], steps: [['1', 'Look', 'Drag to look around the room. Pinch or use the plus and minus buttons to zoom.'], ['2', 'Tap', 'Tap anything that could be dangerous in an earthquake or a typhoon.'], ['3', 'Learn', 'A card tells you why it is a hazard and how to make it safe.'], ['4', 'Find them all', 'Spot every hazard in the room to finish and earn your badge.']], tip: 'Finding and fixing hazards before a disaster is called mitigation. It is one of the smartest ways to keep families and classrooms safe.', next: 'Next place', result: ['You spotted every hazard!', '6 of 6 hazards found.', 'Ask a grown-up to help fix the hazards you found, like tying tall cabinets to the wall.'], legend: [['👈', 'Tap objects to inspect them'], ['⚠️', 'Hazards get an orange marker when found'], ['👀', 'Drag to look, pinch or plus and minus to zoom'], ['🎯', 'Find every hazard to finish']] },
+      { id: 'gobag', p: 'prep', name: 'Go Bag Packing 3D', icon: '🎒', short: 'Grab the right supplies from the room and pack a smart go bag.', desc: 'Grab the right supplies from the room and pack a smart go bag.', badge: ['Go Bag', '🎒'], modesLabel: 'Pick how you want to play', modes: [['🧺', 'On the table', 'All the items are laid out on a table. Good for a first try.', 'Table with supplies'], ['🏗️', 'Messy pile', 'A living room with everything dumped in a heap on the rug. Dig through and pick what matters.', 'Messy pile on the rug'], ['🚪', 'Search the kitchen', 'Harder. Walk around a kitchen with the joystick and open cabinets, drawers, and the fridge to find what you need.', 'Kitchen']], steps: [['1', 'Look', 'Drag to look around the room. Pinch or use the plus and minus buttons to zoom. Tap the top-view button for a view from above.'], ['2', 'Tap', 'Tap an item to learn what it does.'], ['3', 'Pack', 'Pack it or leave it behind.'], ['4', 'Zip', 'Zip up when you are ready.']], tip: 'Your bag has limited room, so choose the supplies that matter most.', result: ['Bag packed!', 'You packed the essentials.', 'Keep your family go bag near the door, and check it with a grown-up every few months.'] },
+      { id: 'fire', p: 'resp', name: 'Fire Extinguisher 3D', icon: '🧯', short: 'Pull, Aim, Squeeze, Sweep. Put out the fire the PASS way.', desc: 'Pull, Aim, Squeeze, Sweep. Put out the fire the PASS way.', badge: ['Fire Out', '🧯'], modesLabel: 'Choose your challenge', modes: [['🙂', 'Easy', 'Take your time, and you will never run out of spray.', 'Kitchen with a small fire'], ['⏱️', 'Difficult', 'Watch your extinguisher and beat the clock.', 'Kitchen with a small fire']], stepsTitle: 'Remember PASS', steps: [['P', 'Pull', 'Pull the safety pin.'], ['A', 'Aim', 'Aim low, at the base.'], ['S', 'Squeeze', 'Hold the spray button.'], ['S', 'Sweep', 'Sweep side to side.']], tip: 'Stand a safe distance away, about two big steps back.', result: ['Fire is out!', '', 'Only fight a small fire, and only with a clear way out behind you. If the fire is big, spreading, or the room fills with smoke, get out fast, close the door, pull the fire alarm, and call for help.'] },
+      { id: 'nobody', p: 'resp', soon: true, name: 'Nobody Left Behind', icon: '🚪', short: 'Watch a classroom evacuation and notice if anyone is still inside.', badge: ['No One Left', '🚪'] },
+      { id: 'bleed', p: 'resp', soon: true, name: 'Stop the Bleed', icon: '🩹', short: 'Put on gloves, cover the wound, then press hard to stop the bleeding.', badge: ['Stop Bleed', '🩹'] },
+      { id: 'cpr', p: 'resp', soon: true, name: 'Hands-Only CPR', icon: '💓', short: 'Call for help, then push hard and fast on the chest in time with the beat.', badge: ['CPR Hero', '❤️'] },
+      { id: 'quake', p: 'resp', name: 'Duck, Cover, and Hold', icon: '🏗️', short: 'Watch the coach, then copy the moves: drop, cover, hold on, walk out.', desc: 'Watch the coach, then copy the moves: drop, cover under the sturdy table, hold on, then walk out.', badge: ['Quake Ready', '🏗️'], scene: 'Classroom with the coach', steps: [['1', 'Watch the coach', 'The coach shows you a move, then adds another each round: drop, cover, hold on, walk out.'], ['2', 'Copy the moves', 'Tap the same moves back in the same order using the Drop, Cover, Hold on, and Walk out buttons.'], ['3', 'Keep the order right', 'Drop first, then cover under the sturdy table, hold on until the shaking stops, and only then walk out.'], ['4', 'Learn it by heart', 'Each round is a little faster, so the right order sticks in your memory.']], tip: 'Try it with your whole body too. When the coach drops, covers, and holds, copy the move yourself.', start: 'Start the drill', result: ['Drill complete', '4 of 4 rounds done.', 'In a real earthquake, hold on under a sturdy table until the shaking stops. Then walk out calmly.'] },
+      { id: 'path', p: 'resp', name: 'Safe Path', icon: '🧭', short: 'Move tile by tile to the evacuation area, away from danger.', desc: 'Move tile by tile to the evacuation area, keeping away from coasts, trees, poles, and buildings when a hazard strikes.', badge: ['Safe Path', '🧭'], mode: 1, modesLabel: 'Pick a level', modes: [['✏️', 'Level 1 · Trace the route', 'Draw a line from your home to the evacuation tent, around houses, trees, and water.'], ['🎲', 'Level 2 · Tile escape', 'Step tile by tile and roll the die. Stay clear of coasts, trees, poles, and buildings when a hazard strikes.'], ['⛰️', 'Level 3 · High ground', 'Roll the early warning first, then climb this topographic map to safe, high ground away from floods, surge, and landslides.']], steps: [['1', 'Move', 'Tap a tile next to you to step there.'], ['2', 'Roll', 'Roll the die. It may bring an earthquake or typhoon.'], ['3', 'Stay safe', 'Keep off tiles near coasts, trees, poles, and buildings.'], ['4', 'Reach', 'Get to the green evacuation tent, safe and quick.']], tip: 'Orange warning markers show risky tiles. If a hazard strikes while you stand on one, you lose a heart.', next: 'Next level', result: ['You reached safety!', '', 'Know where your evacuation area is, and walk the route with your family before a disaster comes.'], legend: [['🚩', 'Start, where you begin'], ['⛺', 'Evacuation area, your safe goal'], ['🌊', 'Coast and water, stay away'], ['🌳', 'Tree, stay away'], ['🏠', 'House, stay away'], ['⚡', 'Electricity pole, stay away'], ['⚠️', 'Risky tile, close to danger'], ['🎲', 'The die may bring an earthquake or typhoon']] },
+      { id: 'cleanup', p: 'rec', name: 'House Cleanup', icon: '🧹', short: 'Clean up safely after a flood or a typhoon, and sort the waste.', desc: 'Clean up safely after a flood inside the house or a typhoon outside. Decide what to keep, what to throw, and what is too dangerous to touch, then sort the waste into the right bin.', badge: ['Cleanup Crew', '🧹'], modesLabel: 'Pick a cleanup', modes: [['🌊', 'After a flood', 'Clean up inside the house. Watch for dirty floodwater and wet electricity.', 'Living room after a flood'], ['🌀', 'After a typhoon', 'Clear the yard outside. Watch for fallen wires and sharp debris.', 'Yard after a typhoon']], steps: [['1', 'Stay safe first', 'Switch off the main power at the fusebox, then open the tools box for your gloves and boots.'], ['2', 'Drag to clean', 'Press and drag an item across the scene to where it belongs.'], ['3', 'Sort the waste', 'Drag trash into the right bin: biodegradable, recyclable, or special.'], ['4', 'Keep the good things', 'Drag things you can wash and reuse to the Keep box.'], ['5', 'Do not touch hazards', 'Never drag a hazard. Tap it once to report it to an adult. Drag on empty ground to look around.']], tip: 'Never touch fallen wires, wet outlets, dirty floodwater, or broken glass.', next: 'Other cleanup', result: ['Cleanup done!', '7 of 7 done safely.', 'Green bin is biodegradable, blue bin is recyclable, and red bin is hazardous or special waste.'] },
+      { id: 'cares', p: 'rec', name: 'CARES: Community and Resilience', icon: '🏘️', short: 'Build a community by a stream, protect it, then simulate a flood.', desc: 'Build a community beside a stream, reach your population goal, and add green and gray protection. Then pick a hazard and simulate: water flows to the lowest ground, so see whose homes stay safe.', badge: ['Community Builder', '🏘️'], modesLabel: 'Pick a map', modes: [['🌊', 'River in the lowlands', 'A river runs along the low ground. Build up on the high ground and keep back from the water.'], ['💧', 'River on one side', 'The river runs down the west side. The safe high ground is across to the east.'], ['🏔️', 'Valley in the middle', 'A stream cuts a valley down the middle. High ground rises on both sides.'], ['🐌', 'The river bend', 'The river bends around a corner. The safe high ground is the far side, away from the bend.']], steps: [['1', 'Build', 'Tap the ground to place houses. Reach your people goal. Build on high ground, not on the low land by the stream.'], ['2', 'Protect', 'Add green protection like trees, mangroves, and a retention pond, and gray protection like dikes, canals, and pumps.'], ['3', 'Choose a hazard', 'Pick a flood or a stronger storm at the top.'], ['4', 'Simulate', 'Press Simulate. Water settles in the lowest ground first, so see whose homes stay dry.']], tip: 'Green infrastructure works with nature to soak up and slow water, while gray infrastructure blocks or moves it. The strongest communities use both.', next: 'Next map', result: ['A resilient community!', '', 'Water always flows downhill and pools in low places. Keep the waterway clear.'], legend: [['🏠', 'House, adds ten people. Build on high ground'], ['🌳', 'Green: trees, mangroves, pond soak up water'], ['🧱', 'Gray: dike, canal, pump block or move water'], ['💧', 'Water fills the lowest ground first']] },
+    ],
+    BADGES: ['hazard', 'gobag', 'fire', 'nobody', 'bleed', 'cpr', 'quake', 'path', 'cares', 'cleanup', 'sapa'],
+    RANKS: [[0, 'Getting Ready'], [1, 'Rising Champion'], [2, 'Junior Champion'], [4, 'DRRM Champion'], [6, 'Master DRRM Champion']],
+    TIPS: [
+      ['Pack a flashlight in your go bag. If the lights go out, you can still find your way.', 'gobag'],
+      ['When the ground shakes: drop, cover, and hold on. Walk out only when the shaking stops.', 'quake'],
+      ['Only fight a small fire, and only with a clear way out behind you.', 'fire'],
+      ['Tall cabinets can tip over in an earthquake. Ask a grown-up to tie them to the wall.', 'hazard'],
+      ['After a flood, never touch wet outlets or fallen wires. Tell an adult right away.', 'cleanup'],
+      ['Know where your evacuation area is, and walk the route with your family.', 'path'],
+      ['Trash in creeks blocks the water. Keep waterways clear so homes stay dry.', 'sapa'],
+      ['Trees and mangroves soak up and slow down water. Strong communities use green and gray protection.', 'cares'],
+    ],
+    TRIVIA: [
+      ['Bayanihan is the spirit of neighbors helping neighbors. Long ago, a whole barangay would lift a family\'s house together and carry it to a new spot!', null],
+      ['BAYANIHanda plays on three Filipino words: bayani, a hero; handa, meaning ready; and bayanihan, neighbors helping neighbors.', null],
+      ['PASS is how you use a fire extinguisher: Pull, Aim, Squeeze, Sweep.', 'fire'],
+      ['Mangrove roots are like a green wall by the sea. They slow down big waves and storm surge.', 'cares'],
+      ['Water always flows downhill and pools in the lowest places. Homes on high ground stay drier in a flood.', 'cares'],
+      ['Small creeks are branches of the river system. When we block them, the water overflows into homes.', 'sapa'],
+      ['Tsunami and storm surge flood low ground, so the safest place to go is high ground.', 'path'],
+      ['Finding and fixing hazards before a disaster is called mitigation.', 'hazard'],
+    ],
+    LEAD: 'Edward Andrew A. Dionido, Lead Science Research Specialist II, UP Resilience Institute. Built with the assistance of AI.',
+    MOVES: [['drop', '⬇️', 'Drop'], ['cover', '🛡️', 'Cover'], ['hold', '✊', 'Hold on'], ['walk', '🚶', 'Walk out']],
+    PMAP: ['W...TG', 'W.H...', 'W...P.', 'W.T...', 'W...H.', 'WS....'],
+    SMAP: ['..HH..~', 'C..R..~', '....X.~', '.H....~', '...H..~'],
+    CMAP: ['hhhhhhh', 'hhhhhhh', 'mmmmmmm', 'lllllll', 'wwwwwww'],
+    TOOLS: [['house', '🏠', 'House', 'home'], ['tree', '🌳', 'Tree', 'green'], ['mangrove', '🌿', 'Mangrove', 'green'], ['pond', '💧', 'Pond', 'green'], ['dike', '🧱', 'Dike', 'gray'], ['canal', '〰️', 'Canal', 'gray'], ['pump', '⚙️', 'Pump', 'gray']],
+    GB: [
+      { id: 'torch', e: '🔦', n: 'Flashlight', ess: true, info: 'Lights the way when the power goes out.', x: 20, y: 38 },
+      { id: 'water', e: '💧', n: 'Drinking water', ess: true, info: 'Clean water to drink for the first few days.', x: 46, y: 33 },
+      { id: 'aid', e: '⛑️', n: 'First aid kit', ess: true, info: 'Bandages and medicine for small cuts and scrapes.', x: 76, y: 38 },
+      { id: 'radio', e: '📻', n: 'Battery radio', ess: true, info: 'Hear news and warnings even without electricity.', x: 28, y: 54 },
+      { id: 'food', e: '🥫', n: 'Canned food', ess: true, info: 'Food that stays good without a fridge.', x: 58, y: 52 },
+      { id: 'batt', e: '🔋', n: 'Extra batteries', ess: true, info: 'Keep your flashlight and radio working.', x: 82, y: 58 },
+      { id: 'game', e: '🎮', n: 'Game console', ess: false, info: 'It takes up space you need for real supplies.', x: 38, y: 68 },
+      { id: 'books', e: '📚', n: 'Heavy books', ess: false, info: 'They make your bag too heavy to carry far.', x: 66, y: 69 },
+    ],
+    HZ: [
+      { id: 'cab', e: '🗄️', n: 'Tall cabinet', why: 'It can tip over when the ground shakes.', fix: 'Tie it to the wall with straps or brackets.', x: 16, y: 42 },
+      { id: 'frame', e: '🖼️', n: 'Heavy frame above the sofa', why: 'It can fall on someone during an earthquake.', fix: 'Hang heavy things away from where people sit and sleep.', x: 50, y: 34 },
+      { id: 'vase', e: '🏺', n: 'Vase on a high shelf', why: 'It can fall and break into sharp pieces.', fix: 'Keep heavy and breakable things on low shelves.', x: 84, y: 40 },
+      { id: 'pots', e: '🪴', n: 'Pots on the window ledge', why: 'Strong typhoon winds can blow them off and hurt someone.', fix: 'Bring them inside before a typhoon.', x: 64, y: 54 },
+      { id: 'door', e: '📦', n: 'Boxes blocking the door', why: 'You need a clear way out in an emergency.', fix: 'Keep doors and hallways clear.', x: 26, y: 66 },
+      { id: 'plug', e: '🔌', n: 'Overloaded outlet', why: 'Too many plugs can overheat and start a fire.', fix: 'Use one plug per outlet and unplug what you are not using.', x: 78, y: 68 },
+    ],
+    CL: [
+      { id: 'fuse', e: '⚡', n: 'Fusebox', type: 'fuse', x: 14, y: 38 },
+      { id: 'chair', e: '🪑', n: 'Muddy chair', act: 'keep', x: 36, y: 60 },
+      { id: 'food', e: '🍌', n: 'Spoiled food', act: 'throw', bin: 'bio', x: 60, y: 69 },
+      { id: 'bottles', e: '🥤', n: 'Plastic bottles', act: 'throw', bin: 'rec', x: 80, y: 55 },
+      { id: 'batt', e: '🔋', n: 'Old batteries', act: 'throw', bin: 'spec', x: 52, y: 44 },
+      { id: 'outlet', e: '🔌', n: 'Wet outlet', act: 'tell', x: 84, y: 36 },
+    ],
+    SHARE: [['💬', 'Messenger', '#e6efff'], ['✉️', 'Gmail', '#fdeaea'], ['📞', 'Viber', '#efe8fb'], ['📁', 'Drive', '#e5f6ee'], ['📶', 'Nearby Share', '#e6f3f9'], ['🖼️', 'Gallery', '#fff5df'], ['📋', 'Copy', '#eef2f4'], ['⋯', 'More', '#eef2f4']],
+    JUMPS: [['splash', 'Splash'], ['welcome', 'Welcome (first time)'], ['players', "Who's playing"], ['addPlayer', 'Add player'], ['home', 'Home'], ['games', 'Games'], ['intro', 'Game intro'], ['play:fire', 'Play · Fire Extinguisher 3D'], ['play:gobag', 'Play · Go Bag Packing 3D'], ['play:quake', 'Play · Duck, Cover, and Hold'], ['play:path', 'Play · Safe Path'], ['play:hazard', 'Play · Hazard Hunt'], ['play:sapa', 'Play · Guide the Stream'], ['play:cleanup', 'Play · House Cleanup'], ['play:cares', 'Play · CARES'], ['result', 'Results + badge earned'], ['id', 'Champion ID'], ['settings', 'Settings + About']],
+  };
+
+  SAMPLE = () => ({ players: [{ id: 'p1', nick: 'Mika', av: 'turtle' }, { id: 'p2', nick: 'Jun', av: 'fox' }, { id: 'p3', nick: 'Lia', av: 'butterfly' }], activeId: 'p1', badges: { p1: { gobag: true, hazard: true, quake: true }, p2: { fire: true } } });
+
+  state = Object.assign({
+    device: (this.props && this.props.device) === 'tablet' ? 'tablet' : 'phone', screen: 'splash', ws: 0, players: [], activeId: null, badges: {}, editMode: false,
+    draft: { nick: '', av: 'turtle', id: null }, filter: 'all', gameId: 'fire', mode: 0, from: 'games', play: {}, result: null,
+    ask: false, askKind: 'tip', askN: 0, homeN: 0, jump: 0, sheet: null, sd: null, snack: null, sound: true, voice: false,
+    names: {}, photos: {}, aboutMore: false, scale: 1, zoom: 1,
+  }, (this.props && this.props.startAs) === 'returning' ? this.SAMPLE() : {});
+
+  componentDidMount() {
+    this.fit = () => { const d = this.dims(this.state.device); const W = window.innerWidth - 32, H = window.innerHeight - 84; const sc = Math.max(0.3, Math.min(1, W / d.w, H / d.h)); if (Math.abs(sc - this.state.scale) > 0.004) this.setState({ scale: sc }); };
+    window.addEventListener('resize', this.fit); this.fit(); this.armSplash();
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.fit); clearTimeout(this.splashT); clearTimeout(this.snT); clearTimeout(this.fx); this.stopSpray(); }
+  componentDidUpdate(pp, ps) {
+    if (ps.device !== this.state.device) this.fit();
+    if (pp.device !== this.props.device && (this.props.device === 'phone' || this.props.device === 'tablet')) this.setState({ device: this.props.device });
+  }
+  dims(dev) { return dev === 'tablet' ? { w: 1312, h: 832, b: 16, r: 42, sr: 28 } : { w: 420, h: 880, b: 10, r: 48, sr: 38 }; }
+  armSplash() { clearTimeout(this.splashT); this.splashT = setTimeout(() => { if (this.state.screen === 'splash') this.afterSplash(); }, 2600); }
+  afterSplash() { if (this.state.players.length) this.go('players'); else this.go('welcome', { ws: 0 }); }
+  go(screen, extra) { this.stopSpray(); clearTimeout(this.fx); this.setState(Object.assign({ screen, ask: false, sheet: null }, extra || {})); if (screen === 'splash') this.armSplash(); }
+  snackShow(t) { clearTimeout(this.snT); this.setState({ snack: t }); this.snT = setTimeout(() => this.setState({ snack: null }), 2600); }
+  speak(t, force) { if (!t || !this.state.sound || (!force && !this.state.voice)) return; try { const u = new SpeechSynthesisUtterance(t); u.rate = 0.95; u.pitch = 1.15; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); } catch (e) {} }
+  av(id) { return this.D.AV.find(a => a.id === id) || this.D.AV[0]; }
+  game(id) { return this.D.G.find(g => g.id === id) || this.D.G[0]; }
+  me() { return this.state.players.find(p => p.id === this.state.activeId) || null; }
+  earned(pid) { return this.state.badges[pid || this.state.activeId] || {}; }
+  countOf(pid) { const e = this.earned(pid); return this.D.G.filter(g => !g.soon && e[g.id]).length; }
+  rankOf(c) { let r = this.D.RANKS[0]; this.D.RANKS.forEach(x => { if (c >= x[0]) r = x; }); return r; }
+  nextOf(c) { const n = this.D.RANKS.find(x => x[0] > c); return n ? { need: n[0] - c, name: n[1], min: n[0] } : null; }
+  seed() { return this.state.players.length ? {} : this.SAMPLE(); }
+  setPlay(patch) { this.setState(s => ({ play: Object.assign({}, s.play, patch) })); }
+  hint(t) { this.setPlay({ hint: t }); this.speak(t); }
+
+  restart() { this.stopSpray(); this.setState({ players: [], activeId: null, badges: {}, names: {}, photos: {}, editMode: false, filter: 'all', result: null }); this.go('splash'); }
+  jumpTo(v) {
+    if (v === 'splash') return this.restart();
+    if (v === 'welcome') { this.setState({ players: [], activeId: null, badges: {} }); return this.go('welcome', { ws: 0 }); }
+    const seed = this.seed(); if (seed.players) this.setState(seed);
+    if (v === 'addPlayer') return this.newPlayer();
+    if (v === 'intro') return this.go('intro', { gameId: 'fire', mode: 0, from: 'games' });
+    if (v.indexOf('play:') === 0) { const id = v.slice(5); const gm = this.game(id); return this.startGame(id, gm.mode || 0); }
+    if (v === 'result') { this.setState({ gameId: 'fire', mode: 0 }); setTimeout(() => this.finish(3, 'Time: 24s'), 0); return; }
+    if (v === 'games') return this.go('games', { filter: 'all' });
+    this.go(v);
+  }
+
+  newPlayer() { this.go('addPlayer', { draft: { nick: '', av: 'turtle', id: null } }); }
+  editPlayer(p) { this.go('addPlayer', { draft: { nick: p.nick, av: p.av, id: p.id } }); }
+  savePlayer() {
+    const d = this.state.draft, nick = d.nick.trim(); if (!nick) return;
+    if (d.id) { this.setState(s => ({ players: s.players.map(p => p.id === d.id ? Object.assign({}, p, { nick, av: d.av }) : p) })); this.go('players'); this.snackShow('Player saved'); return; }
+    const id = 'p' + Date.now().toString(36);
+    this.setState(s => ({ players: s.players.concat([{ id, nick, av: d.av }]), activeId: id }));
+    this.go('home', { homeN: 0, jump: this.state.jump + 1, editMode: false });
+    this.snackShow('Welcome, ' + nick + '!'); this.speak('Hi, ' + nick + '! Ready to learn and be a hero today?');
+  }
+  pickPlayer(p) { if (this.state.editMode) return this.editPlayer(p); this.setState({ activeId: p.id }); this.go('home', { homeN: 0, jump: this.state.jump + 1 }); this.speak('Hi, ' + p.nick + '!'); }
+  removePlayer(id) {
+    const players = this.state.players.filter(p => p.id !== id); const badges = Object.assign({}, this.state.badges); delete badges[id];
+    const activeId = this.state.activeId === id ? (players[0] ? players[0].id : null) : this.state.activeId;
+    this.setState({ players, badges, activeId, editMode: players.length ? this.state.editMode : false });
+    if (!players.length) this.newPlayer(); else this.go('players');
+    this.snackShow('Player removed');
+  }
+
+  openGame(id) { const g = this.game(id); if (g.soon) { this.snackShow('Coming soon! Bayani is still building this game.'); return; } const from = ['home', 'games', 'id', 'players'].indexOf(this.state.screen) >= 0 ? this.state.screen : 'games'; this.go('intro', { gameId: id, mode: g.mode || 0, from }); }
+  startGame(id, mode) { const gid = id || this.state.gameId; const m = mode == null ? this.state.mode : mode; const play = this.initPlay(gid, m); this.go('play', { gameId: gid, mode: m, play, zoom: 1 }); this.speak(play.hint); }
+  initPlay(id, m) {
+    const P = {
+      fire: { pin: false, aimed: false, sweep: false, fire: 100, agent: 100, dist: 2, spraying: false, t0: Date.now(), hint: 'Pull the safety pin first.' },
+      gobag: { packed: [], left: [], top: false, hint: 'Tap an item to learn about it.' },
+      quake: { round: 1, idx: 0, flash: null, hint: 'Round 1. Copy me: Drop' },
+      path: { pos: [5, 1], steps: 0, hearts: 3, die: null, needRoll: false, rolling: false, reveal: false, hint: 'Tap a tile next to you to step there.' },
+      hazard: { found: [], hint: 'Tap anything that could be dangerous in an earthquake or a typhoon.' },
+      sapa: { ch: {}, clr: {}, raining: false, hint: 'Tap the silt to clear it. Then tap ground to build a channel.' },
+      cleanup: { power: false, gear: false, done: [], hint: 'Safety first! Switch off the main power at the fusebox.' },
+      cares: { tool: 'house', placed: {}, scen: 'flood', sim: false, hint: 'Tap high ground to place houses. Reach 60 people.' },
+    };
+    return Object.assign({ g: id, m }, P[id] || {});
+  }
+  finish(stars, line) {
+    const s = this.state, g = this.game(s.gameId), pid = s.activeId;
+    const mine = s.badges[pid] || {}; const had = !!mine[g.id]; const newB = stars === 3 && !had;
+    const badges = newB ? Object.assign({}, s.badges, { [pid]: Object.assign({}, mine, { [g.id]: true }) }) : s.badges;
+    this.go('result', { badges, result: { id: g.id, stars, line, newB, had: had && stars === 3 }, jump: s.jump + 1 });
+    this.speak(g.result[0] + ' ' + g.result[2]);
+  }
+
+  stopSpray() { if (this.sprayT) { clearInterval(this.sprayT); this.sprayT = null; } }
+  sprayStart() { const p = this.state.play; if (!p.pin) { this.hint('Pull the safety pin first!'); return; } if (this.sprayT || p.fire <= 0 || p.agent <= 0) return; this.setPlay({ spraying: true, aimed: true }); this.sprayT = setInterval(() => this.sprayTick(), 100); }
+  sprayEnd() { if (!this.sprayT) return; this.stopSpray(); this.setPlay({ spraying: false }); }
+  sprayTick() {
+    const p = this.state.play; if (this.state.screen !== 'play' || p.g !== 'fire') return this.stopSpray();
+    const hard = p.m === 1; const rate = p.dist === 2 ? 3.4 : 1.3;
+    const fire = Math.max(0, p.fire - rate), agent = hard ? Math.max(0, p.agent - 1.6) : 100;
+    if (fire <= 0) { this.stopSpray(); const secs = Math.max(1, Math.round((Date.now() - p.t0) / 1000)); this.finish(hard && secs > 30 ? 2 : 3, 'Time: ' + secs + 's'); return; }
+    if (agent <= 0) { this.stopSpray(); this.setPlay({ agent: 0, fire, spraying: false, hint: 'Out of spray! Tap restart to try again.' }); return; }
+    const sweep = p.sweep || fire < 65;
+    const hint = p.dist === 1 ? 'Too close! Step back to about two big steps away.' : p.dist === 3 ? 'Too far. Step closer so the spray reaches.' : sweep ? 'Sweep side to side. Keep going!' : 'Aim low, at the base of the fire.';
+    this.setState(s => ({ play: Object.assign({}, s.play, { fire, agent, sweep, hint }) }));
+  }
+  pullPin() { this.setPlay({ pin: true }); this.hint('Pin pulled! Aim low at the base, then hold Spray.'); }
+  stepFire(d) { const p = this.state.play; const dist = Math.min(3, Math.max(1, p.dist + d)); this.setPlay({ dist }); this.hint(dist === 1 ? 'Too close! Stand about two big steps away.' : dist === 3 ? 'Too far. Step closer so the spray reaches.' : 'Good! About two big steps back.'); }
+
+  gbPack(it) { const p = this.state.play; if (p.packed.length >= 7) { this.setState({ sheet: null }); this.hint('Your bag is full! Zip it up.'); return; } this.setState(s => ({ sheet: null, play: Object.assign({}, s.play, { packed: s.play.packed.concat([it.id]) }) })); this.hint(it.ess ? it.n + ' packed. Good choice!' : 'Hmm, the ' + it.n.toLowerCase() + ' takes up space you need.'); }
+  gbLeave(it) { this.setState(s => ({ sheet: null, play: Object.assign({}, s.play, { left: s.play.left.concat([it.id]) }) })); this.hint(it.ess ? 'Are you sure? The ' + it.n.toLowerCase() + ' is really useful.' : 'Good call. Leave it behind.'); }
+  gbZip() { const p = this.state.play, GB = this.D.GB; if (!p.packed.length) { this.hint('Your bag is empty! Tap items to pack them.'); return; } const e = p.packed.filter(id => GB.find(x => x.id === id).ess).length, x = p.packed.length - e; this.finish(e === 6 && x === 0 ? 3 : e >= 4 ? 2 : 1, 'You packed ' + e + ' of 6 essentials.' + (x ? ' ' + x + ' extra item' + (x > 1 ? 's' : '') + ' took up space.' : '')); }
+
+  qTap(id) {
+    const p = this.state.play, M = this.D.MOVES; if (p.flash) return;
+    const seq = r => M.slice(0, r).map(m => m[2]).join(' → ');
+    const exp = M[p.idx][0];
+    if (id === exp) {
+      const idx = p.idx + 1;
+      if (idx === p.round) {
+        if (p.round === 4) { this.setPlay({ flash: { id, ok: true }, idx, done: true }); clearTimeout(this.fx); this.fx = setTimeout(() => this.finish(3, '4 of 4 rounds done.'), 550); return; }
+        this.setPlay({ flash: { id, ok: true }, round: p.round + 1, idx: 0 }); this.hint('Great! Round ' + (p.round + 1) + '. Copy me: ' + seq(p.round + 1));
+      } else { this.setPlay({ flash: { id, ok: true }, idx }); this.hint('Yes! What comes next?'); }
+    } else { this.setPlay({ flash: { id, ok: false }, idx: 0 }); this.hint('Oops! ' + M[p.idx][2] + ' comes next. Again: ' + seq(p.round)); }
+    clearTimeout(this.fx); this.fx = setTimeout(() => this.setPlay({ flash: null }), 450);
+  }
+
+  pHaz(r, c) { const t = (this.D.PMAP[r] || '')[c]; return t === 'W' || t === 'T' || t === 'H' || t === 'P'; }
+  pRisky(r, c) { const t = this.D.PMAP[r][c]; if (t === 'G' || this.pHaz(r, c)) return false; return [[1, 0], [-1, 0], [0, 1], [0, -1]].some(d => this.pHaz(r + d[0], c + d[1])); }
+  pRoute() {
+    const M = this.D.PMAP, R = M.length, C = M[0].length; let S = null, G = null;
+    M.forEach((row, r) => row.split('').forEach((t, c) => { if (t === 'S') S = [r, c]; if (t === 'G') G = [r, c]; }));
+    const cost = {}, prev = {}, dq = [S]; cost[S.join('-')] = 0;
+    while (dq.length) {
+      const cur = dq.shift(), k = cur.join('-');
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(d => {
+        const r = cur[0] + d[0], c = cur[1] + d[1]; if (r < 0 || c < 0 || r >= R || c >= C || this.pHaz(r, c)) return;
+        const nk = r + '-' + c, w = this.pRisky(r, c) ? 1 : 0, nc = cost[k] + w;
+        if (cost[nk] == null || nc < cost[nk]) { cost[nk] = nc; prev[nk] = k; if (w) dq.push([r, c]); else dq.unshift([r, c]); }
+      });
+    }
+    const out = {}; let k = G.join('-'); while (k && k !== S.join('-')) { out[k] = true; k = prev[k]; } return out;
+  }
+  pTap(r, c) {
+    const p = this.state.play; if (p.rolling) return;
+    if (p.needRoll) { this.hint('Roll the die first!'); return; }
+    const d = Math.abs(r - p.pos[0]) + Math.abs(c - p.pos[1]);
+    if (d === 0) return;
+    if (d !== 1) { this.hint('Tap a tile right next to you.'); return; }
+    if (this.pHaz(r, c)) { this.hint("You can't step there. Go around it."); return; }
+    const steps = p.steps + 1;
+    if (this.D.PMAP[r][c] === 'G') { this.setPlay({ pos: [r, c], steps }); clearTimeout(this.fx); this.fx = setTimeout(() => this.finish(p.hearts === 3 ? 3 : p.hearts === 2 ? 2 : 1, 'Steps: ' + steps + ' · Hearts left: ' + p.hearts), 450); return; }
+    this.setPlay({ pos: [r, c], steps, needRoll: true }); this.hint(this.pRisky(r, c) ? 'Careful, this tile is risky! Now roll the die.' : 'Safe spot. Now roll the die.');
+  }
+  pRoll() {
+    const p = this.state.play; if (p.rolling) return; if (!p.needRoll) { this.hint('Move first, then roll the die.'); return; }
+    this.setPlay({ rolling: true });
+    clearTimeout(this.fx); this.fx = setTimeout(() => {
+      const F = [['🌍', 'Earthquake'], ['🌀', 'Typhoon'], ['☀️', 'Clear'], ['☀️', 'Clear']]; const f = F[Math.floor(Math.random() * F.length)];
+      const q = this.state.play; const risky = this.pRisky(q.pos[0], q.pos[1]); const hz = f[1] !== 'Clear';
+      const hearts = hz && risky ? q.hearts - 1 : q.hearts;
+      if (hearts <= 0) { this.setPlay({ rolling: false, die: f, hearts: 0 }); this.finish(1, 'Out of hearts. Keep away from risky tiles!'); return; }
+      this.setPlay({ rolling: false, die: f, hearts, needRoll: false });
+      this.hint(!hz ? 'Clear skies. Keep going!' : risky ? f[1] + '! You were too close to danger. You lost a heart.' : f[1] + '! You are safe on this tile. Keep going.');
+    }, 650);
+  }
+
+  hzOpen(x) { this.setState({ sheet: 'hz', sd: x }); this.speak(x.n + '. ' + x.why); }
+  hzGot() {
+    const x = this.state.sd, p = this.state.play, N = this.D.HZ.length;
+    const found = p.found.indexOf(x.id) < 0 ? p.found.concat([x.id]) : p.found;
+    this.setState(s => ({ sheet: null, play: Object.assign({}, s.play, { found }) }));
+    if (found.length >= N) { clearTimeout(this.fx); this.fx = setTimeout(() => this.finish(3, N + ' of ' + N + ' hazards found.'), 350); } else this.hint(found.length + ' of ' + N + ' found. Keep looking!');
+  }
+
+  sConnected(ch) {
+    const M = this.D.SMAP; let st = null; M.forEach((row, r) => row.split('').forEach((t, c) => { if (t === 'C') st = [r, c]; }));
+    const seen = {}, q = [st]; seen[st.join('-')] = 1;
+    while (q.length) {
+      const cur = q.shift();
+      for (const d of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const R = cur[0] + d[0], C = cur[1] + d[1]; if (!M[R] || M[R][C] == null) continue;
+        if (M[R][C] === '~' && !(cur[0] === st[0] && cur[1] === st[1])) return true;
+        const k = R + '-' + C; if (!seen[k] && ch[k]) { seen[k] = 1; q.push([R, C]); }
+      }
+    }
+    return false;
+  }
+  sTap(r, c) {
+    const p = this.state.play; if (p.raining) return; const t = this.D.SMAP[r][c], k = r + '-' + c;
+    if (t === 'H') return this.hint('Keep the water away from houses. Go around them.');
+    if (t === 'R') return this.hint('You cannot build on rock. Go around it.');
+    if (t === 'C' || t === '~') return;
+    if (t === 'X' && !p.clr[k]) { this.setPlay({ clr: Object.assign({}, p.clr, { [k]: true }) }); return this.hint('Silt cleared! Now the water can pass here.'); }
+    const ch = Object.assign({}, p.ch); if (ch[k]) delete ch[k]; else ch[k] = true;
+    this.setPlay({ ch }); this.hint(this.sConnected(ch) ? 'Connected to the sea! Now let it rain.' : 'Keep building toward the sea.');
+  }
+  sRain() {
+    const p = this.state.play; const n = Object.keys(p.ch).length;
+    if (!this.sConnected(p.ch)) return this.hint('The channel does not reach the sea yet.');
+    this.setPlay({ raining: true }); this.hint('Here comes the rain!');
+    clearTimeout(this.fx); this.fx = setTimeout(() => this.finish(n <= 7 ? 3 : n <= 10 ? 2 : 1, 'Channel: ' + n + ' tiles. The creek reached the sea.'), 1500);
+  }
+
+  clItems() { const m = this.state.play.m; return this.D.CL.map(it => it.id === 'outlet' && m === 1 ? Object.assign({}, it, { e: '⚡', n: 'Fallen wire' }) : it); }
+  clProg(p) { return (p.power ? 1 : 0) + (p.gear ? 1 : 0) + (p.done || []).length; }
+  clTap(it) {
+    const p = this.state.play;
+    if (it.type === 'fuse') { if (p.power) return this.hint('The power is already off.'); this.setState({ sheet: 'clFuse' }); return; }
+    if (p.done.indexOf(it.id) >= 0) return;
+    if (!p.power || !p.gear) return this.hint('Safety first! Switch off the power and put on your gear.');
+    this.setState({ sheet: 'clAct', sd: it });
+  }
+  clPower() { this.setState(s => ({ sheet: null, play: Object.assign({}, s.play, { power: true }) })); this.hint('Power is off. Now open the tools box for your gear.'); }
+  clGear() { const p = this.state.play; if (!p.power) { this.setState({ sheet: null }); return this.hint('Switch off the power at the fusebox first.'); } this.setState(s => ({ sheet: null, play: Object.assign({}, s.play, { gear: true }) })); this.hint('Gear on! Now tap the items to clean up.'); }
+  clAct(a) {
+    const it = this.state.sd;
+    if (it.act === a) { if (a === 'throw') { this.setState({ sheet: 'clBin' }); return; } this.clDone(it, a === 'keep' ? 'Washed and kept. Nice!' : 'Good! You told an adult. Never touch it.'); }
+    else { this.setState({ sheet: null }); this.hint(it.act === 'tell' ? 'Stop! That is dangerous. Never touch it. Tell an adult.' : a === 'tell' ? 'That one is safe to handle with your gloves on. Try again.' : 'Hmm, think again.'); }
+  }
+  clBin(b) { const it = this.state.sd; if (it.bin === b) this.clDone(it, 'Correct bin!'); else this.hint('Not that bin. Try another one.'); }
+  clDone(it, msg) {
+    const p = this.state.play; const done = p.done.concat([it.id]);
+    this.setState(s => ({ sheet: null, play: Object.assign({}, s.play, { done }) }));
+    if ((p.power ? 1 : 0) + (p.gear ? 1 : 0) + done.length >= 7) { clearTimeout(this.fx); this.fx = setTimeout(() => this.finish(3, '7 of 7 done safely.'), 400); } else this.hint(msg);
+  }
+
+  cReach(p) { const v = Object.values(p.placed); const green = v.filter(x => ['tree', 'mangrove', 'pond'].indexOf(x) >= 0).length, gray = v.filter(x => ['dike', 'canal', 'pump'].indexOf(x) >= 0).length; return { green, gray, reach: Math.max(0, (p.scen === 'flood' ? 1 : 2) - (green >= 2 ? 1 : 0) - (gray >= 2 ? 1 : 0)) }; }
+  cFlooded(t, reach) { return t === 'w' || (t === 'l' && reach >= 1) || (t === 'm' && reach >= 2); }
+  cTap(r, c) {
+    const p = this.state.play; if (p.sim) return; const t = this.D.CMAP[r][c], k = r + '-' + c; const placed = Object.assign({}, p.placed);
+    if (placed[k]) { delete placed[k]; this.setPlay({ placed }); return; }
+    if (t === 'w' && p.tool !== 'mangrove') return this.hint(p.tool === 'house' ? 'Houses cannot go in the water.' : 'Only mangroves grow in the water.');
+    placed[k] = p.tool; this.setPlay({ placed });
+    const people = Object.values(placed).filter(x => x === 'house').length * 10;
+    if (p.tool === 'house') this.hint(t === 'l' ? 'Careful! Low land by the stream floods first.' : people >= 60 ? 'Goal reached! Add protection, then press Simulate.' : people + ' of 60 people. Build on high ground.');
+    else this.hint(['tree', 'mangrove', 'pond'].indexOf(p.tool) >= 0 ? 'Green protection soaks up and slows water.' : 'Gray protection blocks or moves water.');
+  }
+  cSim() {
+    const p = this.state.play; const houses = Object.keys(p.placed).filter(k => p.placed[k] === 'house'); const people = houses.length * 10;
+    if (people < 60) return this.hint('Build more homes first. ' + people + ' of 60 people.');
+    this.setPlay({ sim: true }); this.hint('Simulating… water flows to the lowest ground.');
+    clearTimeout(this.fx); this.fx = setTimeout(() => {
+      const r0 = this.cReach(this.state.play);
+      const wet = houses.filter(k => { const rc = k.split('-').map(Number); return this.cFlooded(this.D.CMAP[rc[0]][rc[1]], r0.reach); }).length;
+      this.finish(wet === 0 ? (r0.green && r0.gray ? 3 : 2) : 1, people + ' people · ' + (houses.length - wet) + ' of ' + houses.length + ' homes stayed dry.');
+    }, 1700);
+  }
+
+  openAsk() { this.setState({ ask: true, askKind: 'tip', askN: 0, jump: this.state.jump + 1 }); setTimeout(() => this.speak(this.askItem().text), 0); }
+  askItem() {
+    const s = this.state, D = this.D;
+    if (s.askKind === 'trivia') { const t = D.TRIVIA[s.askN % D.TRIVIA.length]; return { kind: '❓ DID YOU KNOW?', text: t[0], game: t[1] }; }
+    const list = [];
+    if (['intro', 'play', 'result'].indexOf(s.screen) >= 0) { const g = this.game(s.gameId); list.push(['💡 TIP FOR ' + g.name.toUpperCase(), g.tip, g.id]); }
+    if (s.screen === 'id') { const c = this.countOf(), n = this.nextOf(c); list.push(['🏆 CHAMPION TIP', n ? 'You have ' + c + ' badge' + (c === 1 ? '' : 's') + '. Earn ' + n.need + ' more to become ' + n.name + '!' : 'You are a Master DRRM Champion! Keep playing to stay sharp.', null]); }
+    let tips = D.TIPS;
+    if (s.screen === 'games' && s.filter !== 'all') tips = D.TIPS.filter(t => this.game(t[1]).p === s.filter).concat(D.TIPS.filter(t => this.game(t[1]).p !== s.filter));
+    tips.forEach(t => list.push(['💡 SAFETY TIP', t[0], t[1]]));
+    const it = list[s.askN % list.length]; return { kind: it[0], text: it[1], game: it[2] };
+  }
+
+  mascot(size, o) {
+    const h = React.createElement; o = o || {};
+    const arm = { x: 47, y: 39, width: 7, height: 18, rx: 3.5, fill: '#e8ab70' };
+    if (o.wave) arm.style = { transformBox: 'fill-box', transformOrigin: '50% 10%', animation: 'bh-wave 1.1s ease-in-out infinite' };
+    const svg = h('svg', { width: size, height: Math.round(size * 80 / 72), viewBox: '0 0 72 80', style: { display: 'block', overflow: 'visible' } },
+      h('path', { d: 'M24 36 L48 36 L52 70 L20 70 Z', fill: '#f2760c', opacity: 0.92 }),
+      h('rect', { x: 24, y: 37, width: 24, height: 26, rx: 8, fill: '#1f6f8b' }),
+      h('polygon', { points: '36,41 38.2,46 43.6,46.4 39.4,49.9 40.8,55.2 36,52.2 31.2,55.2 32.6,49.9 28.4,46.4 33.8,46', fill: '#ffd24d' }),
+      h('rect', { x: 18, y: 39, width: 7, height: 18, rx: 3.5, fill: '#e8ab70' }),
+      h('rect', arm),
+      h('rect', { x: 28, y: 61, width: 7, height: 14, rx: 3, fill: '#35506b' }),
+      h('rect', { x: 37, y: 61, width: 7, height: 14, rx: 3, fill: '#35506b' }),
+      h('circle', { cx: 36, cy: 24, r: 13, fill: '#e8ab70' }),
+      h('path', { d: 'M23 23 a13 13 0 0 1 26 0 v-3 a13 13 0 0 0 -26 0 Z', fill: '#3a2a22' }),
+      h('path', { d: 'M21 18 a15 10 0 0 1 30 0 Z', fill: '#ffc53d' }),
+      h('rect', { x: 19, y: 16, width: 34, height: 4.5, rx: 2.25, fill: '#eaa100' }),
+      h('g', { style: { transformBox: 'fill-box', transformOrigin: 'center', animation: 'bh-blink 4.2s infinite' } }, h('circle', { cx: 31, cy: 25, r: 1.9, fill: '#2a2320' }), h('circle', { cx: 41, cy: 25, r: 1.9, fill: '#2a2320' })),
+      h('circle', { cx: 27.5, cy: 29, r: 2.1, fill: '#f29a7a', opacity: 0.55 }), h('circle', { cx: 44.5, cy: 29, r: 2.1, fill: '#f29a7a', opacity: 0.55 }),
+      h('path', { d: 'M31 30 q5 4 10 0', stroke: '#2a2320', strokeWidth: 1.8, fill: 'none', strokeLinecap: 'round' })
+    );
+    const anim = [o.jump ? 'bh-jump .7s ease-out' : null, o.bob ? 'bh-bob 2.8s ease-in-out ' + (o.jump ? '.7s' : '0s') + ' infinite' : null].filter(Boolean).join(', ');
+    return h('div', { key: o.key || 'm', style: { display: 'inline-block', transformOrigin: '50% 100%', animation: anim || 'none', marginBottom: o.mb || 0 } }, svg);
+  }
+  flame(w) {
+    const h = React.createElement;
+    return h('div', { style: { position: 'relative', width: w, height: Math.round(w * 1.35), animation: 'bh-flicker 1.4s ease-in-out infinite', transformOrigin: '50% 100%' } },
+      h('div', { style: { position: 'absolute', inset: 0, borderRadius: '50% 50% 50% 50% / 70% 70% 30% 30%', background: 'linear-gradient(#ffd24d, #ff9d2e 55%, #f2760c)' } }),
+      h('div', { style: { position: 'absolute', left: '28%', right: '28%', bottom: '8%', height: '48%', borderRadius: '50% 50% 50% 50% / 70% 70% 30% 30%', background: '#fff6d6' } }));
+  }
+  dots() { const h = React.createElement; return h('div', { style: { display: 'flex', gap: 8 } }, [0, 1, 2].map(i => h('span', { key: i, style: { width: 10, height: 10, borderRadius: '50%', background: '#fff', animation: 'bh-dot 1.2s ease-in-out ' + (i * 0.16) + 's infinite' } }))); }
+  confetti(seed) {
+    const h = React.createElement, C = ['#f2760c', '#ffc53d', '#1aa46a', '#2a6b8f', '#7a53c6', '#e2382b'], kids = [];
+    for (let i = 0; i < 30; i++) {
+      const r = n => ((Math.sin(i * 12.9898 + n * 78.233) * 43758.5453) % 1 + 1) % 1;
+      kids.push(h('span', { key: i, style: { position: 'absolute', top: -24, left: (r(1) * 100).toFixed(1) + '%', width: 7 + r(2) * 6, height: 10 + r(3) * 8, borderRadius: r(4) > 0.6 ? '50%' : 2, background: C[i % C.length], animation: 'bh-fall ' + (2.2 + r(5) * 1.8).toFixed(2) + 's linear ' + (r(6) * 0.8).toFixed(2) + 's both' } }));
+    }
+    return h('div', { key: 'cf' + seed, style: { position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 3 } }, kids);
+  }
+
+  renderVals() {
+    const s = this.state, D = this.D;
+    const tablet = s.device === 'tablet', dm = this.dims(s.device);
+    const me = this.me(), myAv = me ? this.av(me.av) : D.AV[0], nick = me ? me.nick : 'Player';
+    const mine = this.earned(), count = this.countOf(), rank = this.rankOf(count), next = this.nextOf(count);
+    const g = this.game(s.gameId), gp = D.P[g.p] || D.P.mit;
+    const scr = s.screen, dark = scr === 'splash' || scr === 'play';
+    const tabOf = { home: 'home', games: 'games', intro: 'games', id: 'id', players: 'players' };
+    const isTab = ['home', 'games', 'id', 'players'].indexOf(scr) >= 0;
+    const M = (size, o) => this.mascot(size, o);
+    const TABS = { home: ['🏠', 'Home'], games: ['🎮', 'Games'], id: ['🏆', 'My ID'], players: [myAv.e, 'Players'] };
+    const mkTab = k => ({ icon: TABS[k][0], label: TABS[k][1], on: tabOf[scr] === k, off: tabOf[scr] !== k, go: () => this.go(k, k === 'games' ? { filter: 'all' } : {}) });
+    const sc = {}; ['splash', 'welcome', 'players', 'addPlayer', 'home', 'games', 'intro', 'play', 'result', 'id', 'settings'].forEach(k => { sc[k] = scr === k; });
+
+    const today = new Date(), doy = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 864e5);
+    const tip = D.TIPS[doy % D.TIPS.length], tg = this.game(tip[1]);
+    const lines = [
+      { t: 'Hi, ' + nick + '!', s: 'Ready to learn and be a hero today?' },
+      { t: 'Tap me anytime!', s: 'I know lots of safety tips and fun facts.' },
+      { t: count ? 'You have ' + count + ' badge' + (count > 1 ? 's' : '') + '!' : 'Earn your first badge!', s: next ? next.need + ' more to become ' + next.name + '.' : 'You are a Master DRRM Champion!' },
+      { t: 'Did you know?', s: D.TRIVIA[Math.floor(s.homeN / 4) % D.TRIVIA.length][0] },
+    ];
+    const line = lines[s.homeN % lines.length], nextLine = lines[(s.homeN + 1) % lines.length];
+
+    const da = this.av(s.draft.av), dn = s.draft.nick.trim();
+    const askIt = this.askItem(), askG = askIt.game ? this.game(askIt.game) : null;
+    const R = s.result || { id: 'fire', stars: 3, line: '', newB: false, had: false }, rg = this.game(R.id), rp = D.P[rg.p] || D.P.mit;
+    const p = s.play || {};
+    const sd = s.sd || {};
+
+    const hud = {
+      quit: () => this.go('intro'), restart: () => { this.stopSpray(); clearTimeout(this.fx); this.setState({ play: this.initPlay(s.gameId, s.mode), sheet: null }); },
+      howto: () => this.setState({ sheet: 'howto' }), settings: () => this.setState({ sheet: 'sound' }),
+      hint: p.hint, mascot: M(36, { bob: true }), name: g.name,
+      scene: p.top ? 'Top view' : ((g.modes && g.modes[s.mode] && g.modes[s.mode][3]) || g.scene || ''),
+      zoomIn: () => this.setState({ zoom: Math.min(1.3, +(s.zoom + 0.1).toFixed(2)) }), zoomOut: () => this.setState({ zoom: Math.max(0.8, +(s.zoom - 0.1).toFixed(2)) }), zoom: s.zoom,
+      hintTop: { fire: '206px', gobag: '100px', cares: '196px' }[p.g] || '146px', showLabel: ['path', 'sapa', 'cares'].indexOf(p.g) < 0,
+      fire: p.g === 'fire', gobag: p.g === 'gobag', quake: p.g === 'quake', path: p.g === 'path', hazard: p.g === 'hazard', sapa: p.g === 'sapa', cleanup: p.g === 'cleanup', cares: p.g === 'cares',
+    };
+    if (p.g === 'fire') hud.f = { chips: [['PULL', p.pin], ['AIM', p.aimed], ['SQUEEZE', p.aimed], ['SWEEP', p.sweep]].map(c => ({ t: c[0], bg: c[1] ? '#128253' : 'rgba(255,255,255,.14)', bd: c[1] ? '#5fd39b' : 'rgba(255,255,255,.3)' })), fireW: p.fire + '%', agentW: p.agent + '%', hard: p.m === 1, flame: (0.3 + 0.7 * p.fire / 100).toFixed(2), spraying: !!p.spraying, noPin: !p.pin, pull: () => this.pullPin(), down: e => { if (e && e.preventDefault) e.preventDefault(); this.sprayStart(); }, up: () => this.sprayEnd(), fwd: () => this.stepFire(-1), back: () => this.stepFire(1), dist: ['', 'Too close', '2 big steps', 'Too far'][p.dist], distBg: p.dist === 2 ? '#128253' : '#c62f22', noMenu: e => e.preventDefault() };
+    if (p.g === 'gobag') hud.gb = { items: D.GB.filter(x => p.packed.indexOf(x.id) < 0).map(x => ({ e: x.e, n: x.n, x: x.x, y: x.y, op: p.left.indexOf(x.id) >= 0 ? 0.5 : 1, tap: () => this.setState({ sheet: 'gb', sd: x }) })), capW: Math.round(p.packed.length / 7 * 100) + '%', count: p.packed.length + (p.packed.length === 1 ? ' item' : ' items') + ' · ' + (7 - p.packed.length) + ' spaces left', icons: p.packed.map(id => D.GB.find(x => x.id === id).e).join(' '), zip: () => this.gbZip(), top: () => this.setPlay({ top: !p.top }) };
+    if (p.g === 'quake') hud.q = { round: 'Round ' + p.round + ' of 4', dots: [1, 2, 3, 4].map(i => ({ on: i < p.round || !!p.done, off: !(i < p.round || p.done) })), btns: D.MOVES.map(m => { const f = p.flash && p.flash.id === m[0] ? p.flash.ok : null; return { e: m[1], n: m[2], bg: f === true ? '#128253' : f === false ? '#c62f22' : 'rgba(14,34,51,.82)', bd: f === true ? '#5fd39b' : f === false ? '#ff9a8c' : 'rgba(255,255,255,.35)', tap: () => this.qTap(m[0]) }; }) };
+    if (p.g === 'path') {
+      const route = p.reveal ? this.pRoute() : {}, cells = [];
+      D.PMAP.forEach((row, r) => row.split('').forEach((t, c) => {
+        const isMe = p.pos[0] === r && p.pos[1] === c, hz = this.pHaz(r, c), risky = this.pRisky(r, c);
+        const adj = Math.abs(r - p.pos[0]) + Math.abs(c - p.pos[1]) === 1 && !hz && !p.needRoll;
+        cells.push({ e: isMe ? '🧒' : ({ W: '🌊', T: '🌳', H: '🏠', P: '⚡', G: '⛺', S: '🚩' }[t] || ''), bg: t === 'W' ? '#3b8fd0' : t === 'G' ? '#1aa46a' : t === 'T' ? '#5d8a4e' : t === 'H' ? '#c8b48c' : t === 'P' ? '#9fb0bb' : risky ? '#f0c463' : '#a8d58a', bd: isMe ? '#ffffff' : route[r + '-' + c] ? '#ffd24d' : adj ? 'rgba(255,255,255,.8)' : 'rgba(0,0,0,0)', risky: risky && !isMe, tap: () => this.pTap(r, c) });
+      }));
+      hud.pa = { cells, hearts: '❤️'.repeat(p.hearts) + '🤍'.repeat(3 - p.hearts), steps: 'Steps: ' + p.steps, map: 'Map ' + (s.mode + 1) + ' of 3', die: p.rolling ? '🎲' : p.die ? p.die[0] : '🎲', dieLab: p.rolling ? 'Rolling…' : p.die ? p.die[1] : 'Die', roll: () => this.pRoll(), rollOn: p.needRoll && !p.rolling, rollOff: !(p.needRoll && !p.rolling), reveal: () => this.setPlay({ reveal: !p.reveal }), revealOn: !!p.reveal };
+    }
+    if (p.g === 'hazard') hud.hz = { spots: D.HZ.map(x => ({ e: x.e, x: x.x, y: x.y, found: p.found.indexOf(x.id) >= 0, notFound: p.found.indexOf(x.id) < 0, tap: e => { if (e && e.stopPropagation) e.stopPropagation(); this.hzOpen(x); } })), count: 'Hazards: ' + p.found.length + ' of ' + D.HZ.length, place: (g.modes[s.mode] || g.modes[0])[1], miss: () => this.hint('Nothing dangerous there. Keep looking!') };
+    if (p.g === 'sapa') {
+      const cells = [], conn = this.sConnected(p.ch), n = Object.keys(p.ch).length;
+      D.SMAP.forEach((row, r) => row.split('').forEach((t, c) => {
+        const k = r + '-' + c, ch = !!p.ch[k], silt = t === 'X' && !p.clr[k];
+        cells.push({ e: ch ? '💧' : silt ? '🗑️' : ({ C: '🏞️', '~': '🌊', H: '🏠', R: '🪨' }[t] || ''), bg: ch ? (p.raining ? '#2f95e0' : '#7cc4ee') : t === 'C' ? '#3b8fd0' : t === '~' ? '#2a6fae' : t === 'H' ? '#c8b48c' : t === 'R' ? '#9aa5ad' : silt ? '#9c7a52' : '#8cc06a', anim: ch && p.raining ? 'bh-rain .5s ease-in-out infinite' : 'none', tap: () => this.sTap(r, c) });
+      }));
+      hud.sa = { cells, channel: 'Channel: ' + n, puzzle: 'Puzzle ' + (s.mode + 1) + ' of 3', conn, notConn: !conn, rain: () => this.sRain(), canRain: conn && !p.raining, cantRain: !(conn && !p.raining) };
+    }
+    if (p.g === 'cleanup') hud.cl = { items: this.clItems().map(it => ({ e: it.e, n: it.n, x: it.x, y: it.y, done: p.done.indexOf(it.id) >= 0 || (it.type === 'fuse' && p.power), todo: !(p.done.indexOf(it.id) >= 0 || (it.type === 'fuse' && p.power)), tap: () => this.clTap(it) })), prog: (p.power && p.gear ? 'Cleanup · ' : 'Safety first · ') + this.clProg(p) + ' of 7 done', tools: () => this.setState({ sheet: 'clTools' }), gearGlow: p.power && !p.gear, gearGlowOff: !(p.power && !p.gear) };
+    if (p.g === 'cares') {
+      const rc = this.cReach(p), cells = [], people = Object.values(p.placed).filter(x => x === 'house').length * 10;
+      const TL = {}; D.TOOLS.forEach(t => { TL[t[0]] = t; });
+      D.CMAP.forEach((row, r) => row.split('').forEach((t, c) => {
+        const k = r + '-' + c, pl = p.placed[k], fl = p.sim && this.cFlooded(t, rc.reach);
+        cells.push({ e: pl ? TL[pl][1] : (t === 'w' ? '〰️' : ''), bg: fl ? '#58aee6' : { h: '#7fae5a', m: '#a5c96a', l: '#d4dc8e', w: '#3b8fd0' }[t], wet: fl && pl === 'house', tap: () => this.cTap(r, c) });
+      }));
+      hud.ca = { cells, people: 'People: ' + people + ' of 60', placing: 'Placing: ' + TL[p.tool][2], flood: p.scen === 'flood', storm: p.scen === 'storm', setFlood: () => this.setPlay({ scen: 'flood' }), setStorm: () => this.setPlay({ scen: 'storm' }), tools: D.TOOLS.map(t => ({ e: t[1], n: t[2], on: p.tool === t[0], off: p.tool !== t[0], bd: t[3] === 'green' ? '#4bbf6b' : t[3] === 'gray' ? '#8fa3b0' : '#ffb020', pick: () => { this.setPlay({ tool: t[0] }); } })), sim: () => this.cSim(), canSim: people >= 60 && !p.sim, cantSim: !(people >= 60 && !p.sim) };
+    }
+
+    const howItems = (g.legend || g.steps || []).map(x => x.length === 3 ? { e: x[0], t: x[1] + ': ' + x[2] } : { e: x[0], t: x[1] });
+
+    return {
+      tb: { jumpVal: '', phone: !tablet, tablet, setPhone: () => this.setState({ device: 'phone' }), setTablet: () => this.setState({ device: 'tablet' }), jumps: D.JUMPS.map(j => ({ v: j[0], l: j[1] })), onJump: e => { const v = e.target.value; if (v) this.jumpTo(v); }, restart: () => this.restart() },
+      dv: { phone: !tablet, tablet, w: Math.round(dm.w * s.scale), h: Math.round(dm.h * s.scale), ow: dm.w, oh: dm.h, b: dm.b, r: dm.r, sr: dm.sr, scale: s.scale, dir: tablet ? 'row' : 'column', pad: tablet ? '46px 36px 36px' : '42px 18px 28px', pill: dark ? 'rgba(255,255,255,.55)' : 'rgba(22,48,63,.32)' },
+      sb: { c: dark ? '#ffffff' : '#16303f' },
+      nav: { bottom: isTab && !tablet, rail: tablet && (isTab || scr === 'intro' || scr === 'settings'), left: [mkTab('home'), mkTab('games')], right: [mkTab('id'), mkTab('players')], mascot: M(tablet ? 48 : 52, { bob: true, mb: -6 }), ask: () => this.openAsk(), settings: () => this.go('settings') },
+      sc,
+      splash: { flame: this.flame(48), dots: this.dots(), skip: () => this.afterSplash() },
+      wl: { s0: s.ws === 0, s1: s.ws === 1, s2: s.ws === 2, dots: [0, 1, 2].map(i => ({ on: i === s.ws, off: i !== s.ws })), next: () => (s.ws < 2 ? this.setState({ ws: s.ws + 1 }) : this.newPlayer()), cta: s.ws < 2 ? 'Next' : "Let's start", skip: () => this.newPlayer(), showSkip: s.ws < 2, mascot: M(tablet ? 170 : 150, { wave: true, bob: true }) },
+      ap: { title: s.draft.id ? 'Edit player' : 'New player', back: () => this.go(s.players.length ? 'players' : 'welcome', { ws: 2 }), av: da, previewName: dn || 'Your nickname', previewColor: dn ? '#16303f' : '#8fa3b0', avatars: D.AV.map(a => ({ id: a.id, e: a.e, bg: a.bg, ring: a.id === s.draft.av ? '#f2760c' : 'transparent', on: a.id === s.draft.av, pick: () => this.setState({ draft: Object.assign({}, s.draft, { av: a.id }) }) })), nick: s.draft.nick, onNick: e => { const v = e.target.value.slice(0, 14); this.setState(st => ({ draft: Object.assign({}, st.draft, { nick: v }) })); }, counter: s.draft.nick.length + '/14', ok: !!dn, notOk: !dn, save: () => this.savePlayer(), editing: !!s.draft.id, remove: () => this.setState({ sheet: 'remove', sd: s.players.find(x => x.id === s.draft.id) }), cta: s.draft.id ? 'Save' : "Let's play" },
+      pl: { list: s.players.map(x => { const a = this.av(x.av), c = this.countOf(x.id); return { nick: x.nick, e: a.e, bg: a.bg, meta: c + ' badge' + (c === 1 ? '' : 's'), active: x.id === s.activeId, border: x.id === s.activeId ? '#f2760c' : '#d5e3ea', bstyle: s.editMode ? 'dashed' : 'solid', tap: () => this.pickPlayer(x), remove: () => this.setState({ sheet: 'remove', sd: x }) }; }), editing: s.editMode, editLabel: s.editMode ? 'Done' : 'Edit players', toggleEdit: () => this.setState({ editMode: !s.editMode }), canAdd: s.players.length < 10, add: () => this.newPlayer() },
+      home: {
+        mascot: M(tablet ? 84 : 72, { jump: true, bob: true, key: 'hm' + s.jump }), line, tapMascot: () => { this.setState({ homeN: s.homeN + 1, jump: s.jump + 1 }); this.speak(nextLine.t + ' ' + nextLine.s); }, speak: () => this.speak(line.t + ' ' + line.s, true),
+        tip: { text: tip[0], icon: tg.icon, name: tg.name, open: () => this.openGame(tg.id) }, date: today.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
+        avE: myAv.e, avBg: myAv.bg, nick, goPlayers: () => this.go('players'), goSettings: () => this.go('settings'), goId: () => this.go('id'),
+        idPct: Math.round(count / 8 * 100), idLine: count + ' of 8 badges', rank: rank[1],
+        pillars: D.PO.map(pid => { const P = D.P[pid], gs = D.G.filter(x => x.p === pid), live = gs.filter(x => !x.soon), soon = gs.length - live.length, done = live.filter(x => mine[x.id]).length; return Object.assign({}, P, { countLabel: live.length + (live.length === 1 ? ' game' : ' games') + (soon ? ' +' + soon + ' soon' : ''), prog: done + '/' + live.length, dash: (94.25 * (1 - done / live.length)).toFixed(2), open: () => this.go('games', { filter: pid }) }); }),
+      },
+      games: {
+        sub: D.G.filter(x => !x.soon).length + ' games to play, ' + D.G.filter(x => x.soon).length + ' coming soon',
+        chips: [{ id: 'all', icon: '✨', label: 'All', bg: '#16303f' }].concat(D.PO.map(pid => ({ id: pid, icon: D.P[pid].icon, label: D.P[pid].name, bg: D.P[pid].text }))).map(c => Object.assign({}, c, { on: s.filter === c.id, off: s.filter !== c.id, pick: () => this.setState({ filter: c.id }) })),
+        hasBanner: s.filter !== 'all', banner: (() => { const P = D.P[s.filter] || D.P.mit; const live = D.G.filter(x => x.p === P.id && !x.soon); return Object.assign({}, P, { prog: live.filter(x => mine[x.id]).length + ' of ' + live.length + ' badges earned' }); })(),
+        groups: (s.filter === 'all' ? D.PO : [s.filter]).map(pid => { const P = D.P[pid]; return { name: P.name, icon: P.icon, text: P.text, showHead: s.filter === 'all', games: D.G.filter(x => x.p === pid).map(x => ({ live: !x.soon, soon: !!x.soon, name: x.name, icon: x.icon, short: x.short, grad: P.grad, earned: !!mine[x.id], open: () => this.openGame(x.id), credit: e => { if (e && e.stopPropagation) e.stopPropagation(); this.setState({ sheet: 'credit', sd: x }); }, soonTap: () => this.snackShow('Coming soon! Bayani is still building this game.') })) }; }),
+      },
+      intro: { g, p: gp, back: () => this.go(s.from || 'games'), credit: () => this.setState({ sheet: 'credit', sd: g }), mascot: M(56, { bob: true }), speakTip: () => this.speak(g.tip, true), hasModes: !!g.modes, modesLabel: g.modesLabel, modes: (g.modes || []).map((m, i) => ({ icon: m[0], name: m[1], desc: m[2], on: i === s.mode, border: i === s.mode ? gp.ring : '#d5e3ea', tint: gp.tint, color: gp.text, pick: () => this.setState({ mode: i }) })), stepsTitle: g.stepsTitle || 'How to play', steps: (g.steps || []).map(x => ({ n: x[0], t: x[1], d: x[2], color: gp.text })), hasNote: !!g.note, note: g.note || '', start: () => this.startGame(), startLabel: g.start || 'Start', earned: !!mine[g.id], badge: g.badge[0] },
+      hud,
+      res: { s1: R.stars >= 1, s1off: R.stars < 1, s2: R.stars >= 2, s2off: R.stars < 2, s3: R.stars >= 3, s3off: R.stars < 3, title: R.stars === 1 && R.line.indexOf('Out of hearts') === 0 ? 'So close!' : rg.result[0], line: R.line || rg.result[1], newB: R.newB, had: R.had, noB: R.stars < 3, badgeIcon: rg.badge[1], badgeName: rg.badge[0], badgeGrad: rp.grad, remind: rg.result[2], mascot: M(76, { jump: true, bob: true, key: 'rm' + s.jump }), confetti: R.stars >= 2 ? this.confetti(s.jump) : null, again: () => this.startGame(R.id, s.mode), hasNext: !!(rg.next && rg.modes && s.mode < rg.modes.length - 1), nextLabel: rg.next || '', next: () => this.startGame(R.id, s.mode + 1), home: () => this.go('home'), seeId: () => this.go('id'), speak: () => this.speak(rg.result[2], true), tryLine: 'Get 3 stars to earn the ' + rg.badge[0] + ' badge.' },
+      idc: {
+        name: s.names[s.activeId] != null ? s.names[s.activeId] : nick, onName: e => { const v = e.target.value.slice(0, 28); this.setState(st => ({ names: Object.assign({}, st.names, { [st.activeId]: v }) })); },
+        hasPhoto: !!s.photos[s.activeId], noPhoto: !s.photos[s.activeId], avE: myAv.e, avBg: myAv.bg, photoTap: () => this.setState({ sheet: 'photo' }), rank: rank[1], count,
+        badges: D.BADGES.map(id => { const x = this.game(id); return { icon: x.badge[1], name: x.badge[0], earned: !x.soon && !!mine[id], locked: !x.soon && !mine[id], soon: !!x.soon }; }),
+        nextTitle: next ? next.need + ' more badge' + (next.need > 1 ? 's' : '') + ' to become ' + next.name + '!' : 'You reached the top rank!', pct: next ? Math.round((count - rank[0]) / (next.min - rank[0]) * 100) : 100,
+        ladder: D.RANKS.map(r => ({ name: r[1], min: r[0] + (r[0] === 1 ? ' badge' : ' badges'), reached: count >= r[0], notReached: count < r[0], current: r[1] === rank[1] ? 'YOU' : '' })),
+        save: () => this.snackShow('Champion ID saved to Gallery'), share: () => this.setState({ sheet: 'share' }), print: () => this.setState({ sheet: 'print' }),
+      },
+      st: { sound: s.sound, soundOff: !s.sound, voice: s.voice, voiceOff: !s.voice, tSound: () => this.setState({ sound: !s.sound }), tVoice: () => { const v = !s.voice; this.setState({ voice: v }); if (v) setTimeout(() => this.speak('I will read tips and hints aloud.', true), 0); }, back: () => this.go('home'), players: () => this.go('players'), reset: () => this.setState({ sheet: 'reset' }), nick, aboutMore: s.aboutMore, aboutLess: !s.aboutMore, moreLabel: s.aboutMore ? 'See less' : 'See more', toggleAbout: () => this.setState({ aboutMore: !s.aboutMore }), behind: () => this.setState({ sheet: 'behind' }) },
+      ask: { open: s.ask, close: () => this.setState({ ask: false }), hello: 'Hi, ' + nick + '!', tip: s.askKind === 'tip', tipOff: s.askKind !== 'tip', trivia: s.askKind === 'trivia', triviaOff: s.askKind !== 'trivia', setTip: () => this.setState({ askKind: 'tip', askN: 0, jump: s.jump + 1 }), setTrivia: () => this.setState({ askKind: 'trivia', askN: Math.floor(Math.random() * D.TRIVIA.length), jump: s.jump + 1 }), kind: askIt.kind, text: askIt.text, hasGame: !!askG, gameName: askG ? askG.name : '', gameIcon: askG ? askG.icon : '', play: () => { if (askG) this.openGame(askG.id); }, another: () => { this.setState({ askN: s.askN + 1, jump: s.jump + 1 }); }, speak: () => this.speak(askIt.text, true), mascot: M(tablet ? 112 : 104, { wave: true, bob: true, key: 'ak' + s.jump }) },
+      sh: {
+        open: !!s.sheet, close: () => this.setState({ sheet: null }), credit: s.sheet === 'credit', share: s.sheet === 'share', print: s.sheet === 'print', photo: s.sheet === 'photo', remove: s.sheet === 'remove', reset: s.sheet === 'reset', behind: s.sheet === 'behind', howto: s.sheet === 'howto', sound: s.sheet === 'sound', gb: s.sheet === 'gb', hz: s.sheet === 'hz', clFuse: s.sheet === 'clFuse', clTools: s.sheet === 'clTools', clAct: s.sheet === 'clAct', clBin: s.sheet === 'clBin',
+        cr: { name: sd.name || '', icon: sd.icon || '', lead: 'Developed by ' + D.LEAD, hasNote: !!sd.note, note: sd.note || '' },
+        targets: D.SHARE.map(t => ({ e: t[0], n: t[1], bg: t[2], go: () => { this.setState({ sheet: null }); this.snackShow(t[1] === 'Copy' ? 'Champion ID copied' : t[1] === 'Gallery' ? 'Champion ID saved to Gallery' : 'Shared to ' + t[1]); } })),
+        idName: (s.names[s.activeId] != null ? s.names[s.activeId] : nick) || 'Champion', avE: myAv.e, avBg: myAv.bg, rank: rank[1], count,
+        doPrint: () => { this.setState({ sheet: null }); this.snackShow('Sent to the printer'); }, doPdf: () => { this.setState({ sheet: null }); this.snackShow('Saved as PDF in Downloads'); },
+        setPhoto: () => { this.setState(st => ({ sheet: null, photos: Object.assign({}, st.photos, { [st.activeId]: true }) })); this.snackShow('Photo added'); }, hasPhoto: !!s.photos[s.activeId], delPhoto: () => { this.setState(st => ({ sheet: null, photos: Object.assign({}, st.photos, { [st.activeId]: false }) })); },
+        rmNick: sd.nick || '', rmYes: () => { if (sd.id) { this.setState({ sheet: null }); this.removePlayer(sd.id); } },
+        nick, resetYes: () => { this.setState(st => ({ sheet: null, badges: Object.assign({}, st.badges, { [st.activeId]: {} }) })); this.snackShow('Badges reset for ' + nick); },
+        howTitle: g.legend ? (g.id === 'hazard' || g.id === 'cares' ? 'How to play' : 'Map legend') : g.stepsTitle || 'How to play', howItems,
+        st: { sound: s.sound, soundOff: !s.sound, voice: s.voice, voiceOff: !s.voice, tSound: () => this.setState({ sound: !s.sound }), tVoice: () => this.setState({ voice: !s.voice }) },
+        item: { e: sd.e || '', n: sd.n || '', info: sd.info || '', why: sd.why || '', fix: sd.fix || '' },
+        pack: () => this.gbPack(sd), leave: () => this.gbLeave(sd), hzGot: () => this.hzGot(),
+        clPower: () => this.clPower(), clGear: () => this.clGear(), keep: () => this.clAct('keep'), toss: () => this.clAct('throw'), tell: () => this.clAct('tell'), bio: () => this.clBin('bio'), recy: () => this.clBin('rec'), spec: () => this.clBin('spec'), binBack: () => this.setState({ sheet: 'clAct' }),
+      },
+      snack: { on: !!s.snack, text: s.snack || '', bottom: isTab && !tablet ? 110 : 34 },
+    };
+  }
+}
+</script>
+</body>
+</html>

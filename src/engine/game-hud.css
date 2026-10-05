@@ -1,0 +1,245 @@
+/* In-game HUD for the original 3D games, restyled to the design.
+   Markup comes from src/engine/screens.html (generated); element ids and the
+   classes the game code toggles (open, show, good, bad, on, done, pulse, armed,
+   cue, shake) are the contract with public/engine/games.js. */
+
+#game-layer{position:fixed;inset:0;z-index:40;background:#0e2233;color:#16303f;font-family:Nunito,system-ui,sans-serif;-webkit-user-select:none;user-select:none;
+  --top:env(safe-area-inset-top,0px);--bot:env(safe-area-inset-bottom,0px)}
+#game-layer[hidden]{display:none}
+#game-layer *{box-sizing:border-box}
+#game-layer button{font-family:inherit;cursor:pointer;border:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+#game-layer .screen{position:absolute;inset:0;display:none;background:#0e2233;overflow:hidden}
+#game-layer .screen.active{display:block}
+#game-layer .engine-results{display:none!important}
+#game-layer canvas.stage{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#game-layer .hud{position:absolute;inset:0;pointer-events:none;color:#fff}
+#game-layer .hud button{pointer-events:auto}
+
+/* ---- corner buttons: back, restart / how to play, settings ---- */
+#game-layer .hud .tl,#game-layer .hud .tr{position:absolute;top:calc(var(--top) + 12px);display:flex;gap:8px;z-index:10;pointer-events:auto}
+#game-layer .hud .tl{left:14px}
+#game-layer .hud .tr{right:14px}
+#game-layer .icon-btn{width:48px;height:48px;border-radius:15px;background:rgba(255,255,255,.94);color:#16303f;font-size:20px;font-weight:900;line-height:1;
+  box-shadow:0 4px 0 rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;padding:0}
+#game-layer .icon-btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.3)}
+
+/* ---- status pill ---- */
+#game-layer .sp-hud-top{position:absolute;top:calc(var(--top) + 70px);left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;
+  background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 14px;z-index:5;white-space:nowrap;
+  font-weight:900;font-size:13.5px;color:#fff;max-width:calc(100% - 20px);overflow:hidden}
+#game-layer .sp-hud-top > *{min-width:0;overflow:hidden;text-overflow:ellipsis}
+#sp-hearts,#sapa-hearts,#hg-hearts{color:#ff5b6e;letter-spacing:1px;font-size:15px;flex:none}
+#sp-steps,#sp-level,#sapa-pieces,#sapa-level,#tr-steps,#hg-steps,#clean-progress,#cares-tool,#hazard-scene,#hazard-found{opacity:.92}
+#hazard-found{color:#ffc53d;opacity:1}
+#game-layer .sapa-chip{background:rgba(255,255,255,.16);border-radius:999px;padding:3px 9px;font-size:12.5px;font-weight:900;color:#fff}
+#game-layer .sapa-chip.on{background:#1aa46a}
+#game-layer .hg-warn{font-size:12.5px;font-weight:900;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.16)}
+#game-layer .hg-warn.ok{background:#1aa46a}
+#game-layer .hg-warn.bad{background:#c62f22}
+#screen-cleanup .sp-hud-top::before{content:'\1F9F9'}
+@media (max-width:400px){#game-layer .sp-hud-top{gap:8px;font-size:12px;padding:6px 11px}}
+
+/* ---- Bayani hint bubble: hints, toasts and the drill coach ---- */
+#game-layer .hint,#game-layer .sp-toast,#quake-say,#cpr-say,#bleed-say{position:absolute;top:calc(var(--top) + 116px);left:50%;transform:translateX(-50%);
+  width:max-content;max-width:88%;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.96);color:#16303f;border:none;border-radius:20px;
+  padding:5px 14px 5px 6px;z-index:7;box-shadow:0 6px 18px rgba(0,0,0,.25);pointer-events:none;font-weight:800;font-size:14.5px;line-height:1.3;text-align:left}
+#game-layer .hint::before,#game-layer .sp-toast::before,#quake-say::before,#cpr-say::before,#bleed-say::before{content:'';flex:none;width:42px;height:42px;border-radius:50%;
+  background:#ffe58a url('../assets/mascot.svg') 50% 4px/36px 40px no-repeat}
+#game-layer .hint:empty,#quake-say:empty{display:none}
+#game-layer .sp-toast{opacity:0;transition:opacity .2s}
+#game-layer .sp-toast.show{opacity:1}
+#game-layer .sp-toast.good{box-shadow:0 0 0 3px #1aa46a,0 6px 18px rgba(0,0,0,.25)}
+#game-layer .sp-toast.bad{box-shadow:0 0 0 3px #e2382b,0 6px 18px rgba(0,0,0,.25)}
+/* per-game bubble heights, below each game's status row (ids beat the shared rule) */
+#game-layer #hint-gobag{top:calc(var(--top) + 70px)}
+#game-layer #hint-fire{top:calc(var(--top) + 190px)}
+#game-layer #hazard-toast,#game-layer #cares-toast{top:calc(var(--top) + 162px)}
+#game-layer #quake-say{top:calc(var(--top) + 130px)}
+#game-layer #quake-toast{top:calc(var(--top) + 190px)}
+
+/* ---- side buttons: zoom, top view, reveal route ---- */
+#game-layer .sp-side{position:absolute;left:16px;bottom:calc(var(--bot) + 40px);display:flex;flex-direction:column;gap:10px;z-index:6;pointer-events:auto}
+#screen-gobag .sp-side,#screen-cares .sp-side{top:52%;bottom:auto;transform:translateY(-50%)}
+#game-layer .sp-mini{width:48px;height:48px;border-radius:14px;background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.2);color:#fff;
+  font-size:22px;font-weight:900;line-height:1;display:flex;align-items:center;justify-content:center;padding:0}
+#game-layer .sp-mini:active{transform:translateY(2px)}
+#btn-topview{font-size:18px}
+
+/* ---- main actions ---- */
+#game-layer .sp-die-wrap{position:absolute;right:16px;bottom:calc(var(--bot) + 40px);display:flex;flex-direction:row-reverse;align-items:center;gap:12px;z-index:6;pointer-events:auto}
+#game-layer .sp-roll{background:#d9650a;color:#fff;font-weight:900;font-size:15.5px;padding:13px 18px;border-radius:999px;box-shadow:0 5px 0 #a34a05;white-space:nowrap}
+#game-layer .sp-roll:active{transform:translateY(3px);box-shadow:0 2px 0 #a34a05}
+#game-layer .sp-roll:disabled{background:#7d8b94;box-shadow:0 5px 0 #5f6c74;opacity:.85;transform:none}
+#game-layer .pulse{animation:bh-pulse 1.6s infinite}
+#sp-die,#hg-die{width:78px;height:78px;border-radius:18px;background:#fff;box-shadow:0 6px 0 rgba(0,0,0,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#16303f}
+#sp-die .dico,#hg-die .dico{font-size:32px;line-height:1}
+#sp-die .dlab,#hg-die .dlab{font-size:10.5px;font-weight:900;color:#4f6572;margin-top:3px;letter-spacing:.3px}
+#sp-die.shake,#hg-die.shake{animation:spshake .09s linear infinite}
+@keyframes spshake{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(-2px,1px) rotate(-6deg)}50%{transform:translate(2px,-1px) rotate(5deg)}75%{transform:translate(-1px,2px) rotate(-3deg)}100%{transform:translate(0,0) rotate(0)}}
+#game-layer #btn-sapa-rain{background:#2a6b8f;box-shadow:0 6px 0 #1f5675;font-size:17px;padding:15px 22px}
+#game-layer #btn-sapa-rain::before{content:'\1F327\FE0F  '}
+#game-layer #btn-sapa-rain:active{box-shadow:0 2px 0 #1f5675}
+#game-layer #btn-sapa-rain:disabled{background:#7d8b94;box-shadow:0 6px 0 #5f6c74}
+#game-layer #btn-sapa-rain:not(:disabled){animation:bh-pulse 1.6s infinite}
+#game-layer .tools-btn{position:absolute;right:16px;bottom:calc(var(--bot) + 44px);background:rgba(14,34,51,.82);border:2px solid rgba(255,255,255,.3);color:#fff;
+  font-weight:900;font-size:16px;padding:13px 18px;border-radius:999px;z-index:6;white-space:nowrap}
+#game-layer .tools-btn:active{transform:translateY(2px)}
+
+/* ---- Fire Extinguisher ---- */
+#game-layer .chips{position:absolute;top:calc(var(--top) + 70px);left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5}
+#game-layer .chip{padding:7px 10px;border-radius:999px;font-weight:900;font-size:12px;letter-spacing:1px;background:rgba(14,34,51,.62);border:2px solid rgba(255,255,255,.3);color:#fff}
+#game-layer .chip.done{background:#128253;border-color:#5fd39b}
+#game-layer .gauge{position:absolute;left:50%;transform:translateX(-50%);width:min(72%,360px);height:12px;background:rgba(14,34,51,.45);border-radius:999px;z-index:5}
+#game-layer .gauge .lab{position:absolute;top:-17px;left:0;color:#fff;font-size:11px;font-weight:900;letter-spacing:1px;text-shadow:0 1px 3px rgba(0,0,0,.75)}
+#fire-meter{top:calc(var(--top) + 134px)}
+#agent-meter{top:calc(var(--top) + 168px)}
+#fire-meter .lab::before{content:'\1F525  '}
+#agent-meter .lab::before{content:'\1F9EF  '}
+#fire-fill,#agent-fill{height:100%;width:100%;border-radius:999px;transition:width .12s linear}
+#fire-fill{background:linear-gradient(90deg,#ffd24d,#f2760c,#e2382b)}
+#agent-fill{background:linear-gradient(90deg,#8fe3ff,#2aa7d6)}
+#game-layer .reticle{position:absolute;top:50%;left:50%;width:30px;height:30px;transform:translate(-50%,-50%);pointer-events:none}
+#game-layer .reticle::before,#game-layer .reticle::after{content:'';position:absolute;background:rgba(255,255,255,.85)}
+#game-layer .reticle::before{left:14px;top:0;width:2px;height:100%}
+#game-layer .reticle::after{top:14px;left:0;height:2px;width:100%}
+#game-layer .move{position:absolute;left:16px;bottom:calc(var(--bot) + 34px);display:flex;flex-direction:column;gap:10px;z-index:6;pointer-events:auto}
+#game-layer .move button{width:60px;height:56px;border-radius:16px;background:rgba(255,255,255,.92);color:#16303f;font-weight:900;font-size:20px;box-shadow:0 5px 0 rgba(0,0,0,.25)}
+#game-layer .move button:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.25)}
+#game-layer .pull-btn{position:absolute;left:50%;bottom:calc(var(--bot) + 176px);transform:translateX(-50%);background:linear-gradient(#ffdd6b,#ffc53d);color:#4a3200;
+  font-weight:900;font-size:17px;padding:15px 24px;border-radius:999px;box-shadow:0 6px 0 #c99400;z-index:6;white-space:nowrap}
+#game-layer .pull-btn::before{content:'\1F4CC  '}
+#game-layer .pull-btn:active{transform:translate(-50%,4px);box-shadow:0 2px 0 #c99400}
+#game-layer .spray-btn{position:absolute;right:18px;bottom:calc(var(--bot) + 34px);width:118px;height:118px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#3ee39b,#1aa46a 60%,#128253);color:#03321e;font-weight:900;font-size:16px;line-height:1.15;
+  box-shadow:0 8px 0 #0b5e3b;z-index:6;touch-action:none;display:flex;align-items:center;justify-content:center;text-align:center}
+#game-layer .spray-btn:active{transform:translateY(5px);box-shadow:0 3px 0 #0b5e3b}
+
+/* ---- Go Bag ---- */
+#game-layer .cap-wrap{position:absolute;left:16px;right:178px;bottom:calc(var(--bot) + 36px);z-index:6;pointer-events:none;color:#fff;
+  background:rgba(14,34,51,.78);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:8px 12px 9px}
+#game-layer .cap-wrap .lab{font-size:11.5px;font-weight:900;letter-spacing:1px;margin-bottom:4px}
+#game-layer .cap-wrap .lab::before{content:'\1F392  '}
+#game-layer .cap-wrap .cap{height:14px;background:rgba(255,255,255,.2);border-radius:999px;overflow:hidden}
+#cap-fill{height:100%;width:0;background:linear-gradient(90deg,#3ee39b,#1aa46a);transition:width .2s}
+#bag-count{font-size:12.5px;font-weight:800;margin-top:4px}
+#game-layer .zip-btn{position:absolute;right:16px;bottom:calc(var(--bot) + 44px);background:#d9650a;color:#fff;font-weight:900;font-size:16px;padding:15px 18px;
+  border-radius:999px;box-shadow:0 6px 0 #a34a05;z-index:6;white-space:nowrap}
+#game-layer .zip-btn:active{transform:translateY(4px);box-shadow:0 2px 0 #a34a05}
+#tap-hint{position:absolute;left:50%;bottom:calc(var(--bot) + 116px);transform:translateX(-50%);max-width:88%;text-align:center;color:#fff;font-weight:800;font-size:13px;
+  background:rgba(14,34,51,.72);padding:6px 12px;border-radius:999px;pointer-events:none;z-index:5}
+#gobag-stick{position:absolute;left:18px;bottom:calc(var(--bot) + 30px);width:104px;height:104px;border-radius:50%;background:rgba(14,34,51,.45);
+  border:2px solid rgba(255,255,255,.35);z-index:7;touch-action:none;pointer-events:auto}
+#gobag-stick-knob{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(255,255,255,.9);box-shadow:0 2px 6px rgba(0,0,0,.3)}
+#gobag-stick[style*="block"] ~ .cap-wrap{bottom:calc(var(--bot) + 150px);right:auto;width:min(46%,220px)}
+#gobag-stick[style*="block"] ~ .sp-side{left:auto;right:16px}
+
+/* ---- Duck, Cover, and Hold ---- */
+#quake-round{position:absolute;top:calc(var(--top) + 70px);left:50%;transform:translateX(-50%);z-index:5;white-space:nowrap;
+  background:rgba(14,34,51,.78)!important;border:1px solid rgba(255,255,255,.18);padding:7px 14px!important;font-size:14px!important}
+#quake-dots{position:absolute;top:calc(var(--top) + 112px);left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5}
+#quake-dots .qdot{display:block;width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.3)}
+#quake-dots .qdot.on{background:#1aa46a}
+#quake-steps{position:absolute;left:12px;right:12px;bottom:calc(var(--bot) + 36px);display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:620px;margin:0 auto;z-index:6}
+#quake-steps button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:88px;border-radius:20px;color:#fff;
+  background:rgba(14,34,51,.82);border:2px solid rgba(255,255,255,.35);box-shadow:0 5px 0 rgba(0,0,0,.3);font-weight:900;font-size:14px;opacity:.55;transition:background .15s}
+#quake-steps button.armed{opacity:1}
+#quake-steps button.armed:active{transform:translateY(3px)}
+#quake-steps button.cue{background:#128253;border-color:#5fd39b;opacity:1}
+#quake-steps button.bad{background:#c62f22;border-color:#ff9a8c;opacity:1}
+#quake-steps button:disabled{cursor:default}
+#quake-steps button::before{font-size:28px;line-height:1}
+#btn-quake-drop::before{content:'\2B07\FE0F'}
+#btn-quake-cover::before{content:'\1F6E1\FE0F'}
+#btn-quake-hold::before{content:'\270A'}
+#btn-quake-evac::before{content:'\1F6B6'}
+
+/* ---- CARES ---- */
+#cares-scen,#game-layer .haz-scn{position:absolute;top:calc(var(--top) + 114px);left:50%;transform:translateX(-50%);display:flex;gap:6px;
+  background:rgba(14,34,51,.65);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:5px;z-index:5}
+#cares-scen button,#game-layer .haz-scn button{background:transparent;color:#d6e3ea;font-weight:800;font-size:13px;padding:6px 12px;border-radius:9px;white-space:nowrap}
+#cares-scen button.on,#game-layer .haz-scn button.on{background:#c62f22;color:#fff;font-weight:900}
+#game-layer .haz-scn button.done::after{content:' \2713'}
+#cares-palette{position:absolute;left:0;right:0;bottom:calc(var(--bot) + 96px);display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:0 10px;z-index:6}
+#game-layer .cares-tool{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:56px;padding:6px 6px 8px;border-radius:12px;
+  background:rgba(14,34,51,.82);border:2px solid rgba(255,255,255,.2);color:#fff}
+#game-layer .cares-tool .ct-ic{font-size:19px;line-height:1}
+#game-layer .cares-tool .ct-nm{font-size:10.5px;font-weight:800}
+#game-layer .cares-tool.g-green{border-color:#4bbf6b}
+#game-layer .cares-tool.g-gray{border-color:#8fa3b0}
+#game-layer .cares-tool.g-home{border-color:#ffb020}
+#game-layer .cares-tool.on{background:rgba(14,34,51,.95);box-shadow:0 0 0 2px #ffc53d}
+#game-layer .cares-tool.on::after{content:'';position:absolute;bottom:3px;left:50%;width:18px;height:3px;margin-left:-9px;border-radius:2px;background:#ffc53d}
+#game-layer #btn-cares-sim{position:absolute;left:50%;bottom:calc(var(--bot) + 30px);transform:translateX(-50%);font-size:17px;padding:13px 26px;box-shadow:0 6px 0 #a34a05;z-index:6}
+#game-layer #btn-cares-sim::before{content:'\25B6  '}
+#game-layer #btn-cares-sim:active{transform:translate(-50%,3px);box-shadow:0 3px 0 #a34a05}
+#game-layer #btn-cares-sim:disabled{box-shadow:0 6px 0 #5f6c74;transform:translateX(-50%)}
+#game-layer #btn-cares-sim:not(:disabled){animation:bh-pulse 1.6s infinite}
+
+/* ---- sheets: legends, item cards, cleanup choices ---- */
+#game-layer .legend-pop,#game-layer .modal{position:absolute;inset:0;display:none;flex-direction:column;justify-content:flex-end;align-items:center;
+  background:rgba(14,34,51,.5);z-index:20;pointer-events:auto;padding:0}
+#game-layer .modal{z-index:30}
+#game-layer .legend-pop.open,#game-layer .modal.open{display:flex;animation:bh-fade .2s both}
+#game-layer .legend-card,#game-layer .modal .box{position:relative;width:100%;max-width:560px;max-height:88%;overflow-y:auto;scrollbar-width:none;background:#fff;color:#16303f;
+  border-radius:30px 30px 0 0;padding:30px 20px calc(var(--bot) + 28px);display:flex;flex-direction:column;gap:14px;animation:bh-up .26s ease-out both;text-align:left}
+#game-layer .legend-card::before,#game-layer .modal .box::before{content:'';position:absolute;top:12px;left:50%;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:#d5e3ea}
+#game-layer .legend-card h3,#game-layer .modal h2{margin:0;font:800 23px/1.1 'Baloo 2',sans-serif}
+#game-layer .legend-card ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+#game-layer .legend-card li{display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px;line-height:1.4}
+#game-layer .legend-card li .lg{width:36px;height:36px;border-radius:12px;background:#eef6fa;display:inline-flex;align-items:center;justify-content:center;font-size:19px;flex:none}
+#game-layer .rline{margin:0;color:#4f6572;font-weight:700;font-size:14.5px;line-height:1.4}
+#game-layer .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;font-weight:900;font-size:16px;line-height:1.2;padding:13px 18px;border-radius:999px;
+  color:#fff;background:#128253;box-shadow:0 4px 0 #0b5e3b;border:none}
+#game-layer .btn:active{transform:translateY(3px)}
+#game-layer .btn.warm{background:#d9650a;box-shadow:0 4px 0 #a34a05}
+#game-layer .btn.ghost{background:#fff;color:#16303f;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea}
+#game-layer .x{position:absolute;top:14px;right:14px;width:40px;height:40px;border-radius:12px;background:#eef3f6;font-weight:900;font-size:16px;color:#4f6572}
+
+/* go bag item card */
+#game-layer .info-head{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
+#info-ic{width:92px;height:92px;border-radius:28px;background:#eef6fa;display:flex;align-items:center;justify-content:center;font-size:50px}
+#info-name{font:800 24px/1.1 'Baloo 2',sans-serif;margin:4px 0 0}
+#info-text{margin:0;text-align:center;font-weight:700;font-size:16px;line-height:1.45;color:#3d5563}
+#game-layer .info-btns{display:flex;flex-direction:row-reverse;gap:10px}
+#game-layer .info-btns .btn{flex:1}
+#btn-info-pack:not(.ghost)::before{content:'\1F392'}
+
+/* hazard spotted */
+#game-layer .clean-head{display:flex;align-items:center;gap:12px}
+#game-layer .clean-ic{font-size:44px;line-height:1;flex:none}
+#game-layer .clean-head h3{font:800 22px/1.1 'Baloo 2',sans-serif;margin:0;padding-top:3px}
+#hazard-modal-name{color:#16303f!important;font-size:17px!important;font-weight:900!important;margin-top:2px}
+#hazard-modal-why{background:#fff1e3;border-radius:18px;padding:12px 14px;color:#5c2f0e;font-size:15px}
+#hazard-modal-fix{background:#e5f6ee;border-radius:18px;padding:12px 14px;color:#16303f!important;font-weight:800!important;font-size:15.5px}
+#hazard-modal-fix::before{content:'\2713  HOW TO MAKE IT SAFE';display:block;font-size:12px;font-weight:900;letter-spacing:1px;color:#0c5c3a;margin-bottom:3px}
+
+/* cleanup choices */
+#game-layer .clean-actions{display:flex;flex-direction:column;gap:10px}
+#btn-clean-keep{background:#2a6b8f;box-shadow:0 4px 0 #1f5675}
+#btn-clean-keep::before{content:'\1F9FD'}
+#btn-clean-toss{background:#128253;box-shadow:0 4px 0 #0b5e3b}
+#btn-clean-toss::before{content:'\1F5D1\FE0F'}
+#btn-clean-hazard{background:#c62f22;box-shadow:0 4px 0 #922a20}
+#btn-clean-hazard::before{content:'\270B'}
+#game-layer .btn.bin-bio{background:#2e9c53;box-shadow:0 4px 0 #1f7a3d}
+#game-layer .btn.bin-bio::before{content:'\1F7E2'}
+#game-layer .btn.bin-rec{background:#2f7fc0;box-shadow:0 4px 0 #205f92}
+#game-layer .btn.bin-rec::before{content:'\1F535'}
+#game-layer .btn.bin-spec{background:#c0392b;box-shadow:0 4px 0 #922a20}
+#game-layer .btn.bin-spec::before{content:'\1F534'}
+#btn-clean-modal-close,#btn-bin-back{background:none!important;border:none!important;box-shadow:none!important;color:#4f6572!important;padding:8px!important}
+
+/* ---- Hands-Only CPR and Stop the Bleed (coming soon, kept working) ---- */
+#cpr-count{position:absolute;top:calc(var(--top) + 70px);left:50%;transform:translateX(-50%);background:rgba(14,34,51,.78);border-radius:999px;padding:7px 14px;font-weight:900;font-size:13.5px;z-index:5}
+#btn-cpr-call{position:absolute;left:50%;bottom:calc(var(--bot) + 40px);transform:translateX(-50%);z-index:6;width:auto}
+#btn-cpr-push{position:absolute;left:50%;bottom:calc(var(--bot) + 24px);transform:translateX(-50%);width:150px;height:150px;border-radius:50%;background:#e2382b;color:#fff;font-weight:900;font-size:20px;box-shadow:0 8px 0 #a3241a;z-index:6}
+#game-layer .bleed-bar{position:absolute;left:50%;transform:translateX(-50%);width:220px;height:12px;border-radius:999px;background:rgba(255,255,255,.2);overflow:hidden;z-index:5}
+#bleed-bar-blood{top:calc(var(--top) + 180px)}
+#bleed-bar-press{top:calc(var(--top) + 200px)}
+#bleed-fill{height:100%;width:0;background:#e2382b;transition:width .1s linear}
+#bleed-press-fill{height:100%;width:0;background:#1aa46a;transition:width .1s linear}
+#bleed-steps{position:absolute;left:0;right:0;bottom:calc(var(--bot) + 24px);display:flex;justify-content:center;z-index:6}
+#btn-bleed-press{width:150px;height:150px;border-radius:50%;background:#d9650a;color:#fff;font-weight:900;font-size:17px;box-shadow:0 8px 0 #a34a05}
+#btn-bleed-gloves,#btn-bleed-cover{width:auto!important;bottom:calc(var(--bot) + 40px)!important}
+
+@media (prefers-reduced-motion: reduce){#game-layer .pulse,#btn-sapa-rain,#btn-cares-sim{animation:none!important}}

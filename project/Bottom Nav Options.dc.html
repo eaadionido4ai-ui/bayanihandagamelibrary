@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#f0eee9;font-family:Nunito,system-ui,sans-serif;color:#16303f}a{color:#a84d04}a:hover{color:#f2760c}button{font-family:inherit;cursor:pointer;border:none;padding:0;background:none;color:inherit;-webkit-tap-highlight-color:transparent}.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}.dv-tname{font:600 13px/1.2 system-ui,sans-serif;color:#1a1a1a}.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:600 13px/1.3 system-ui,sans-serif;color:#1a1a1a}.dv-opt:target .dv-oid{background:#2a78d6;color:#fff}.dv-next{margin:26px 0 0;font:12px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.5)}</style>
+</helmet>
+<section class="dv-turn" id="t1">
+  <div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Bottom navigation options. Tap the tabs in each phone to see what lives there.</span></div>
+  <div class="dv-opts">
+    <sc-for list="{{ variants }}" as="v" hint-placeholder-count="4">
+      <div class="dv-opt" id="{{ v.id }}">
+        <div class="dv-olabel"><a class="dv-oid" href="#{{ v.id }}">{{ v.id }}</a>{{ v.label }}</div>
+        <p style="margin:0 0 6px;max-width:376px;font:12.5px/1.45 system-ui,sans-serif;color:rgba(0,0,0,.6);text-wrap:pretty">{{ v.desc }}</p>
+        <div style="width:360px;height:780px;border:8px solid #22313b;border-radius:36px;overflow:hidden;position:relative;display:flex;flex-direction:column;background:#eef6fa;box-shadow:0 24px 60px rgba(14,34,51,.22)">
+          <div style="height:32px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font:600 13px Roboto,system-ui,sans-serif;position:relative;background:#eef6fa">
+            <span>9:30</span>
+            <span style="position:absolute;left:50%;top:8px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:#1d2a33"></span>
+            <span style="display:flex;gap:4px;align-items:center"><span style="width:12px;height:10px;background:#16303f;clip-path:polygon(50% 100%,0 20%,100% 20%)"></span><span style="width:10px;height:10px;background:#16303f;clip-path:polygon(100% 0,100% 100%,0 100%)"></span><span style="width:7px;height:12px;border-radius:2px;background:#16303f"></span></span>
+          </div>
+
+          <sc-if value="{{ v.isHome }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:1;min-height:0;overflow-y:auto;padding:6px 16px 18px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(#eef6fa,#cfe6ef)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:38px;height:38px;border-radius:12px;flex:none;background:linear-gradient(135deg,#ffd76a,#f2760c);box-shadow:0 4px 10px rgba(242,118,12,.35);display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px;box-sizing:border-box">
+                  <div style="width:15px;height:20px;border-radius:50% 50% 50% 50%/70% 70% 30% 30%;background:linear-gradient(#fff3c4,#ffd24d 45%,#fff6d6)"></div>
+                </div>
+                <div style="font:800 21px/1 'Baloo 2',sans-serif;flex:1;padding-top:3px">BAYANIHanda</div>
+                <sc-if value="{{ v.idBtn }}"><button onClick="{{ v.openId }}" aria-label="My Champion ID" style="width:40px;height:40px;border-radius:14px;background:linear-gradient(135deg,#ffd76a,#ffc53d);box-shadow:0 3px 0 #c99400;font-size:19px;display:flex;align-items:center;justify-content:center">🏆</button></sc-if>
+                <sc-if value="{{ v.gear }}"><button onClick="{{ v.openSettings }}" aria-label="Settings" style="width:40px;height:40px;border-radius:14px;background:#fff;border:2px solid #d5e3ea;box-shadow:0 3px 0 #d5e3ea;font-size:17px;display:flex;align-items:center;justify-content:center">⚙️</button></sc-if>
+                <button onClick="{{ v.openPlayers }}" style="display:flex;align-items:center;gap:6px;background:#fff;border:2px solid #d5e3ea;border-radius:999px;padding:3px 11px 3px 3px;font-weight:800;font-size:14px;box-shadow:0 3px 0 #d5e3ea">
+                  <span style="width:30px;height:30px;border-radius:50%;background:#cdebe0;display:flex;align-items:center;justify-content:center;font-size:17px">🐢</span>Mika
+                </button>
+              </div>
+
+              <div style="display:flex;align-items:flex-end;gap:10px;background:#fff;border-radius:22px;padding:14px 14px 12px;border:2px solid #d5e3ea;box-shadow:0 5px 0 rgba(20,48,66,.08)">
+                <svg width="58" height="64" viewBox="0 0 72 80" style="flex:none"><path d="M24 36 L48 36 L52 70 L20 70 Z" fill="#f2760c" opacity="0.92"></path><rect x="24" y="37" width="24" height="26" rx="8" fill="#1f6f8b"></rect><polygon points="36,41 38.2,46 43.6,46.4 39.4,49.9 40.8,55.2 36,52.2 31.2,55.2 32.6,49.9 28.4,46.4 33.8,46" fill="#ffd24d"></polygon><rect x="18" y="39" width="7" height="18" rx="3.5" fill="#e8ab70"></rect><rect x="47" y="39" width="7" height="18" rx="3.5" fill="#e8ab70"></rect><rect x="28" y="61" width="7" height="14" rx="3" fill="#35506b"></rect><rect x="37" y="61" width="7" height="14" rx="3" fill="#35506b"></rect><circle cx="36" cy="24" r="13" fill="#e8ab70"></circle><path d="M23 23 a13 13 0 0 1 26 0 v-3 a13 13 0 0 0 -26 0 Z" fill="#3a2a22"></path><path d="M21 18 a15 10 0 0 1 30 0 Z" fill="#ffc53d"></path><rect x="19" y="16" width="34" height="4.5" rx="2.25" fill="#eaa100"></rect><circle cx="31" cy="25" r="1.9" fill="#2a2320"></circle><circle cx="41" cy="25" r="1.9" fill="#2a2320"></circle><path d="M31 30 q5 4 10 0" stroke="#2a2320" stroke-width="1.8" fill="none" stroke-linecap="round"></path></svg>
+                <div style="flex:1;background:#eef6fa;border-radius:16px;padding:10px 12px">
+                  <p style="margin:0;font:800 18px/1.15 'Baloo 2',sans-serif">Hi, Mika!</p>
+                  <p style="margin:2px 0 0;font-size:14px;color:#4f6572;font-weight:700;line-height:1.35">Ready to learn and be a hero today?</p>
+                </div>
+              </div>
+
+              <div style="background:#fff5df;border:2px solid #ffe2a8;border-radius:22px;padding:14px 16px;display:flex;flex-direction:column;gap:8px">
+                <div style="font-size:12px;font-weight:900;letter-spacing:1px;color:#8a5f00">💡 TODAY'S SAFETY TIP</div>
+                <p style="margin:0;font-weight:700;font-size:15px;line-height:1.4">Pack a flashlight in your go bag. If the lights go out, you can still find your way.</p>
+                <button onClick="{{ v.goP.prep }}" style="align-self:flex-start;display:flex;align-items:center;gap:6px;background:#128253;color:#fff;font-weight:800;font-size:14px;padding:9px 15px;border-radius:999px;box-shadow:0 4px 0 #0c5c3a">🎒 Play Go Bag Packing</button>
+              </div>
+
+              <div style="font:800 19px/1.1 'Baloo 2',sans-serif;margin-top:2px">Pick an adventure</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <button onClick="{{ v.goP.mit }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:#fff;border:2px solid #bfe0ef;border-radius:20px;padding:12px;box-shadow:0 5px 0 rgba(20,48,66,.1)">
+                  <span style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#6db4d6,#2a6b8f);display:flex;align-items:center;justify-content:center;font-size:23px">🛡️</span>
+                  <span style="font:800 16px/1.1 'Baloo 2',sans-serif">Stop Hazards Early</span>
+                  <span style="font-size:12px;font-weight:800;background:#cfe6ef;border-radius:999px;padding:3px 9px">2 games</span>
+                </button>
+                <button onClick="{{ v.goP.prep }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:#fff;border:2px solid #bfe9d4;border-radius:20px;padding:12px;box-shadow:0 5px 0 rgba(20,48,66,.1)">
+                  <span style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#5fd39b,#128253);display:flex;align-items:center;justify-content:center;font-size:23px">🎒</span>
+                  <span style="font:800 16px/1.1 'Baloo 2',sans-serif">Get Ready</span>
+                  <span style="font-size:12px;font-weight:800;background:#cfe6ef;border-radius:999px;padding:3px 9px">1 game</span>
+                </button>
+                <button onClick="{{ v.goP.resp }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:#fff;border:2px solid #ffd9ad;border-radius:20px;padding:12px;box-shadow:0 5px 0 rgba(20,48,66,.1)">
+                  <span style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#ffb04d,#f2760c);display:flex;align-items:center;justify-content:center;font-size:23px">🚨</span>
+                  <span style="font:800 16px/1.1 'Baloo 2',sans-serif">Act Fast</span>
+                  <span style="font-size:12px;font-weight:800;background:#cfe6ef;border-radius:999px;padding:3px 9px">3 games +3 soon</span>
+                </button>
+                <button onClick="{{ v.goP.rec }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:#fff;border:2px solid #ddcdfa;border-radius:20px;padding:12px;box-shadow:0 5px 0 rgba(20,48,66,.1)">
+                  <span style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#c3a6ff,#7a53c6);display:flex;align-items:center;justify-content:center;font-size:23px">🏘️</span>
+                  <span style="font:800 16px/1.1 'Baloo 2',sans-serif">Bounce Back</span>
+                  <span style="font-size:12px;font-weight:800;background:#cfe6ef;border-radius:999px;padding:3px 9px">2 games</span>
+                </button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ v.isStub }}">
+            <div style="flex:1;min-height:0;overflow-y:auto;background:linear-gradient(#eef6fa,#cfe6ef);padding:28px 22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center">
+              <div style="width:84px;height:84px;border-radius:26px;background:#fff;box-shadow:0 6px 0 rgba(20,48,66,.1);display:flex;align-items:center;justify-content:center;font-size:42px">{{ v.stub.icon }}</div>
+              <div style="font:800 26px/1.1 'Baloo 2',sans-serif">{{ v.stub.title }}</div>
+              <p style="margin:0;color:#4f6572;font-weight:700;font-size:15px;line-height:1.45;max-width:270px;text-wrap:pretty">{{ v.stub.text }}</p>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:4px">
+                <sc-for list="{{ v.stub.items }}" as="it"><span style="background:#fff;border:2px solid #d5e3ea;border-radius:999px;padding:6px 12px;font-weight:800;font-size:13px">{{ it }}</span></sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ v.mascotOpen }}">
+            <div style="position:absolute;left:14px;right:14px;bottom:124px;z-index:5;background:#fff;border-radius:22px;padding:16px;box-shadow:0 14px 34px rgba(14,34,51,.28);border:2px solid #ffe2a8;display:flex;flex-direction:column;gap:10px">
+              <div style="font-size:12px;font-weight:900;letter-spacing:1px;color:#8a5f00">{{ v.trivia.kind }}</div>
+              <p style="margin:0;font-weight:700;font-size:15px;line-height:1.4">{{ v.trivia.text }}</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button onClick="{{ v.nextTip }}" style="background:#fff;border:2px solid #d5e3ea;box-shadow:0 3px 0 #d5e3ea;border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px">Another one</button>
+                <button onClick="{{ v.goP.games }}" style="background:#128253;color:#fff;box-shadow:0 3px 0 #0c5c3a;border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px">Play {{ v.trivia.game }}</button>
+              </div>
+              <span style="position:absolute;left:50%;bottom:-9px;width:16px;height:16px;margin-left:-8px;background:#fff;border-right:2px solid #ffe2a8;border-bottom:2px solid #ffe2a8;transform:rotate(45deg)"></span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ v.isA }}">
+            <div style="flex:none;background:#fff;border-top:1px solid #d5e3ea">
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);padding:10px 4px 2px">
+                <sc-for list="{{ v.tabs }}" as="t">
+                  <button onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;min-height:58px">
+                    <sc-if value="{{ t.on }}"><span style="width:62px;height:34px;border-radius:17px;background:#ffe4c4;display:flex;align-items:center;justify-content:center;font-size:21px">{{ t.icon }}</span><span style="font-size:13px;font-weight:900;color:#a84d04">{{ t.label }}</span></sc-if>
+                    <sc-if value="{{ t.off }}"><span style="width:62px;height:34px;display:flex;align-items:center;justify-content:center;font-size:21px;filter:grayscale(.5);opacity:.8">{{ t.icon }}</span><span style="font-size:13px;font-weight:700;color:#4f6572">{{ t.label }}</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+              <div style="height:18px;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:#16303f;opacity:.35"></span></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ v.isB }}">
+            <div style="flex:none;background:#fff;border-top:1px solid #d5e3ea">
+              <div style="display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding:8px 2px 2px">
+                <sc-for list="{{ v.tabsL }}" as="t">
+                  <button onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;min-height:56px">
+                    <sc-if value="{{ t.on }}"><span style="width:50px;height:32px;border-radius:16px;background:#ffe4c4;display:flex;align-items:center;justify-content:center;font-size:20px">{{ t.icon }}</span><span style="font-size:12px;font-weight:900;color:#a84d04">{{ t.label }}</span></sc-if>
+                    <sc-if value="{{ t.off }}"><span style="width:50px;height:32px;display:flex;align-items:center;justify-content:center;font-size:20px;filter:grayscale(.5);opacity:.8">{{ t.icon }}</span><span style="font-size:12px;font-weight:700;color:#4f6572">{{ t.label }}</span></sc-if>
+                  </button>
+                </sc-for>
+                <button onClick="{{ v.toggleMascot }}" aria-label="Ask Bayani" style="display:flex;flex-direction:column;align-items:center;gap:3px;margin-top:-34px">
+                  <span style="width:70px;height:70px;border-radius:50%;box-sizing:border-box;background:radial-gradient(circle at 35% 30%,#ffe58a,#ffc53d 60%,#eaa100);border:4px solid #fff;box-shadow:0 5px 0 #c99400,0 8px 18px rgba(14,34,51,.18);display:flex;align-items:flex-end;justify-content:center;overflow:hidden">
+                    <svg width="50" height="56" viewBox="0 0 72 80" style="margin-bottom:-6px"><path d="M24 36 L48 36 L52 70 L20 70 Z" fill="#f2760c" opacity="0.92"></path><rect x="24" y="37" width="24" height="26" rx="8" fill="#1f6f8b"></rect><polygon points="36,41 38.2,46 43.6,46.4 39.4,49.9 40.8,55.2 36,52.2 31.2,55.2 32.6,49.9 28.4,46.4 33.8,46" fill="#ffd24d"></polygon><rect x="18" y="39" width="7" height="18" rx="3.5" fill="#e8ab70"></rect><rect x="47" y="39" width="7" height="18" rx="3.5" fill="#e8ab70"></rect><circle cx="36" cy="24" r="13" fill="#e8ab70"></circle><path d="M23 23 a13 13 0 0 1 26 0 v-3 a13 13 0 0 0 -26 0 Z" fill="#3a2a22"></path><path d="M21 18 a15 10 0 0 1 30 0 Z" fill="#ffc53d"></path><rect x="19" y="16" width="34" height="4.5" rx="2.25" fill="#eaa100"></rect><circle cx="31" cy="25" r="1.9" fill="#2a2320"></circle><circle cx="41" cy="25" r="1.9" fill="#2a2320"></circle><path d="M31 30 q5 4 10 0" stroke="#2a2320" stroke-width="1.8" fill="none" stroke-linecap="round"></path></svg>
+                  </span>
+                  <span style="font-size:12px;font-weight:900;color:#16303f">Ask Bayani</span>
+                </button>
+                <sc-for list="{{ v.tabsR }}" as="t">
+                  <button onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;min-height:56px">
+                    <sc-if value="{{ t.on }}"><span style="width:50px;height:32px;border-radius:16px;background:#ffe4c4;display:flex;align-items:center;justify-content:center;font-size:20px">{{ t.icon }}</span><span style="font-size:12px;font-weight:900;color:#a84d04">{{ t.label }}</span></sc-if>
+                    <sc-if value="{{ t.off }}"><span style="width:50px;height:32px;display:flex;align-items:center;justify-content:center;font-size:20px;filter:grayscale(.5);opacity:.8">{{ t.icon }}</span><span style="font-size:12px;font-weight:700;color:#4f6572">{{ t.label }}</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+              <div style="height:18px;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:#16303f;opacity:.35"></span></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ v.isC }}">
+            <div style="flex:none;background:#cfe6ef;padding:10px 14px 0">
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+                <sc-for list="{{ v.tabs }}" as="t">
+                  <button onClick="{{ t.go }}" style="display:block;width:100%">
+                    <sc-if value="{{ t.on }}"><span style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;height:68px;border-radius:22px;background:#128253;color:#fff;box-shadow:0 3px 0 #0c5c3a;transform:translateY(2px);font-weight:900;font-size:15px"><span style="font-size:25px;line-height:1.1">{{ t.icon }}</span>{{ t.label }}</span></sc-if>
+                    <sc-if value="{{ t.off }}"><span style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;height:68px;border-radius:22px;background:#fff;color:#16303f;border:2px solid #d5e3ea;box-sizing:border-box;box-shadow:0 5px 0 #b9ccd8;font-weight:800;font-size:15px"><span style="font-size:25px;line-height:1.1">{{ t.icon }}</span>{{ t.label }}</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+              <div style="height:22px;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:#16303f;opacity:.35"></span></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ v.isD }}">
+            <div style="flex:none;background:#cfe6ef;padding:8px 12px 0">
+              <div style="background:#0e2233;border-radius:26px;display:grid;grid-template-columns:repeat(5,1fr);padding:8px 4px;box-shadow:0 10px 24px rgba(14,34,51,.3)">
+                <sc-for list="{{ v.tabs }}" as="t">
+                  <button onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;min-height:58px">
+                    <sc-if value="{{ t.on }}"><span style="width:40px;height:40px;border-radius:50%;background:{{ t.color }};display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 3px 0 rgba(0,0,0,.35)">{{ t.icon }}</span><span style="font-size:11.5px;font-weight:900;color:#fff">{{ t.label }}</span></sc-if>
+                    <sc-if value="{{ t.off }}"><span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:20px;opacity:.85">{{ t.icon }}</span><span style="font-size:11.5px;font-weight:700;color:#b4c8d4">{{ t.label }}</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+              <div style="height:20px;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:#16303f;opacity:.35"></span></div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <p class="dv-next">Try next: "go with <a class="dv-oid" href="#1b">1b</a> but use the big buttons from <a class="dv-oid" href="#1c">1c</a>" · "<a class="dv-oid" href="#1a">1a</a> with Players instead of Settings" · "build the prototype with <a class="dv-oid" href="#1d">1d</a>"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { act: { a: 'home', b: 'home', c: 'home', d: 'home' }, mascot: false, tip: 0 };
+
+  renderVals() {
+    const act = this.state.act;
+    const T = {
+      home: { icon: '🏠', label: 'Home', color: '#f2760c' },
+      games: { icon: '🎮', label: 'Games' },
+      id: { icon: '🏆', label: 'My ID' },
+      settings: { icon: '⚙️', label: 'Settings' },
+      players: { icon: '🐢', label: 'Players' },
+      mit: { icon: '🛡️', label: 'Prevent', color: '#2a6b8f' },
+      prep: { icon: '🎒', label: 'Prepare', color: '#128253' },
+      resp: { icon: '🚨', label: 'Respond', color: '#f2760c' },
+      rec: { icon: '🏘️', label: 'Recover', color: '#7a53c6' },
+    };
+    const STUB = {
+      games: { icon: '🎮', title: 'All games', text: 'Every game in one list, grouped by the four adventures.', items: ['Guide the Stream', 'Hazard Hunt', 'Go Bag Packing 3D', 'Fire Extinguisher 3D', 'Duck, Cover, and Hold', 'Safe Path', 'House Cleanup', 'CARES'] },
+      id: { icon: '🏆', title: 'My Champion ID', text: 'Your ID card, badges, and rank. Save it to your gallery, share it, or print it.', items: ['11 badges', 'Save image', 'Share', 'Print'] },
+      settings: { icon: '⚙️', title: 'Settings', text: 'Sound, voice, and About BAYANIHanda.', items: ['Sound and voice', 'Read tips aloud', 'About'] },
+      players: { icon: '🐢', title: "Who's playing?", text: 'Switch players or add a new one. Up to 10 players on this device.', items: ['🐢 Mika', '🦊 Jun', '🦋 Lia', '+ Add player'] },
+      mit: { icon: '🛡️', title: 'Stop Hazards Early', text: 'Spot dangers before they happen and stop them from turning into disasters.', items: ['Guide the Stream', 'Hazard Hunt'] },
+      prep: { icon: '🎒', title: 'Get Ready', text: 'Get your family and your go bag ready before anything happens.', items: ['Go Bag Packing 3D'] },
+      resp: { icon: '🚨', title: 'Act Fast', text: 'Learn what to do in the first minutes when a disaster strikes.', items: ['Fire Extinguisher 3D', 'Duck, Cover, and Hold', 'Safe Path', '3 more coming soon'] },
+      rec: { icon: '🏘️', title: 'Bounce Back', text: 'After a disaster, help your home and your community bounce back.', items: ['House Cleanup', 'CARES: Community and Resilience'] },
+    };
+    const TRIVIA = [
+      { kind: '💬 BAYANI SAYS', text: 'When the ground shakes, drop, cover, and hold on. Walk out only after the shaking stops.', game: 'Duck, Cover, and Hold' },
+      { kind: '❓ DID YOU KNOW?', text: 'PASS means Pull, Aim, Squeeze, Sweep. It is how you use a fire extinguisher.', game: 'Fire Extinguisher' },
+      { kind: '❓ DID YOU KNOW?', text: 'Small creeks are branches of the river. When we block them, water flows into homes.', game: 'Guide the Stream' },
+    ];
+    const go = (vid, k) => () => this.setState(s => ({ act: { ...s.act, [vid]: k }, mascot: false }));
+    const mk = (vid, keys) => keys.map(k => ({ ...T[k], key: k, on: act[vid] === k, off: act[vid] !== k, go: go(vid, k) }));
+    const pillarGo = (vid, pillarTabs) => ({
+      mit: go(vid, pillarTabs ? 'mit' : 'games'), prep: go(vid, pillarTabs ? 'prep' : 'games'),
+      resp: go(vid, pillarTabs ? 'resp' : 'games'), rec: go(vid, pillarTabs ? 'rec' : 'games'), games: go(vid, 'games'),
+    });
+    const base = [
+      { id: '1a', vid: 'a', label: 'Classic: Home · Games · My ID · Settings', desc: 'The familiar Android pattern with four clear tabs. Players opens from the avatar chip on Home.', isA: true, tabs: mk('a', ['home', 'games', 'id', 'settings']) },
+      { id: '1b', vid: 'b', label: 'Mascot in the middle', desc: 'Home · Games · Ask Bayani · My ID · Players. The raised mascot gives a tip or trivia from any screen. Tap it.', isB: true, tabsL: mk('b', ['home', 'games']), tabsR: mk('b', ['id', 'players']) },
+      { id: '1c', vid: 'c', label: 'Big buttons, 3 tabs', desc: 'Home · Games · My ID as large, chunky buttons for small fingers and early readers. Settings moves to a gear on Home for grown-ups.', isC: true, gear: true, tabs: mk('c', ['home', 'games', 'id']) },
+      { id: '1d', vid: 'd', label: 'Adventure tabs', desc: 'Home plus one tab per DRRM pillar, each in its pillar color. Champion ID opens from the trophy on Home.', isD: true, idBtn: true, tabs: mk('d', ['home', 'mit', 'prep', 'resp', 'rec']) },
+    ];
+    const variants = base.map(v => {
+      const k = act[v.vid];
+      return {
+        ...v,
+        isHome: k === 'home', isStub: k !== 'home', stub: STUB[k] || STUB.games,
+        openPlayers: go(v.vid, 'players'), openSettings: go(v.vid, 'settings'), openId: go(v.vid, 'id'),
+        goP: pillarGo(v.vid, v.vid === 'd'),
+        mascotOpen: v.vid === 'b' && this.state.mascot,
+        trivia: TRIVIA[this.state.tip % TRIVIA.length],
+        toggleMascot: () => this.setState(s => ({ mascot: !s.mascot })),
+        nextTip: () => this.setState(s => ({ tip: s.tip + 1 })),
+      };
+    });
+    return { variants };
+  }
+}
+</script>
+</body>
+</html>
