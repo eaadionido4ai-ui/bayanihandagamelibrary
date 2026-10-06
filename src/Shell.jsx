@@ -7,6 +7,7 @@ import { Games, Intro } from './screens/Games.jsx';
 import Result from './screens/Result.jsx';
 import ChampionId, { IdCard } from './screens/ChampionId.jsx';
 import Settings from './screens/Settings.jsx';
+import { TeacherCorner, BuildWithUs } from './screens/GrownUps.jsx';
 import { NavBar, NavRail } from './Nav.jsx';
 import { AskSheet, Sheet, Snack } from './Overlays.jsx';
 
@@ -176,6 +177,7 @@ export default function Shell() {
       case 'welcome': if (c.ws > 0) patch({ ws: c.ws - 1 }); break;
       case 'addPlayer': go(engine.players().length ? 'players' : 'welcome', { ws: 2 }); break;
       case 'players': if (engine.activeId()) go('home'); break;
+      case 'teacher': case 'contribute': go('settings'); break;
       default: if (engine.activeId()) go('home'); break;
     }
   };
@@ -217,9 +219,11 @@ export default function Shell() {
   else if (scr === 'result') body = <Result c={c} />;
   else if (scr === 'id') body = <ChampionId c={c} />;
   else if (scr === 'settings') body = <Settings c={c} />;
+  else if (scr === 'teacher') body = <TeacherCorner c={c} />;
+  else if (scr === 'contribute') body = <BuildWithUs c={c} />;
   else if (scr === 'play') body = <div data-screen-label="Gameplay" style={{ position: 'absolute', inset: 0, background: '#0e2233' }} />;
 
-  const rail = tablet && (isTab || scr === 'intro' || scr === 'settings');
+  const rail = tablet && (isTab || ['intro', 'settings', 'teacher', 'contribute'].indexOf(scr) >= 0);
   const bottom = isTab && !tablet;
   const idName = (s.names[activeId] != null ? s.names[activeId] : nick) || 'Champion';
 

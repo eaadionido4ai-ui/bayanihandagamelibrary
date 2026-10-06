@@ -64,6 +64,15 @@ device"), because `QuakeGame` calls a `_label` helper it doesn't define. The bri
 lends it Hazard Hunt's identical helper at startup (`applyEngineFixes` in
 `src/engine/bridge.js`), so `public/engine/games.js` stays an exact copy.
 
+## For grown-ups
+
+Settings has a "For grown-ups" section behind a multiplication question:
+
+- **Teacher's corner** (coming soon): dimmed mockups of the planned lesson guides,
+  class progress and printables. Lesson content still needs writing and review.
+- **Build with us**: how to contribute games, lessons and translations. Contact us
+  opens an email to eadionido@up.edu.ph (`CONTACT_EMAIL` in `src/screens/GrownUps.jsx`).
+
 ## Not done yet
 
 - **Saving, sharing and printing inside the Android app.** Save downloads a PNG of the ID,
