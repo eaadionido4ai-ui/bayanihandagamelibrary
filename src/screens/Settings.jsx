@@ -13,6 +13,7 @@ export function Toggle({ on, small }) {
 
 export default function Settings({ c }) {
   const { s, patch, nick } = c;
+  const gate = (to) => { const a = 3 + Math.floor(Math.random() * 7), b = 3 + Math.floor(Math.random() * 7); patch({ sheet: 'gate', sd: { a, b, to } }); };
   const toggleVoice = () => { const v = !s.voice; patch({ voice: v }); if (v) setTimeout(() => c.speak('I will read tips and hints aloud.', true), 0); };
   return (
     <div data-screen-label="Settings" className="scroll" style={{ ...sx('position:absolute;inset:0;background:radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef)'), padding: c.pad }}>
@@ -29,6 +30,11 @@ export default function Settings({ c }) {
           <button onClick={toggleVoice} role="switch" aria-checked={s.voice} style={sx(ROW)}>
             <span style={sx('font-size:22px')}>🗣️</span><span style={sx('flex:1;font-weight:900;font-size:16px')}>Read tips and hints aloud</span><Toggle on={s.voice} />
           </button>
+        </div>
+        <div style={sx(LABEL)}>For grown-ups</div>
+        <div style={sx(CARD)}>
+          <button onClick={() => gate('teacher')} style={{ ...sx(ROW), borderBottom: '1px solid #e3ecf1' }}><span style={sx('font-size:22px')}>🍎</span><span style={sx('flex:1;min-width:0')}><span style={sx('display:block;font-weight:900;font-size:16px')}>Teacher's corner <span style={sx('display:inline-block;font-size:10.5px;font-weight:900;letter-spacing:.6px;background:#d9650a;color:#fff;border-radius:999px;padding:2px 8px;margin-left:4px;vertical-align:2px')}>COMING SOON</span></span><span style={sx('display:block;font-weight:700;font-size:12.5px;color:#4f6572;margin-top:1px')}>Lesson guides, class progress, printables</span></span><span style={sx('font-size:22px;font-weight:900;color:#8fa3b0')}>›</span></button>
+          <button onClick={() => gate('contribute')} style={sx(ROW)}><span style={sx('font-size:22px')}>🤝</span><span style={sx('flex:1;min-width:0')}><span style={sx('display:block;font-weight:900;font-size:16px')}>Build with us</span><span style={sx('display:block;font-weight:700;font-size:12.5px;color:#4f6572;margin-top:1px')}>Contribute games and lessons</span></span><span style={sx('font-size:22px;font-weight:900;color:#8fa3b0')}>›</span></button>
         </div>
         <div style={sx(LABEL)}>Players</div>
         <div style={sx(CARD)}>
