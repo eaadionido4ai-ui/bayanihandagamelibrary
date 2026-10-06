@@ -131,6 +131,9 @@ const WAYS = [
   ['🌏', 'Translate', 'Filipino and regional languages'],
 ];
 
+const CONTACT_EMAIL = 'eadionido@up.edu.ph';
+const CONTACT_LINK = 'mailto:' + CONTACT_EMAIL + '?subject=' + encodeURIComponent('BAYANIHanda: I would like to help');
+
 export function BuildWithUs({ c }) {
   return (
     <div data-screen-label="Build with us" className="scroll" style={{ ...sx('position:absolute;inset:0'), background: BG, padding: c.pad }}>
@@ -147,8 +150,8 @@ export function BuildWithUs({ c }) {
             <span style={sx('min-width:0')}><b style={sx('display:block;font-weight:900;font-size:15px')}>{w[1]}</b><span style={sx('display:block;font-weight:700;font-size:12.5px;color:#4f6572;line-height:1.35;margin-top:1px')}>{w[2]}</span></span>
           </div>
         ))}
-        <button onClick={() => c.snackShow('Contact details are coming soon.')} {...pr("margin-top:4px;width:100%;background:#7a53c6;color:#fff;font:800 20px 'Baloo 2',sans-serif;padding:13px 24px 10px;border-radius:999px;box-shadow:0 5px 0 #5a3a9e", 'transform:translateY(4px);box-shadow:0 1px 0 #5a3a9e')}>✉️ Contact us</button>
-        <p style={sx('margin:0;text-align:center;font-weight:700;font-size:12.5px;color:#4f6572')}>Contact details are coming soon.</p>
+        <a href={CONTACT_LINK} {...pr("display:block;text-align:center;text-decoration:none;margin-top:4px;width:100%;background:#7a53c6;color:#fff;font:800 20px 'Baloo 2',sans-serif;padding:13px 24px 10px;border-radius:999px;box-shadow:0 5px 0 #5a3a9e", 'transform:translateY(4px);box-shadow:0 1px 0 #5a3a9e')}>✉️ Contact us</a>
+        <p style={sx('margin:0;text-align:center;font-weight:700;font-size:13px;color:#4f6572;line-height:1.5;-webkit-user-select:text;user-select:text')}>Email us at <b style={sx('font-weight:900;color:#5a3a9e')}>{CONTACT_EMAIL}</b></p>
       </div>
     </div>
   );
