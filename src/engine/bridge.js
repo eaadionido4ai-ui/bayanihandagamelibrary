@@ -133,6 +133,18 @@ function applyEngineFixes() {
   if (W.QuakeGame && !W.QuakeGame._label && W.HazardHunt && W.HazardHunt._label) {
     W.QuakeGame._label = W.HazardHunt._label;
   }
+  // The extinguisher mist never showed: its particles start parked at y = -100,
+  // so three.js measures the spray's bounds there once and culls it every frame
+  // after. Always draw it.
+  if (W.FireGame && W.FireGame._buildSpray && !W.FireGame._buildSpray.fixed) {
+    const build = W.FireGame._buildSpray;
+    W.FireGame._buildSpray = function () {
+      const r = build.apply(this, arguments);
+      if (this.spray) this.spray.frustumCulled = false;
+      return r;
+    };
+    W.FireGame._buildSpray.fixed = true;
+  }
 }
 
 function addHowtoButtons() {
