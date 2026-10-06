@@ -55,7 +55,7 @@ export default function Settings({ c }) {
           <button onClick={() => patch({ aboutMore: !s.aboutMore })} aria-expanded={s.aboutMore} style={sx('margin-top:8px;color:#b35205;font-weight:900;font-size:15px;padding:4px 0')}>{s.aboutMore ? 'See less' : 'See more'}</button>
         </div>
         <button onClick={() => patch({ sheet: 'behind' })} style={sx('display:flex;align-items:center;gap:12px;width:100%;padding:16px;text-align:left;background:#fff;border-radius:22px;box-shadow:0 4px 0 rgba(20,48,66,.08)')}><span style={sx('font-size:22px')}>🔥</span><span style={sx('flex:1;font-weight:900;font-size:16px')}>Behind BAYANIHanda</span><span style={sx('font-size:22px;font-weight:900;color:#8fa3b0')}>›</span></button>
-        <p style={sx('margin:4px 0 0;text-align:center;font-size:12.5px;font-weight:700;color:#4f6572')}>Works offline · Version 1.0</p>
+        <p style={sx('margin:4px 0 0;text-align:center;font-size:12.5px;font-weight:700;color:#4f6572')}>Works offline · Version 1.0 · {__BUILD_ID__}</p>
       </div>
     </div>
   );
