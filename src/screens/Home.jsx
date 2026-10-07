@@ -1,5 +1,5 @@
 import { sx, pr } from '../ui/sx.js';
-import { Mascot, Logo } from '../ui/art.jsx';
+import { Mascot, Logo, Wordmark } from '../ui/art.jsx';
 import { P, PO, G, LIVE, TIPS, TRIVIA, game } from '../data.js';
 
 export default function Home({ c }) {
@@ -20,11 +20,8 @@ export default function Home({ c }) {
     <div data-screen-label="Home" className="scroll" style={{ ...sx('position:absolute;inset:0;background:radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef)'), padding: c.pad }}>
       <div style={sx('max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:16px')}>
         <div style={sx('display:flex;align-items:center;gap:10px')}>
-          <Logo />
-          <div style={sx('flex:1;min-width:0')}>
-            <div style={sx("font:800 22px/1 'Baloo 2',sans-serif;padding-top:4px")}>BAYANIHanda</div>
-            <div style={sx('font-size:12px;font-weight:800;color:#4f6572;letter-spacing:.4px')}>Game Library</div>
-          </div>
+          <Logo size={44} />
+          <div style={sx('flex:1;min-width:0')}><Wordmark size={22} sub={10.5} /></div>
           {!tablet && <button onClick={() => c.go('settings')} aria-label="Settings" style={sx('width:44px;height:44px;border-radius:15px;background:#fff;border:2px solid #d5e3ea;box-shadow:0 3px 0 #d5e3ea;font-size:18px;display:flex;align-items:center;justify-content:center;flex:none')}>⚙️</button>}
           <button onClick={() => c.go('players')} aria-label="Switch player" style={sx('display:flex;align-items:center;gap:7px;background:#fff;border:2px solid #d5e3ea;border-radius:999px;padding:3px 12px 3px 3px;font-weight:900;font-size:15px;box-shadow:0 3px 0 #d5e3ea;flex:none')}>
             <span style={{ ...sx('width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px'), background: myAv.bg }}>{myAv.e}</span>{nick}

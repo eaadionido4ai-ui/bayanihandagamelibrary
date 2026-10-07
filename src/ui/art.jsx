@@ -60,11 +60,29 @@ export function Confetti() {
   return <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 3 }}>{kids}</div>;
 }
 
-// Rounded orange square with a flame, the app's logo.
-export function Logo({ size = 42, radius = 13, flame = [16, 21], pb = 8, shadow = '0 4px 10px rgba(242,118,12,.35)' }) {
+// The app icon (logo 1b, the Bayanihan house): four neighbours in the pillar
+// colours lifting a house together. Shapes match public/brand/icon-rounded.svg.
+export function Logo({ size = 42, radius = 25, shadow = '0 4px 10px rgba(22,48,63,.18)' }) {
   return (
-    <div style={{ ...sx('flex:none;background:linear-gradient(135deg,#ffd76a,#f2760c);display:flex;align-items:flex-end;justify-content:center'), width: size, height: size, borderRadius: radius, boxShadow: shadow, paddingBottom: pb }}>
-      <div style={{ width: flame[0], height: flame[1], borderRadius: '50% 50% 50% 50%/70% 70% 30% 30%', background: 'linear-gradient(#fff3c4,#ffd24d 45%,#fff6d6)' }} />
+    <svg width={size} height={size} viewBox="0 0 100 100" role="img" aria-label="BAYANIHanda" style={{ display: 'block', flex: 'none', borderRadius: size * radius / 100, boxShadow: shadow }}>
+      <rect width="100" height="100" rx={radius} fill="#cfe6ef" />
+      <polygon points="50,18 77,40 23,40" fill="#16303f" stroke="#16303f" strokeWidth="6" strokeLinejoin="round" />
+      <rect x="30" y="39" width="40" height="18" fill="#fff5df" />
+      <rect x="45" y="44" width="10" height="13" rx="2" fill="#f2760c" />
+      <rect x="18" y="56" width="64" height="6" rx="3" fill="#eaa100" />
+      {[[27, '#2a6b8f'], [42.3, '#128253'], [57.7, '#f2760c'], [73, '#7a53c6']].map(([x, c]) => (
+        <g key={x} fill={c}><circle cx={x} cy="68.5" r="4.6" /><rect x={x - 5} y="74.5" width="10" height="14" rx="5" /></g>
+      ))}
+    </svg>
+  );
+}
+
+// The two-colour wordmark from the horizontal logo.
+export function Wordmark({ size = 22, sub = 12 }) {
+  return (
+    <div style={{ minWidth: 0 }}>
+      <div style={{ font: "800 " + size + "px/1 'Baloo 2',sans-serif", paddingTop: size * 0.18 }}><span style={{ color: '#16303f' }}>BAYANI</span><span style={{ color: '#d9650a' }}>Handa</span></div>
+      <div style={{ fontSize: sub, fontWeight: 900, color: '#4f6572', letterSpacing: sub * 0.3 }}>GAME LIBRARY</div>
     </div>
   );
 }

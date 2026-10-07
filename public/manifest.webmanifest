@@ -1,0 +1,17 @@
+{
+  "name": "BAYANIHanda Game Library",
+  "short_name": "BAYANIHanda",
+  "description": "Play, learn, and be ready. DRRM learning games for children.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#cfe6ef",
+  "theme_color": "#d9650a",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

@@ -39,6 +39,23 @@ npm run android:open    # open in Android Studio, then Run or build an APK
 
 Set your own `appId` in `capacitor.config.json` before publishing.
 
+The launcher icon comes from `assets/` (the Bayanihan house logo). After `npx cap add android`,
+generate the Android icon sizes with:
+
+```sh
+npx @capacitor/assets generate --android
+```
+
+## Brand
+
+Logo 1b, the Bayanihan house: four neighbours in the pillar colours lifting a house together.
+
+| File | Used for |
+| --- | --- |
+| `public/brand/icon-rounded.svg` | Browser tab icon (`public/icon.svg`); in the app via the `Logo` component in `src/ui/art.jsx` |
+| `public/brand/icon-square.svg` | Home-screen icons (`public/*.png`) and Android launcher sources (`assets/`); phones apply their own mask |
+| `public/brand/logo-horizontal.svg` | Documents and presentations; the Home header recreates it with `Logo` and `Wordmark` |
+
 ## How it fits together
 
 | Part | Where | What it does |

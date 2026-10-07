@@ -44,7 +44,7 @@ export function NavRail({ c }) {
   const t = tabs(c);
   return (
     <nav style={sx('flex:none;width:100px;height:100%;background:#fff;border-right:1px solid #d5e3ea;display:flex;flex-direction:column;align-items:center;gap:4px;padding:calc(env(safe-area-inset-top, 0px) + 24px) 0 22px;z-index:20')}>
-      <div style={{ marginBottom: 18 }}><Logo size={48} radius={15} flame={[18, 24]} pb={9} shadow="0 4px 12px rgba(242,118,12,.35)" /></div>
+      <div style={{ marginBottom: 18 }}><Logo size={54} /></div>
       {t.left.map((x) => <Tab key={x.k} t={x} rail />)}
       <button onClick={c.openAsk} aria-label="Ask Bayani" style={sx('display:flex;flex-direction:column;align-items:center;gap:4px;margin:8px 0')}>
         <span style={sx('width:68px;height:68px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe58a,#ffc53d 60%,#eaa100);border:4px solid #fff;box-shadow:0 4px 0 #c99400,0 6px 14px rgba(14,34,51,.16);display:flex;align-items:flex-end;justify-content:center;overflow:hidden')}><Mascot size={48} bob mb={-6} /></span>

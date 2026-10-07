@@ -1,5 +1,5 @@
 import { sx, pr } from '../ui/sx.js';
-import { Mascot, Flame, Dots } from '../ui/art.jsx';
+import { Mascot, Logo, Dots } from '../ui/art.jsx';
 import { AV, MAX_PLAYERS, av } from '../data.js';
 
 const BG = 'radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef)';
@@ -11,9 +11,9 @@ const BACK = 'width:48px;height:48px;border-radius:16px;background:#fff;border:2
 export function Splash({ c }) {
   return (
     <div data-screen-label="Splash" onClick={c.afterSplash} style={sx('position:absolute;inset:0;background:radial-gradient(130% 90% at 50% 30%,#f58a1f 0%,#d9650a 50%,#9c4504 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;color:#fff;text-align:center;padding:40px 24px;cursor:pointer')}>
-      <div style={sx('width:128px;height:128px;border-radius:38px;background:#fff;box-shadow:0 10px 0 rgba(120,50,0,.35);display:flex;align-items:flex-end;justify-content:center;padding-bottom:24px')}><Flame w={48} /></div>
+      <div style={sx('padding:6px;border-radius:44px;background:#fff;box-shadow:0 10px 0 rgba(120,50,0,.35)')}><Logo size={128} shadow="none" /></div>
       <div>
-        <div style={sx("font:800 46px/1 'Baloo 2',sans-serif;padding-top:6px")}>BAYANIHanda</div>
+        <div style={sx("font:800 46px/1 'Baloo 2',sans-serif;padding-top:6px")}>BAYANI<span style={{ color: '#ffe58a' }}>Handa</span></div>
         <div style={sx('font-size:15px;font-weight:900;letter-spacing:5px;text-transform:uppercase;margin-top:6px')}>Game Library</div>
       </div>
       <p style={sx('margin:0;font-weight:800;font-size:20px;font-style:italic')}>“Play, learn, and be ready.”</p>
