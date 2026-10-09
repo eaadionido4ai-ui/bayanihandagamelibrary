@@ -93,8 +93,8 @@ Settings has a "For grown-ups" section behind a multiplication question:
 
 ## TANGHALAN, the museum
 
-TANGHALAN (Technology-Assisted Navigable Gallery Highlighting Art, Learning and Narratives)
-is a walkable 3D museum inside the library. It opens from a card under the adventures on
+TANGHALAN (Three-dimensional Animated Gallery Highlighting Youth-Generated Artworks,
+Learnings and Narratives) is a walkable 3D museum inside the library. It opens from a card under the adventures on
 Home and from the end of the Games list, so the games stay first.
 
 - **One connected space.** Nine rooms in a 3 × 3 grid open into each other: the Lobby, the

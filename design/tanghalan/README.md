@@ -1,7 +1,7 @@
 # TANGHALAN design sources
 
-TANGHALAN (Technology-Assisted Navigable Gallery Highlighting Art, Learning and
-Narratives) is the museum wing of the game library (`src/museum/`,
+TANGHALAN (Three-dimensional Animated Gallery Highlighting Youth-Generated Artworks,
+Learnings and Narratives) is the museum wing of the game library (`src/museum/`,
 `src/screens/Tanghalan.jsx`). These files draw the museum's sample works and the concept
 mockups.
 

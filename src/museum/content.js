@@ -4,6 +4,10 @@
 // envisioned: names, ages and places are made up, and the pictures come from
 // design/tanghalan/art.js. Learners' own works, shared with consent, will replace them.
 
+// What TANGHALAN stands for: each pair is the letters that spell the name, then the rest of the word.
+export const NAME_PARTS = [['T', 'hree-dimensional '], ['An', 'imated '], ['G', 'allery '], ['H', 'ighlighting '], ['', 'Youth-Generated '], ['A', 'rtworks, '], ['L', 'earnings '], ['a', 'nd '], ['N', 'arratives']];
+export const FULL_NAME = NAME_PARTS.map((p) => p[0] + p[1]).join('');
+
 export const SAMPLE_NOTE = 'The artworks and stories here are samples of how the virtual museum is envisioned. Learners\' own works, shared with their parents\' consent, will replace them.';
 
 export const CEIL = 4.2;

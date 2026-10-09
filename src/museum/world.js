@@ -3,7 +3,7 @@
 // glows, story stands with open books, signs, and furniture. Returns the scene, the walls and
 // furniture to collide with, and the things a player can look at.
 
-import { CEIL, DOOR_H, ROOMS, DOORS, WORKS, STATIONS, room, wallPoint, spotOf, imageOf } from './content.js';
+import { CEIL, DOOR_H, ROOMS, DOORS, WORKS, STATIONS, NAME_PARTS, room, wallPoint, spotOf, imageOf } from './content.js';
 
 const PANEL = 0.1; // each room has its own wall panels, so a shared wall is two panels back to back
 const WAINSCOT = 0xe4d3b5;
@@ -301,8 +301,17 @@ export function buildWorld(T, renderer, onProgress, onLoad, opts) {
     drawLogo(c, 60, 56, 150);
     c.fillStyle = '#ffc53d'; c.font = '900 40px Nunito'; c.fillText('MALIGAYANG PAGDATING!', 240, 104);
     c.fillStyle = '#fff5df'; c.font = '800 96px "Baloo 2"'; c.fillText('TANGHALAN', 236, 196);
-    c.fillStyle = '#cfe0e8'; c.font = '800 34px Nunito';
-    ['🕹️  Walk anywhere with the joystick', '👀  Near a picture, tap Look', '📖  At a story stand, tap Read', '🎮  Play in the Go Bag and Fire rooms'].forEach((t, i) => c.fillText(t, 70, 320 + i * 86));
+    // what the name stands for, on two lines, with the letters that spell it in gold
+    c.font = '900 25px Nunito';
+    [NAME_PARTS.slice(0, 4), NAME_PARTS.slice(4)].forEach((parts, i) => {
+      let x = 70;
+      parts.forEach(([a, b]) => {
+        if (a) { c.fillStyle = '#ffc53d'; c.fillText(a, x, 250 + i * 34); x += c.measureText(a).width; }
+        c.fillStyle = '#cfe0e8'; c.fillText(b, x, 250 + i * 34); x += c.measureText(b).width;
+      });
+    });
+    c.fillStyle = '#cfe0e8'; c.font = '800 32px Nunito';
+    ['🕹️  Walk anywhere with the joystick', '👀  Near a picture, tap Look', '📖  At a story stand, tap Read', '🎮  Play in the Go Bag and Fire rooms'].forEach((t, i) => c.fillText(t, 70, 352 + i * 76));
     c.fillStyle = '#ffc53d'; c.font = '900 27px Nunito'; c.fillText('The works shown are samples of how', 70, 676); c.fillText('the virtual museum is envisioned.', 70, 712);
   }));
   const wb = hang(lobby, 'N', -3.2, 1.75, plane(1.9, 1.425, new T.MeshBasicMaterial({ map: welcome })));

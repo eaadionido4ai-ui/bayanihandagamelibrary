@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { sx, pr } from '../ui/sx.js';
 import { Mascot } from '../ui/art.jsx';
 import { P, game } from '../data.js';
-import { ROOMS, DOORS, WORKS, KINDS, SAMPLE_NOTE, room, roomAt } from '../museum/content.js';
+import { ROOMS, DOORS, WORKS, KINDS, SAMPLE_NOTE, NAME_PARTS, room, roomAt } from '../museum/content.js';
 import { createMuseum } from '../museum/runtime.js';
 import { loadProgress, saveProgress } from '../museum/store.js';
 import { readLines, stopReading } from '../museum/speech.js';
@@ -26,7 +26,11 @@ const BAYANI_LINES = [
 ];
 let resume = null; // where you were, so coming back from a game puts you in the same spot
 
-const byLine = (w) => w.by + ', ' + w.age + ' · ' + w.grade + ' · ' + w.place;
+// "Three-dimensional Animated Gallery …", with the letters that spell TANGHALAN picked out
+function FullName({ accent }) {
+  return <>{NAME_PARTS.map(([a, b], i) => <span key={i}>{a && <b style={{ color: accent, fontWeight: 900 }}>{a}</b>}{b}</span>)}</>;
+}
+
 const seenIn = (prog, id) => WORKS.filter((w) => w.room === id && prog.seen[w.id]).length;
 
 // ---------- the way in, on Home and Games (after the games, so the library comes first) ----------
@@ -118,6 +122,7 @@ function Loading({ f }) {
     <div style={sx('position:absolute;inset:0;z-index:20;background:radial-gradient(120% 80% at 50% 0%,#24465c,#0e2233);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;padding:24px;text-align:center')}>
       <Mascot size={78} bob />
       <div style={sx("font:800 26px/1.1 'Baloo 2',sans-serif;padding-top:4px")}>Opening TANGHALAN…</div>
+      <div style={sx('max-width:340px;font-weight:800;font-size:13px;line-height:1.45;color:#bcd4e0')}><FullName accent="#ffc53d" /></div>
       <div style={sx('width:min(260px,70vw);height:10px;border-radius:999px;background:rgba(255,255,255,.18);overflow:hidden')}><div style={{ ...sx('height:100%;background:#ffc53d;border-radius:999px;transition:width .2s'), width: Math.round(f * 100) + '%' }} /></div>
     </div>
   );
@@ -280,6 +285,7 @@ function IntroSheet({ onClose }) {
       <div style={sx(CARD + ';align-items:center;text-align:center')}>
         <Mascot size={70} wave bob />
         <div style={sx("font:800 26px/1.1 'Baloo 2',sans-serif;padding-top:4px")}>Maligayang pagdating!</div>
+        <div style={sx('font-weight:800;font-size:13.5px;line-height:1.45;color:#4f6572')}><b style={sx('color:#16303f;font-weight:900')}>TANGHALAN:</b> <FullName accent="#d9650a" /></div>
         <p style={sx('margin:0;font-weight:700;font-size:15px;line-height:1.5;color:#25404e')}>TANGHALAN is a museum of art and stories made by kids about staying safe and helping each other. Walk from room to room with Bayani.</p>
       </div>
       <div style={sx(CARD)}>
