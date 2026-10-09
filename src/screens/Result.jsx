@@ -76,7 +76,9 @@ export default function Result({ c }) {
           {nx && <button onClick={() => (nx.go ? nx.go() : c.startGame(rg.id, nx.mode))} {...pr("width:100%;background:#128253;color:#fff;font:800 20px 'Baloo 2',sans-serif;padding:12px 24px 9px;border-radius:999px;box-shadow:0 5px 0 #0b5e3b", 'transform:translateY(4px);box-shadow:0 1px 0 #0b5e3b')}>{nx.label} →</button>}
           <div style={sx('display:flex;gap:10px')}>
             {R.newBadge && <button onClick={() => c.go('id')} style={sx('flex:1;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;border-radius:999px;padding:12px;font-weight:900;font-size:15px')}>🏆 My ID</button>}
-            <button onClick={() => c.go('home')} style={sx('flex:1;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;border-radius:999px;padding:12px;font-weight:900;font-size:15px')}>🏠 Home</button>
+            {c.s.from === 'museum'
+              ? <button onClick={() => c.go('museum')} style={sx('flex:1;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;border-radius:999px;padding:12px;font-weight:900;font-size:15px')}>🏛️ Museum</button>
+              : <button onClick={() => c.go('home')} style={sx('flex:1;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;border-radius:999px;padding:12px;font-weight:900;font-size:15px')}>🏠 Home</button>}
           </div>
         </div>
       </div>

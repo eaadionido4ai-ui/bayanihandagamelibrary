@@ -65,6 +65,7 @@ Logo 1b, the Bayanihan house: four neighbours in the pillar colours lifting a ho
 | In-game screens | `src/engine/screens.html` | Each game's canvas and HUD markup, also extracted unchanged. |
 | Bridge | `src/engine/bridge.js` | Starts games with the mode picked on the intro screen, shows the game layer, turns each game's result into the new Results screen, opens the app's sheets from the in-game buttons, and handles speech. |
 | HUD style | `src/engine/game-hud.css` | Restyles the real HUDs to the design: corner buttons, status pill, Bayani hint bubble, side buttons, bottom sheets. |
+| Museum | `src/museum/`, `src/screens/Tanghalan.jsx` | TANGHALAN, the walkable 3D museum (below). |
 
 To pick up a newer version of the web app, replace the file in `project/uploads/` and
 run `npm run extract-engine`. The bridge relies on the engine's element ids, on
@@ -90,19 +91,46 @@ Settings has a "For grown-ups" section behind a multiplication question:
 - **Build with us**: how to contribute games, lessons and translations. Contact us
   opens an email to eadionido@up.edu.ph (`CONTACT_EMAIL` in `src/screens/GrownUps.jsx`).
 
-## TANGHALAN (coming soon)
+## TANGHALAN, the museum
 
 TANGHALAN (Technology-Assisted Navigable Gallery Highlighting Art, Learning and Narratives)
-is the museum wing of the library: one connected 3D space where players walk from room to
-room, look at learners' art, and read or listen to their stories and poems at story stands.
-For now it is a placeholder. The games come first: a small card under the adventures on
-Home and a tile at the end of Games open `src/screens/Tanghalan.jsx`, which shows dimmed
-mockups (walking the rooms, an artwork, a story stand, the museum map), how learners' works
-will get in, and a button back to the games.
+is a walkable 3D museum inside the library. It opens from a card under the adventures on
+Home and from the end of the Games list, so the games stay first.
 
-The preview pictures in `public/tanghalan/` are rendered from `design/tanghalan/`, which also
-holds the 3D museum scene, built with the app's three.js, to start the real museum from. See
-`design/tanghalan/README.md`.
+- **One connected space.** Nine rooms in a 3 × 3 grid open into each other: the Lobby, the
+  Bulwagan ng Bayanihan (featured hall), a room for each pillar, the Kuwentuhan Corner for
+  stories, and two game rooms.
+- **Your player walks in third person** with the joystick (or WASD and the arrow keys).
+  Drag to look around, pinch or scroll to zoom. Bayani walks beside you.
+- **Artworks hang on the walls; stories, poems, letters and comics sit on story stands and
+  reading walls.** Walk up to one and tap Look or Read: the work opens with the child's
+  words in Filipino or English, read aloud line by line, a sticker to give, and Bayani's
+  tip with a button to the matching game.
+- **Game rooms.** The Go Bag Room and the Fire Safety Room each have a game station that
+  starts Go Bag Packing 3D or Fire Extinguisher 3D. After the game, the Museum button on the
+  results (or Back) returns you to the same spot.
+- **The map** shows where you are and the rooms you visited, and can take you to any room.
+- **Progress** (works seen, rooms visited, stickers) is saved per player in
+  `bayanihanda_museum_v1::<player>`.
+
+**The works are samples** of how the virtual museum is envisioned: the names, ages and
+places are made up, and every work, placard and the welcome board say so. To show real
+works, collected through teachers with parents' consent:
+
+1. Put the picture in `public/tanghalan/works/<id>.webp` (about 1024 px wide).
+2. Add or edit its entry in `src/museum/content.js`: room, wall or stand position, title,
+   first name, age, grade, province, the child's words or story text in Filipino and
+   English, Bayani's tip and the game it leads to.
+3. Remove the sample notes (`SAMPLE_NOTE` in `content.js`, the strip in
+   `src/screens/Tanghalan.jsx`, the placards in `src/museum/world.js`).
+
+| Part | Where |
+| --- | --- |
+| Rooms, doors, works, game stations | `src/museum/content.js` |
+| The 3D museum (three.js from `public/engine/`) | `src/museum/world.js`, `characters.js`, `runtime.js` |
+| Screen, controls, sheets, Home and Games cards | `src/screens/Tanghalan.jsx` |
+| Read-aloud, progress | `src/museum/speech.js`, `store.js` |
+| Sample pictures and how they are drawn | `design/tanghalan/` (see its README) |
 
 ## Not done yet
 
@@ -112,8 +140,8 @@ holds the 3D museum scene, built with the app's three.js, to start the real muse
   Capacitor plugins (`@capacitor/filesystem`, `@capacitor/share`, and a print plugin).
 - **Hands-Only CPR and Stop the Bleed** are playable in the engine but stay "Coming soon",
   as in the web app. **Nobody Left Behind** doesn't exist yet.
-- **TANGHALAN is only a placeholder.** The walkable museum still needs building, and its
-  sample works and names are made up; real works need parents' consent forms and review.
+- **TANGHALAN shows sample works.** Real works need parents' consent forms and review
+  before they replace the samples.
 - **Not yet tested on a phone.** Everything was checked in Chromium at phone (412×915)
   and tablet (1280×800) sizes, with software WebGL.
 

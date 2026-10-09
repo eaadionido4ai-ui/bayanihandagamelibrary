@@ -1,26 +1,25 @@
 # TANGHALAN design sources
 
 TANGHALAN (Technology-Assisted Navigable Gallery Highlighting Art, Learning and
-Narratives) is the planned museum wing of the game library: one connected 3D space
-where players walk from room to room, look at learners' art and read or listen to
-their stories and poems. The app shows it as a "coming soon" placeholder
-(`src/screens/Tanghalan.jsx`). These files make that placeholder's pictures.
+Narratives) is the museum wing of the game library (`src/museum/`,
+`src/screens/Tanghalan.jsx`). These files draw the museum's sample works and the concept
+mockups.
 
 | File | What it is |
 | --- | --- |
-| `gallery.js` | The museum scene, built with the app's own three.js (`public/engine/three.min.js`) in the games' low-poly style: the main hall with archways into a room for each pillar, a doorway to the Kuwentuhan Corner, framed works, story stands with open books, the player and Bayani. A starting point for the real museum. |
-| `art.js` | Sample children's works drawn in code (crayon drawings, a poem, a story, a letter, a comic). Placeholders until real, consented works arrive. |
-| `screens.html` | Mockup of the app screens: Home entry, museum map, walking, an artwork, a story stand. |
-| `overview.html` | Pitch slide. |
-| `preview.html` | The two 3D stills used inside the app's placeholder. |
-| `mock.js`, `common.css`, `fonts.css`, `fonts/` | Shared pieces. Gochi Hand and Patrick Hand are under the SIL Open Font License. |
-| `render.cjs` | Renders the mockups to `out/` and the placeholder images to `public/tanghalan/`. |
+| `art.js` | The sample children's works, drawn in code: crayon drawings, a poem, a story, a letter, a comic, and the open books on the story stands. They are samples of how the virtual museum is envisioned; names, ages and places are made up. |
+| `works.html` | Loads `art.js` so `render.cjs` can draw the works. |
+| `render.cjs` | Writes every work in `src/museum/content.js` to `public/tanghalan/works/` (WebP), then the mockups to `out/`. |
+| `gallery.js`, `screens.html`, `overview.html`, `mock.js`, `common.css` | The concept mockups made before the museum was built (app screens and a pitch slide). |
+| `fonts.css`, `fonts/` | Gochi Hand and Patrick Hand (SIL Open Font License) for the children's handwriting. |
 
 To render, from the repository root, after `npm install` and with Playwright's Chromium
 installed (`npm i -D playwright && npx playwright install chromium`):
 
 ```sh
-node design/tanghalan/render.cjs
+node design/tanghalan/render.cjs              # works and mockups
+node design/tanghalan/render.cjs --works-only # just public/tanghalan/works/
 ```
 
-Names, ages and places in the samples are made up.
+Real works replace the samples: put each picture in `public/tanghalan/works/` and edit its
+entry in `src/museum/content.js` (see the main README).

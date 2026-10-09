@@ -440,6 +440,93 @@
       p.text('Tumawag sa 911', W / 2, 930, 46, C.red, { font: '"Patrick Hand"' });
       p.signature('Nico, 10', W - 24, H - 30);
     } },
+    // cleaning the canal so the street does not flood
+    kanal: { w: 1024, h: 768, seed: 113, draw(p) {
+      const W = p.W, H = p.H;
+      p.draw(p.rect(-10, -10, W + 20, 170, 6), C.sky, null, { w: 14, gap: 9, alpha: 0.6 });
+      p.sun(W - 80, 70, 52, true);
+      p.cloud(150, 90, 85, '#8e9eab', '#4b5966'); p.rain(80, 140, 230, 220, 10);
+      p.grass(440, C.lime);
+      // street, then the canal with its concrete edges
+      p.draw(p.rect(-10, 455, W + 20, 80, 3), '#9aa1a6', null, { w: 12, gap: 8, alpha: 0.7 });
+      for (let x = 30; x < W; x += 120) p.line([[x, 495], [x + 60, 495]], C.white, 6, { passes: 2 });
+      p.draw(p.rect(-10, 590, W + 20, 110, 3), '#b9bec2', null, { w: 12, gap: 8, alpha: 0.7 });
+      p.water(-10, 610, W + 20, 70, C.blue);
+      p.line([[-10, 608], [W + 10, 608]], '#5f666b', 6); p.line([[-10, 684], [W + 10, 684]], '#5f666b', 6);
+      [[150, C.red], [210, C.green], [690, C.yellow], [760, C.pink]].forEach(([x, col]) => p.draw(p.rect(x, 630, 30, 16, 1), col, C.black, { w: 5, gap: 3, lw: 2 }));
+      p.arrow([[380, 650], [470, 640], [560, 650]], C.navy, 5);
+      // kids with gloves and a sack, a trash bin, a sign
+      p.kid(300, 590, 150, C.red, { arms: 'hold' });
+      p.draw(p.poly([[330, 520], [395, 520], [405, 600], [322, 600]], 3), '#d9c79a', '#8a6a2a', { w: 8, gap: 5, lw: 3 });
+      p.kid(470, 590, 140, C.blue, { arms: 'side', dress: true, long: true, skin: C.skin2 });
+      p.line([[510, 520], [560, 615]], C.gray, 5);
+      p.kid(620, 590, 130, C.purple, { arms: 'wave' });
+      p.draw(p.rect(820, 470, 90, 120, 4), C.green, '#1f7a38', { w: 9, gap: 5, lw: 4 });
+      p.draw(p.rect(808, 452, 114, 24, 3), '#1f7a38', null, { w: 7, gap: 4 });
+      p.text('BASURA', 865, 530, 26, C.white);
+      p.line([[60, 590], [60, 420]], C.brown, 7);
+      p.draw(p.rect(-6, 330, 210, 96, 3), C.white, C.red, { w: 8, gap: 5, lw: 5 });
+      p.text('BAWAL', 100, 360, 34, C.red); p.text('MAGTAPON', 100, 398, 30, C.red);
+      p.text('LINISIN ANG KANAL!', 560, 215, 76, [C.blue, C.green, C.orange, C.purple], { spread: 1.04 });
+      p.signature('Rico, 10', W - 26, H - 30);
+    } },
+    // the family's plan: the route, the meeting place and who to call
+    plano: { w: 1024, h: 768, seed: 127, draw(p) {
+      const W = p.W, H = p.H;
+      p.text('PLANO NG PAMILYA', W / 2, 62, 74, C.navy, { spread: 1.04 });
+      // river to avoid
+      p.draw(p.poly([[-10, 150], [140, 170], [230, 260], [210, 380], [-10, 400]], 4), C.blue, '#1b4f9c', { w: 12, gap: 8, lw: 4, alpha: 0.6 });
+      p.line([[60, 230], [150, 320]], C.red, 10); p.line([[150, 230], [60, 320]], C.red, 10);
+      p.text('IWASAN', 105, 365, 36, C.red);
+      // home, path, meeting tree, evacuation school
+      p.house(170, 650, 170, 120, '#f6d36b', C.red);
+      p.text('BAHAY', 170, 700, 36, C.navy);
+      const path = [[260, 620], [380, 600], [470, 520], [560, 470], [680, 420], [780, 330]];
+      for (let i = 0; i < path.length - 1; i++) {
+        const a = path[i], b = path[i + 1];
+        for (let t = 0; t < 1; t += 0.34) p.line([[a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], [a[0] + (b[0] - a[0]) * (t + 0.18), a[1] + (b[1] - a[1]) * (t + 0.18)]], C.orange, 7, { passes: 2 });
+      }
+      p.arrow([[740, 370], [790, 322]], C.orange, 7);
+      p.tree(470, 470, 170, C.green);
+      p.draw(p.poly([[470, 245], [480, 270], [507, 272], [486, 288], [494, 314], [470, 299], [446, 314], [454, 288], [433, 272], [460, 270]], 1), C.yellow, C.gold, { w: 5, gap: 3, lw: 2 });
+      p.text('TAGPUAN', 470, 500, 36, C.green);
+      p.draw(p.rect(780, 170, 200, 140, 3), '#f4f0e6', C.navy, { w: 9, gap: 5, lw: 4 });
+      p.draw(p.poly([[766, 172], [880, 110], [994, 172]], 3), C.blue, C.navy, { w: 9, gap: 5, lw: 4 });
+      p.text('PAARALAN', 880, 220, 32, C.navy); p.text('EVAC', 880, 270, 40, C.red);
+      // the family walking, and who to call
+      [[560, 600, C.red, {}], [610, 610, C.purple, { dress: true, long: true, skin: C.skin2 }], [655, 612, C.blue, {}], [695, 615, C.green, { dress: true }]].forEach(([x, y, col, o], i) => p.kid(x, y, 110 - i * 12, col, Object.assign({ arms: 'down' }, o)));
+      p.draw(p.rect(800, 560, 190, 120, 4), C.white, C.navy, { w: 8, gap: 5, lw: 4 });
+      p.text('☎ 911', 895, 600, 40, C.red); p.text('Barangay', 895, 648, 32, C.navy);
+      p.signature('Lea, 11', W - 26, H - 26);
+    } },
+    // sharing relief goods at the barangay hall
+    tulong: { w: 1024, h: 768, seed: 131, draw(p) {
+      const W = p.W, H = p.H;
+      p.draw(p.rect(-10, -10, W + 20, 200, 6), C.sky, null, { w: 14, gap: 9, alpha: 0.55 });
+      p.sun(90, 80, 54, true); p.cloud(820, 90, 80);
+      p.grass(560, C.lime);
+      // barangay hall
+      p.draw(p.rect(250, 260, 520, 300, 4), '#f4e2b8', C.brown, { w: 10, gap: 6, lw: 5 });
+      p.draw(p.poly([[220, 262], [510, 160], [800, 262]], 3), C.red, '#9a2318', { w: 10, gap: 6, lw: 5 });
+      p.draw(p.rect(330, 285, 360, 56, 3), C.white, C.navy, { w: 8, gap: 5, lw: 3 });
+      p.text('BARANGAY HALL', 510, 313, 38, C.navy);
+      p.draw(p.rect(460, 420, 100, 140, 3), C.brown, '#5a3a1a', { w: 8, gap: 5, lw: 3 });
+      p.draw(p.rect(300, 380, 90, 70, 2), C.sky, C.navy, { w: 7, gap: 4, lw: 3 }); p.draw(p.rect(630, 380, 90, 70, 2), C.sky, C.navy, { w: 7, gap: 4, lw: 3 });
+      // table with relief boxes and water
+      p.draw(p.rect(330, 560, 360, 26, 3), C.brown, '#5a3a1a', { w: 8, gap: 5, lw: 3 });
+      p.line([[350, 586], [350, 660]], '#5a3a1a', 9); p.line([[670, 586], [670, 660]], '#5a3a1a', 9);
+      [[360, 500], [440, 500], [400, 455]].forEach(([x, y]) => { p.draw(p.rect(x, y, 76, 60, 2), '#d9a35f', '#8a5a2b', { w: 7, gap: 4, lw: 3 }); p.text('RELIEF', x + 38, y + 30, 20, '#8a5a2b'); });
+      [[560, 520], [590, 520], [620, 520]].forEach(([x, y]) => p.draw(p.rect(x, y, 22, 40, 2), C.sky, C.blue, { w: 5, gap: 3, lw: 2 }));
+      // neighbours giving and receiving
+      p.kid(250, 690, 170, C.green, { arms: 'hold' });
+      p.kid(760, 690, 160, C.orange, { arms: 'hold', dress: true, long: true, skin: C.skin2 });
+      p.draw(p.rect(800, 590, 64, 50, 2), '#d9a35f', '#8a5a2b', { w: 6, gap: 4, lw: 3 });
+      p.kid(880, 700, 130, C.purple, { arms: 'wave' });
+      p.kid(140, 700, 120, C.blue, { arms: 'up' });
+      [[150, 300], [880, 300], [930, 420]].forEach(([x, y]) => p.draw(p.poly([[x, y + 30], [x - 32, y], [x - 26, y - 22], [x - 8, y - 24], [x, y - 10], [x + 8, y - 24], [x + 26, y - 22], [x + 32, y]], 2), C.red, '#9a2318', { w: 6, gap: 4, lw: 3 }));
+      p.text('TULONG-TULONG TAYO!', W / 2, 105, 70, [C.red, C.orange, C.green, C.blue, C.purple], { spread: 1.03 });
+      p.signature('Joy, 9', W - 26, H - 30);
+    } },
     // a poem on lined paper
     tula: { w: 768, h: 1024, seed: 83, lined: true, draw(p) {
       const W = p.W, H = p.H;
@@ -534,5 +621,26 @@
     wk.draw(p); p.grain(wk.lined ? 0.01 : 0.05);
     return canvas;
   }
-  window.KidArt = { ready, draw, names: Object.keys(WORKS), size: n => [WORKS[n].w, WORKS[n].h] };
+  // An open picture book for a story stand: the story's first lines on the left, a drawing on the right.
+  function book(title, lines, artName) {
+    const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 640;
+    const c = cv.getContext('2d'), W = 1024, H = 640, pw = W / 2 - 26;
+    c.fillStyle = '#7a1f1a'; c.beginPath(); c.moveTo(26, 0); c.arcTo(W, 0, W, H, 26); c.arcTo(W, H, 0, H, 26); c.arcTo(0, H, 0, 0, 26); c.arcTo(0, 0, W, 0, 26); c.fill();
+    c.fillStyle = '#fffaf0'; c.fillRect(22, 18, pw, H - 36); c.fillRect(W / 2 + 4, 18, pw, H - 36);
+    c.fillStyle = 'rgba(0,0,0,.12)'; c.fillRect(W / 2 - 10, 18, 20, H - 36);
+    let size = 56; c.font = size + 'px "Patrick Hand"';
+    while (c.measureText(title).width > pw - 70 && size > 30) { size -= 2; c.font = size + 'px "Patrick Hand"'; }
+    c.fillStyle = '#16303f'; c.fillText(title, 56, 100);
+    c.font = '38px "Patrick Hand"'; c.fillStyle = '#2a3f8f';
+    let line = '', y = 176;
+    for (const word of lines.join(' ').split(' ')) {
+      const t = line ? line + ' ' + word : word;
+      if (c.measureText(t).width > pw - 70) { c.fillText(line, 56, y); y += 54; line = word; if (y > H - 50) { line = ''; break; } } else line = t;
+    }
+    if (line) c.fillText(line, 56, y);
+    const art = draw(artName), k = Math.min((pw - 60) / art.width, (H - 110) / art.height), dw = art.width * k, dh = art.height * k;
+    c.drawImage(art, W / 2 + 4 + (pw - dw) / 2, 18 + (H - 36 - dh) / 2, dw, dh);
+    return cv;
+  }
+  window.KidArt = { ready, draw, book, names: Object.keys(WORKS), size: n => [WORKS[n].w, WORKS[n].h] };
 })();

@@ -9,6 +9,7 @@ import ChampionId, { IdCard } from './screens/ChampionId.jsx';
 import Settings from './screens/Settings.jsx';
 import { TeacherCorner, BuildWithUs } from './screens/GrownUps.jsx';
 import { Tanghalan } from './screens/Tanghalan.jsx';
+import { forgetProgress } from './museum/store.js';
 import { NavBar, NavRail } from './Nav.jsx';
 import { AskSheet, Sheet, Snack } from './Overlays.jsx';
 
@@ -104,7 +105,7 @@ export default function Shell() {
     speak('Hi, ' + p.nick + '!');
   }
   function removePlayer(id) {
-    engine.removePlayer(id); refresh();
+    engine.removePlayer(id); forgetProgress(id); refresh();
     const left = engine.players();
     if (!left.length) go('addPlayer', { draft: { nick: '', av: 'turtle', id: null }, editMode: false });
     else go('players');
@@ -115,7 +116,7 @@ export default function Shell() {
   function openGame(id) {
     const g = game(id);
     if (g.soon) { snackShow('Coming soon! Bayani is still building this game.'); return; }
-    const from = ['home', 'games', 'id', 'players'].indexOf(s.screen) >= 0 ? s.screen : 'games';
+    const from = ['home', 'games', 'id', 'players', 'museum'].indexOf(s.screen) >= 0 ? s.screen : 'games';
     go('intro', { gameId: id, mode: s.modes[id] || 0, from });
   }
   function startGame(id, mode) {
@@ -167,10 +168,12 @@ export default function Shell() {
   const guard = useRef(false);
   const ignorePop = useRef(false);
   const backRef = useRef(null);
+  const backHook = useRef(null); // a screen's own back step, such as closing the museum's sheets
   backRef.current = () => {
     const c = sRef.current;
     if (c.ask) return patch({ ask: false });
     if (c.sheet) return patch({ sheet: null });
+    if (backHook.current && backHook.current()) return undefined;
     switch (c.screen) {
       case 'play': if (!engine.closeGamePopup()) { engine.stop(); patch({ screen: 'intro' }); } break;
       case 'intro': go(c.from || 'games'); break;
@@ -207,6 +210,7 @@ export default function Shell() {
     go, refresh, speak, snackShow, afterSplash, newPlayer, editPlayer, savePlayer, pickPlayer, removePlayer,
     resetBadges: () => { engine.resetBadges(); refresh(); },
     openGame, startGame, askItem, openAsk,
+    setBack: (fn) => { backHook.current = fn; },
     tabOf: scr === 'museum' ? s.museumFrom : TAB_OF[scr],
   };
 
@@ -226,7 +230,7 @@ export default function Shell() {
   else if (scr === 'museum') body = <Tanghalan c={c} />;
   else if (scr === 'play') body = <div data-screen-label="Gameplay" style={{ position: 'absolute', inset: 0, background: '#0e2233' }} />;
 
-  const rail = tablet && (isTab || ['intro', 'settings', 'teacher', 'contribute', 'museum'].indexOf(scr) >= 0);
+  const rail = tablet && (isTab || ['intro', 'settings', 'teacher', 'contribute'].indexOf(scr) >= 0);
   const bottom = isTab && !tablet;
   const idName = (s.names[activeId] != null ? s.names[activeId] : nick) || 'Champion';
 
