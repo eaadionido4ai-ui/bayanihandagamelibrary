@@ -4,3 +4,4 @@ android/app/build/
 android/.gradle/
 .DS_Store
 *.log
+design/tanghalan/out/

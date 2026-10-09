@@ -1,6 +1,7 @@
 import { sx, pr } from '../ui/sx.js';
 import { Mascot, Logo, Wordmark } from '../ui/art.jsx';
 import { P, PO, G, LIVE, TIPS, TRIVIA, game } from '../data.js';
+import { MuseumCard } from './Tanghalan.jsx';
 
 export default function Home({ c }) {
   const { s, patch, tablet, nick, myAv, count, rank, next, mine } = c;
@@ -82,6 +83,7 @@ export default function Home({ c }) {
                 );
               })}
             </div>
+            <MuseumCard c={c} />
           </div>
         </div>
       </div>

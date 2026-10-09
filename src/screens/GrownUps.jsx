@@ -17,7 +17,7 @@ function Header({ c, title, soon }) {
 }
 
 // A preview of a planned screen, dimmed so it reads as "not working yet".
-function Mockup({ c, label, children }) {
+export function Mockup({ c, label, children }) {
   return (
     <div style={sx('position:relative;border-radius:24px;overflow:hidden')}>
       <div aria-hidden="true" style={sx('padding:46px 12px 12px;display:flex;flex-direction:column;gap:10px;background:rgba(255,255,255,.35);border:2px dashed #9fb6c4;border-radius:24px')}>{children}</div>

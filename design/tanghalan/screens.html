@@ -1,0 +1,261 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+body{background:#dde6ea;width:2160px;padding:34px 40px 40px}
+.top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;gap:30px}
+.top h1{margin:0;font:800 34px/1 'Baloo 2'}
+.top h1 span{color:#d9650a}
+.top p{margin:7px 0 0;font-weight:800;color:#4f6572;font-size:16px;max-width:1250px;line-height:1.4}
+.top p b{color:#d9650a;font-weight:900}
+.legend{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.tag{font-weight:900;font-size:13px;padding:6px 12px;border-radius:999px;white-space:nowrap}
+.row{display:flex;gap:28px;align-items:flex-start}
+.col{display:flex;flex-direction:column;align-items:center;gap:12px;width:390px}
+.cap{text-align:center;font-weight:800;font-size:15px;color:#2f4b5a;line-height:1.35;max-width:375px}
+.cap b{display:block;font:800 19px/1.1 'Baloo 2';color:#16303f;margin-bottom:3px}
+.num{display:inline-flex;width:26px;height:26px;border-radius:50%;background:#d9650a;color:#fff;align-items:center;justify-content:center;font-size:14px;margin-right:6px;vertical-align:2px}
+.ns{display:inline-block;font:900 10.5px Nunito;letter-spacing:.6px;background:#16303f;color:#ffc53d;border-radius:999px;padding:3px 8px;margin-left:6px;vertical-align:3px}
+
+/* 1 home */
+.homehdr{display:flex;align-items:center;gap:9px}
+.lg{width:44px;height:44px;flex:none;filter:drop-shadow(0 3px 5px rgba(22,48,63,.18))}
+.wm b{display:block;font:800 21px/1 'Baloo 2';padding-top:3px}
+.wm small{display:block;font-size:9px;font-weight:900;letter-spacing:2.8px;color:#4f6572}
+.gear{margin-left:auto;width:42px;height:42px;border-radius:14px;background:#fff;box-shadow:0 3px 0 rgba(20,48,66,.1);display:flex;align-items:center;justify-content:center;font-size:19px}
+.me{display:flex;align-items:center;gap:6px;background:#fff;border-radius:999px;padding:4px 12px 4px 4px;font-weight:900;font-size:14px;box-shadow:0 3px 0 rgba(20,48,66,.1)}
+.me i{font-style:normal;width:32px;height:32px;border-radius:50%;background:#ffd9c4;display:flex;align-items:center;justify-content:center;font-size:18px}
+.greet{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.greet .bay{width:50px;height:56px;flex:none}
+.greet b{display:block;font:800 19px/1.1 'Baloo 2';padding-top:2px}
+.greet span{font-weight:700;font-size:13px;color:#3d5563}
+.museum{border-radius:22px;padding:13px 14px 15px;color:#fff;background:linear-gradient(160deg,#16303f,#1f4e6b);box-shadow:0 5px 0 #0b1c27;display:flex;flex-direction:column;gap:6px}
+.mtop{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:900;letter-spacing:1.3px;color:#bcd4e0}
+.mwall{position:relative;height:112px;border-radius:14px;margin:4px 0 2px;display:flex;align-items:center;justify-content:center;gap:12px;overflow:hidden;
+  background:radial-gradient(60px 50px at 22% 18%,rgba(255,240,200,.95),transparent),radial-gradient(60px 50px at 50% 18%,rgba(255,240,200,.95),transparent),radial-gradient(60px 50px at 78% 18%,rgba(255,240,200,.95),transparent),#efe5d2}
+.mwall::after{content:'';position:absolute;left:0;right:0;bottom:10px;height:5px;background:repeating-linear-gradient(90deg,#2a6b8f 0 22px,#128253 22px 44px,#f2760c 44px 66px,#7a53c6 66px 88px)}
+.fr{background:#fdfbf5;padding:3px;border:4px solid var(--f);width:84px;box-shadow:0 4px 8px rgba(0,0,0,.25);position:relative;z-index:1;margin-top:-6px}
+.fr.tall{width:56px}
+.fr img{display:block;width:100%}
+.mt{font:800 30px/1 'Baloo 2';color:#ffc53d;padding-top:4px}
+.museum small{font-weight:700;font-size:13.5px;line-height:1.35;color:#e5eff4}
+.idc{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#ffd76a,#f5a742);border-radius:20px;padding:12px 14px;font:800 17px 'Baloo 2';box-shadow:0 4px 0 #c96f12}
+
+/* 2 halls */
+.subt{font-weight:800;font-size:12.5px;color:#4f6572;margin-top:1px}
+.plan{display:grid;grid-template-columns:1fr 1.25fr 1fr;grid-template-rows:66px 86px 44px;gap:6px;padding:10px;background:#f6f1e7;border-radius:20px}
+.room{border-radius:12px;border:2.5px solid var(--c);background:var(--b);font-weight:900;font-size:11.5px;line-height:1.15;color:#16303f;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4px}
+.room i{font-style:normal;font-size:19px;line-height:1;margin-bottom:3px}
+.room small{display:block;font-weight:800;font-size:9.5px;color:#4f6572;margin-top:2px}
+.room.fe{background:#16303f;border-color:#16303f;color:#ffc53d;font:800 14px/1.05 'Baloo 2';padding-top:6px}
+.room.fe small{color:#cfe0e8;font-family:Nunito;font-size:10px}
+.room.lb{grid-column:2;border-style:dashed}
+.hall{display:flex;align-items:center;gap:11px;background:#fff;border-radius:18px;padding:10px 12px;box-shadow:0 4px 0 rgba(20,48,66,.08)}
+.hall .pi{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
+.hall b{display:block;font:800 16px/1.1 'Baloo 2';padding-top:2px}
+.hall small{display:block;font-weight:700;font-size:12px;color:#4f6572;margin-top:1px}
+.seen{margin-left:auto;font-weight:900;font-size:11.5px;background:#e5f6ee;color:#0c5c3a;border-radius:999px;padding:4px 9px;white-space:nowrap}
+.foot{text-align:center;font-weight:800;font-size:12px;color:#4f6572}
+
+/* 4 artwork */
+.topbar{position:absolute;top:12px;left:14px;right:14px;display:flex;align-items:center;justify-content:space-between}
+.count{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:999px;padding:6px 14px;font-weight:900;font-size:13.5px}
+.artwrap{position:absolute;top:74px;left:18px;right:18px}
+.sheet{position:absolute;left:0;right:0;bottom:0;top:350px;background:#fff;border-radius:26px 26px 0 0;padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-weight:900;font-size:11.5px;border-radius:999px;padding:4px 10px;background:#eef3f6;color:#3d5563}
+.chip.pv{background:#e3f0f7;color:#1f5675}
+.atitle{font:800 26px/1 'Baloo 2';padding-top:3px}
+.by{font-weight:800;font-size:13px;color:#4f6572;margin-top:-4px}
+.by b{color:#16303f}
+.tog{display:flex;background:#eef3f6;border-radius:999px;padding:3px;width:max-content;gap:2px}
+.tog span{padding:5px 12px;border-radius:999px;font-weight:800;font-size:12px;color:#3d5563}
+.tog .on{background:#16303f;color:#fff;font-weight:900}
+.story{margin:0;font-weight:700;font-size:13.5px;line-height:1.45;color:#25404e}
+.row2{display:flex;gap:8px}
+.row2 .btn{flex:1;font-size:15.5px;padding:10px 0 7px}
+.row2 .btn.w{font-size:14px;padding:9px 0 6px}
+.note{background:#fff5df;border:2px solid #ffe2a8;border-radius:16px;padding:8px 11px;font-weight:800;font-size:12.5px;line-height:1.4}
+.note u{text-decoration:none;color:#0c5c3a;font-weight:900;white-space:nowrap}
+.stk{display:flex;align-items:center;gap:8px;font-weight:900;font-size:12.5px;color:#4f6572}
+.stk span{width:36px;height:36px;border-radius:12px;background:#eef3f6;display:flex;align-items:center;justify-content:center;font-size:18px}
+.stk small{margin-left:auto;font-weight:800;font-size:10.5px;color:#7a8d99;text-align:right;line-height:1.25}
+
+/* 5 kuwentuhan */
+.tabs{display:flex;background:#fff;border-radius:999px;padding:4px;gap:4px;box-shadow:0 3px 0 rgba(20,48,66,.06)}
+.tabs span{flex:1;text-align:center;padding:8px 4px;border-radius:999px;font-weight:800;font-size:13px;color:#3d5563}
+.tabs .on{background:#16303f;color:#fff;font-weight:900}
+.poem{padding:0 0 12px}
+.ill{height:124px;overflow:hidden;border-bottom:3px solid #ffe2a8}
+.ill img{width:100%;height:100%;object-fit:cover;object-position:50% 22%}
+.pt{font:800 25px/1 'Baloo 2';padding:12px 14px 0}
+.pby{font-weight:800;font-size:12.5px;color:#4f6572;padding:2px 14px 6px}
+.pby b{color:#16303f}
+.lines{padding:0 10px;display:flex;flex-direction:column;gap:2px}
+.lines div{font-weight:800;font-size:15.5px;line-height:1.3;padding:3px 6px;border-radius:10px;color:#25404e}
+.lines .cur{background:#ffe58a;color:#16303f;font-weight:900}
+.lines .gap{height:6px;padding:0}
+.lines .fade{opacity:.45}
+.player{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.player .pb{width:44px;height:44px;border-radius:50%;background:#d9650a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 4px 0 #a34a05;flex:none}
+.player .sk{font-size:16px;color:#3d5563;font-weight:900}
+.player .bar{flex:1;height:8px;background:#f3e6c4;border-radius:999px;overflow:hidden}
+.player .bar i{display:block;width:38%;height:100%;background:#f2a900}
+.who{display:flex;gap:6px}
+.who span{flex:1;text-align:center;font-weight:900;font-size:12px;padding:8px 6px;border-radius:14px;background:#fff;color:#3d5563;border:2px solid #f0dca8}
+.who .on{border-color:#d9650a;color:#a84d04;background:#fff4e8}
+
+.mapcard{background:#fff;border-radius:20px;padding:8px;box-shadow:0 4px 0 rgba(20,48,66,.08)}
+.legend2{display:flex;gap:14px;justify-content:center;font-weight:800;font-size:12px;color:#4f6572}
+.legend2 span{display:flex;align-items:center;gap:6px}
+.legend2 i{font-style:normal;width:20px;height:20px;border-radius:50%;color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.minimap{position:absolute;top:12px;right:72px;width:104px;height:71px;border-radius:12px;overflow:hidden;box-shadow:0 4px 0 rgba(0,0,0,.3)}
+.handle{align-self:center;width:40px;height:5px;border-radius:3px;background:#d5e3ea;margin-top:-4px}
+.chip.st{background:#fff1c7;color:#7a5400}
+.lines2{display:flex;flex-direction:column;gap:2px;margin:0 -4px}
+.lines2 div{font-weight:800;font-size:14.5px;line-height:1.3;padding:3px 6px;border-radius:10px;color:#25404e}
+.lines2 .cur{background:#ffe58a;color:#16303f;font-weight:900}
+.lines2 .fade{opacity:.45}
+.player2{display:flex;align-items:center;gap:10px}
+.player2 .pb{width:42px;height:42px;border-radius:50%;background:#d9650a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 4px 0 #a34a05;flex:none}
+.player2 .sk{font-size:15px;color:#3d5563;font-weight:900}
+.player2 .bar{flex:1;height:8px;background:#f3e6c4;border-radius:999px;overflow:hidden}
+.player2 .bar i{display:block;width:45%;height:100%;background:#f2a900}
+.player2 .pg{font-weight:900;font-size:12px;color:#4f6572}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.pc{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:3px;background:#fff;border:2px solid var(--b);border-radius:18px;padding:10px 10px 9px;box-shadow:0 4px 0 rgba(20,48,66,.08);min-height:122px}
+.pc .pi{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)}
+.pc small{font-size:8.5px;font-weight:900;letter-spacing:.4px;text-transform:uppercase;color:#4f6572;margin-top:2px}
+.pc b{font:800 15px/1.05 'Baloo 2';padding-top:1px}
+.pc em{font-style:normal;margin-top:auto;font-size:10.5px;font-weight:900;background:#e3eff4;border-radius:999px;padding:3px 8px}
+.pc .ring{position:absolute;top:9px;right:9px;width:30px;height:30px;border-radius:50%;border:3px solid;font-style:normal;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.peek{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.55);border:2px dashed #b9ccd8;border-radius:18px;padding:9px 11px}
+.peek .pw{width:50px;height:50px;flex:none;border-radius:14px;background:#efe5d2;display:flex;align-items:center;justify-content:center;gap:4px}
+.peek .pf{display:block;background:#fdfbf5;padding:1.5px;border:2.5px solid var(--f)}
+.peek .pf img{display:block;width:100%}
+.peek .pt2{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.peek .pt2 b{font:800 15px/1.1 'Baloo 2';color:#3d5563;padding-top:2px}
+.peek .pt2 small{font-size:11px;font-weight:700;color:#4f6572;line-height:1.3}
+.peek .pt2 em{font-style:normal;align-self:flex-start;font-size:9px;font-weight:900;letter-spacing:.5px;background:#eef2f4;color:#4f6572;border-radius:999px;padding:2px 7px;margin-top:1px}
+.peek .chev{font-size:19px;font-weight:900;color:#8fa3b0}
+.reco{margin-top:26px;background:#fff;border-radius:22px;padding:18px 22px;display:flex;gap:26px;box-shadow:0 4px 0 rgba(20,48,66,.08)}
+.reco div{flex:1;font-weight:700;font-size:14.5px;line-height:1.45;color:#25404e}
+.reco b{display:block;font:800 18px/1.1 'Baloo 2';color:#16303f;margin-bottom:5px}
+</style></head><body>
+
+<div class="top">
+  <div><h1>TANGHALAN · <span>Virtual museum</span> wing (mockup)</h1>
+  <p><b>T</b>echnology-<b>A</b>ssisted <b>N</b>avigable <b>G</b>allery <b>H</b>ighlighting <b>A</b>rt, <b>L</b>earning <b>a</b>nd <b>N</b>arratives: a walkable, third-person museum of connected rooms inside the BAYANIHanda Game Library, showing learners' art and stories.</p></div>
+  <div class="legend"><span class="tag" style="background:#fff1e3;color:#a84d04;outline:2px solid #f2760c">Orange outline = new on an existing screen</span><span class="tag" style="background:#fff;color:#4f6572">Artworks, names and places are samples</span></div>
+</div>
+
+<div class="row">
+
+<!-- 1 Home entry -->
+<div class="col">
+<div class="phone"><div class="scr"><div class="pad" style="padding-top:30px;gap:11px">
+  <div class="homehdr"><span class="lg" data-logo></span><div class="wm"><b><span style="color:#16303f">BAYANI</span><span style="color:#d9650a">Handa</span></b><small>GAME LIBRARY</small></div><span class="gear">⚙️</span><span class="me"><i>🦊</i>Mika</span></div>
+  <div class="greet card"><span class="bay" data-bayani></span><div><b>Hi, Mika!</b><span>Ready to learn and be a hero today?</span></div></div>
+  <div style="font:800 21px/1 'Baloo 2';margin:6px 2px 0">Pick an adventure</div>
+  <div class="pgrid">
+    <div class="pc" style="--b:#bfe0ef"><span class="pi" style="background:linear-gradient(135deg,#6db4d6,#2a6b8f)">🛡️</span><small>Prevention</small><b>Stop Hazards Early</b><em>2 games</em><i class="ring" style="border-color:#2a6b8f">1/2</i></div>
+    <div class="pc" style="--b:#bfe9d4"><span class="pi" style="background:linear-gradient(135deg,#5fd39b,#128253)">🎒</span><small>Preparedness</small><b>Get Ready</b><em>1 game</em><i class="ring" style="border-color:#128253">1/1</i></div>
+    <div class="pc" style="--b:#ffd9ad"><span class="pi" style="background:linear-gradient(135deg,#ffb04d,#f2760c)">🚨</span><small>Response</small><b>Act Fast</b><em>3 games</em><i class="ring" style="border-color:#e8700b">2/3</i></div>
+    <div class="pc" style="--b:#ddcdfa"><span class="pi" style="background:linear-gradient(135deg,#c3a6ff,#7a53c6)">🏘️</span><small>Recovery</small><b>Bounce Back</b><em>2 games</em><i class="ring" style="border-color:#7a53c6">0/2</i></div>
+  </div>
+  <div class="peek new">
+    <span class="pw"><span class="pf" style="--f:#f2760c;width:24px"><img data-art="baha"></span><span class="pf" style="--f:#128253;width:17px"><img data-art="gobag"></span></span>
+    <span class="pt2"><b>TANGHALAN</b><small>A museum of art and stories made by kids. Take a peek!</small><em>COMING SOON</em></span>
+    <span class="chev">›</span>
+  </div>
+</div>
+<div class="navb"><span class="on"><i>🏠</i>Home</span><span><i>🎮</i>Games</span><span class="ask"><i><span data-bayani style="width:40px;height:44px;margin-bottom:-3px"></span></i>Ask Bayani</span><span><i>🏆</i>My ID</span><span><i>🦊</i>Players</span></div>
+</div></div>
+<div class="cap"><b><span class="num">1</span>Entry point</b>The game library stays first. A small TANGHALAN card sits under the adventures on Home, and at the end of Games.</div>
+</div>
+
+<!-- 2 Map -->
+<div class="col">
+<div class="phone"><div class="scr"><div class="pad" style="gap:10px">
+  <div class="hdr"><span class="back">←</span><div><div class="title">Museum map</div><div class="subt">TANGHALAN · The BAYANIHanda museum</div></div></div>
+  <div class="mapcard"><div data-map="big" data-me="🦊" style="width:100%;aspect-ratio:360/246"></div></div>
+  <div class="legend2"><span><i style="background:#1aa46a">✓</i>Rooms you visited</span><span><i style="background:#fff;border:2px solid #f2760c">🦊</i>You are here</span></div>
+  <div class="lab">In this room</div>
+  <div class="hall"><span class="pi" style="background:#16303f;color:#ffc53d">⭐</span><span><b>Bulwagan ng Bayanihan</b><small>6 artworks · 1 story stand · 2 reading walls</small></span><span class="seen">4 of 9</span></div>
+  <div class="hall"><span class="pi" style="background:#fff1c7">🚪</span><span><b>Doors from here</b><small>Stop Hazards Early · Get Ready · Kuwentuhan Corner · Lobby</small></span></div>
+  <div class="btn" style="margin-top:2px">🚶 Keep exploring</div>
+  <div class="btn w">🧭 Walk with Bayani</div>
+</div></div></div>
+<div class="cap"><b><span class="num">2</span>One connected museum <span class="ns">NEW SCREEN</span></b>The rooms open into each other: one per adventure, a featured hall and a story corner. The map shows where you are and where you have been.</div>
+</div>
+
+<!-- 3 Walk -->
+<div class="col">
+<div class="phone"><div class="scr" style="background:#0e2233">
+  <canvas class="stage" data-view='{"dpr":2,"fov":64,"cam":[-0.9,2.1,3.7],"look":[2.6,0.95,-5.2],"me":[0.6,0.9,2.6],"bayani":[2.45,-6.3,-0.3]}'></canvas>
+  <div class="hud">
+    <div class="tl"><span class="ib">←</span></div>
+    <div class="tr"><span class="ib">⚙</span></div>
+    <div class="minimap" data-map="mini"></div>
+    <div class="stat" style="top:90px">🏛️ Bulwagan ng Bayanihan <em>4 of 9</em></div>
+    <div class="hint" style="top:136px"><span class="face"><span data-bayani style="width:36px;height:40px;margin-bottom:-3px"></span></span>Walk anywhere! Near a picture or a story stand, tap Look.</div>
+    <div class="stick"><i></i></div>
+    <div class="act">👀 Look</div>
+  </div>
+</div></div>
+<div class="cap"><b><span class="num">3</span>Roam with your player <span class="ns">NEW SCREEN</span></b>Walk with the joystick from room to room, through archways in each pillar's color. Bayani waits by the next work.</div>
+</div>
+
+<!-- 4 Artwork -->
+<div class="col">
+<div class="phone"><div class="scr" style="background:radial-gradient(120% 60% at 50% 0%,#2a5068,#0e2233)">
+  <div class="topbar"><span class="ib">✕</span><span class="count">3 of 9</span><span class="ib">›</span></div>
+  <div class="artwrap"><div class="frame" style="--f:#2a6b8f"><img data-art="bayanihan"></div></div>
+  <div class="sheet">
+    <div class="chips"><span class="chip pv">🛡️ Stop Hazards Early</span><span class="chip">🖍️ Crayon on paper</span></div>
+    <div class="atitle">Bayanihan!</div>
+    <div class="by">by <b>Ana</b>, 10 · Grade 4 · Iloilo</div>
+    <div class="tog"><span class="on">Filipino</span><span>English</span></div>
+    <p class="story">“Malapit sa ilog ang dati naming bahay, kaya laging bumabaha. Nagtulungan ang mga kapitbahay na ilipat ito sa mataas na lugar. Ngayon, ligtas na kami.”</p>
+    <div class="row2"><span class="btn">🔊 Listen</span><span class="btn w">🎙️ Ana's voice</span></div>
+    <div class="note">💡 <b>Bayani:</b> Homes away from the riverbank stay safer in floods. <u>▶ Play Guide the Stream</u></div>
+    <div class="stk">Sticker<span>❤️</span><span>👏</span><span>🌟</span><small>Stays on<br>this device</small></div>
+  </div>
+</div></div>
+<div class="cap"><b><span class="num">4</span>Look and listen <span class="ns">NEW SCREEN</span></b>The artist's first name, age and the story behind the work, read aloud. Bayani's note links it to a game.</div>
+</div>
+
+<!-- 5 Story stand -->
+<div class="col">
+<div class="phone"><div class="scr" style="background:#0e2233">
+  <canvas class="stage" data-view='{"dpr":2,"fov":58,"cam":[-0.35,3.3,0.95],"look":[-2.6,-0.25,-3.0],"me":[-1.72,-1.5,4.0]}'></canvas>
+  <div class="hud"><div class="tl"><span class="ib">←</span></div><div class="tr"><span class="ib">⚙</span></div></div>
+  <div class="sheet" style="top:388px;gap:7px">
+    <div class="handle"></div>
+    <div class="chips"><span class="chip st">📖 Story stand</span><span class="chip">Kuwento · 3 pages</span></div>
+    <div class="atitle" style="font-size:24px">Si Bayani at ang Baha</div>
+    <div class="by">ni <b>Bea</b>, 11 · Grade 5 · Bulacan</div>
+    <div class="lines2">
+      <div>Umuulan nang malakas buong gabi.</div>
+      <div>Tumataas ang tubig sa ilog.</div>
+      <div class="cur">🔊 “Lumikas na tayo!” sabi ni Bayani.</div>
+      <div class="fade">Dala nila ang go bag at flashlight.</div>
+    </div>
+    <div class="player2"><span class="sk">⏮</span><span class="pb">⏸</span><span class="sk">⏭</span><span class="bar"><i></i></span><span class="pg">1 / 3</span></div>
+    <div class="who"><span class="on">🦸 Bayani reads</span><span>🎙️ Bea reads</span><span>🌐 English</span></div>
+  </div>
+</div></div>
+<div class="cap"><b><span class="num">5</span>Read at a story stand <span class="ns">NEW SCREEN</span></b>Stories, poems and letters sit on stands and reading walls in every room. Walk up, tap Read, and listen line by line.</div>
+</div>
+
+</div>
+
+<div class="reco">
+  <div><b>✅ Same app, new wing</b>TANGHALAN reuses the games' 3D engine, Bayani's voice and the players on the device. Every work links back to a game, so the museum feeds the library.</div>
+  <div><b>🚪 One connected museum</b>Halls open into each other like one big building. Kids roam freely with their player: art hangs on the walls, and stories and poems wait on story stands.</div>
+  <div><b>🔒 Consent comes first</b>Teachers submit works with a parent's signed consent. Only first name, age and province are shown: no faces, full names or schools. The team checks each work before it goes up.</div>
+  <div><b>🌱 Grows with every class</b>New rooms open as more schools send works, and the featured hall changes with each exhibit. Rooms keep their pillar colors, so kids always know where a work belongs.</div>
+</div>
+
+<script src="../../public/engine/three.min.js"></script>
+<script src="art.js"></script><script src="gallery.js"></script><script src="mock.js"></script>
+</body></html>

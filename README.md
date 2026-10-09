@@ -90,6 +90,20 @@ Settings has a "For grown-ups" section behind a multiplication question:
 - **Build with us**: how to contribute games, lessons and translations. Contact us
   opens an email to eadionido@up.edu.ph (`CONTACT_EMAIL` in `src/screens/GrownUps.jsx`).
 
+## TANGHALAN (coming soon)
+
+TANGHALAN (Technology-Assisted Navigable Gallery Highlighting Art, Learning and Narratives)
+is the museum wing of the library: one connected 3D space where players walk from room to
+room, look at learners' art, and read or listen to their stories and poems at story stands.
+For now it is a placeholder. The games come first: a small card under the adventures on
+Home and a tile at the end of Games open `src/screens/Tanghalan.jsx`, which shows dimmed
+mockups (walking the rooms, an artwork, a story stand, the museum map), how learners' works
+will get in, and a button back to the games.
+
+The preview pictures in `public/tanghalan/` are rendered from `design/tanghalan/`, which also
+holds the 3D museum scene, built with the app's three.js, to start the real museum from. See
+`design/tanghalan/README.md`.
+
 ## Not done yet
 
 - **Saving, sharing and printing inside the Android app.** Save downloads a PNG of the ID,
@@ -98,6 +112,8 @@ Settings has a "For grown-ups" section behind a multiplication question:
   Capacitor plugins (`@capacitor/filesystem`, `@capacitor/share`, and a print plugin).
 - **Hands-Only CPR and Stop the Bleed** are playable in the engine but stay "Coming soon",
   as in the web app. **Nobody Left Behind** doesn't exist yet.
+- **TANGHALAN is only a placeholder.** The walkable museum still needs building, and its
+  sample works and names are made up; real works need parents' consent forms and review.
 - **Not yet tested on a phone.** Everything was checked in Chromium at phone (412×915)
   and tablet (1280×800) sizes, with software WebGL.
 

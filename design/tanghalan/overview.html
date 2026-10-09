@@ -1,0 +1,99 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+html{overflow:hidden}
+body{width:1920px;height:1080px;overflow:hidden;position:relative;background:radial-gradient(90% 120% at 100% 0%,#fff1dc 0%,#eef6fa 45%,#cfe6ef 100%)}
+.blob{position:absolute;border-radius:50%;filter:blur(2px)}
+.credit{position:absolute;right:96px;top:36px;font-weight:800;font-size:15px;color:#4f6572}
+.left{position:absolute;left:96px;top:78px;width:680px}
+.kick{display:inline-flex;align-items:center;gap:10px;background:#fff;border-radius:999px;padding:6px 16px 6px 6px;font-weight:900;font-size:15.5px;box-shadow:0 4px 0 rgba(20,48,66,.08)}
+.kick span{width:34px;height:34px;display:block}
+.kick b{color:#d9650a}
+h1{margin:20px 0 0;font:800 116px/0.9 'Baloo 2';letter-spacing:1px;color:#16303f;padding-top:12px}
+.acr{margin:12px 0 0;font-weight:800;font-size:23px;line-height:1.35;color:#3d5563}
+.acr b{color:#d9650a;font-weight:900}
+.lead{margin:16px 0 0;font-weight:700;font-size:20.5px;line-height:1.5;color:#3d5563}
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px}
+.ft{display:flex;align-items:center;gap:14px;background:#fff;border-radius:22px;padding:13px 16px;box-shadow:0 5px 0 rgba(20,48,66,.08);border:2px solid var(--b)}
+.ft span{width:54px;height:54px;border-radius:17px;display:flex;align-items:center;justify-content:center;font-size:28px;background:var(--g);flex:none}
+.ft b{display:block;font:800 21px/1.05 'Baloo 2';padding-top:3px}
+.ft small{display:block;font-weight:800;font-size:14px;color:#4f6572;margin-top:2px;line-height:1.3}
+.facts{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.facts span{background:#16303f;color:#fff;border-radius:999px;padding:9px 16px;font-weight:900;font-size:15.5px}
+.facts span.o{background:#fff;color:#16303f;border:2px solid #d5e3ea}
+.tab{position:absolute;left:812px;top:96px;width:1012px;height:642px;background:#1b262e;border-radius:38px;padding:12px;box-shadow:0 30px 60px rgba(14,34,51,.28)}
+.tab .scr{border-radius:27px;background:#0e2233}
+.under{position:absolute;left:812px;top:760px;width:1012px;display:flex;align-items:center;gap:18px}
+.lbl{white-space:nowrap;background:#fff;border-radius:999px;padding:8px 16px;font-weight:900;font-size:15.5px;box-shadow:0 4px 0 rgba(20,48,66,.1)}
+.call{margin-left:auto;display:flex;align-items:center;gap:14px;background:#fff;border-radius:22px;padding:10px 14px 10px 10px;box-shadow:0 6px 0 rgba(20,48,66,.08);width:640px}
+.call .fr{width:118px;flex:none;background:#fdfbf5;padding:4px;border:5px solid #2a6b8f;box-shadow:0 4px 10px rgba(0,0,0,.18)}
+.call .fr img{display:block;width:100%}
+.call b{display:block;font:800 22px/1 'Baloo 2';padding-top:3px}
+.call small{display:block;font-weight:800;font-size:13px;color:#4f6572;margin-top:2px}
+.call p{margin:5px 0 0;font-weight:700;font-size:13.5px;line-height:1.4;color:#25404e}
+.call .ls{flex:none;background:#d9650a;color:#fff;font:800 17px 'Baloo 2';padding:11px 16px 8px;border-radius:999px;box-shadow:0 4px 0 #a34a05;align-self:center}
+.flow{position:absolute;left:96px;right:96px;bottom:50px;display:flex;align-items:center;gap:14px;background:#fff;border-radius:26px;padding:18px 26px;box-shadow:0 6px 0 rgba(20,48,66,.08)}
+.flow .t{font:800 22px/1 'Baloo 2';color:#a84d04;padding-top:3px;white-space:nowrap;margin-right:6px}
+.st{display:flex;align-items:center;gap:11px;flex:1}
+.st i{font-style:normal;width:48px;height:48px;border-radius:15px;background:#eef6fa;display:flex;align-items:center;justify-content:center;font-size:25px;flex:none}
+.st b{display:block;font-weight:900;font-size:17px}
+.st small{display:block;font-weight:700;font-size:13.5px;color:#4f6572;line-height:1.3}
+.arr{font-size:24px;color:#b9ccd8;font-weight:900}
+.minimap{position:absolute;top:12px;right:76px;width:122px;height:83px;border-radius:12px;overflow:hidden;box-shadow:0 4px 0 rgba(0,0,0,.3)}
+.mock{position:absolute;right:96px;bottom:16px;font-weight:800;font-size:12.5px;color:#6a7f8b}
+</style></head><body>
+<div class="blob" style="width:520px;height:520px;right:-140px;top:-180px;background:rgba(255,197,61,.18)"></div>
+<div class="blob" style="width:380px;height:380px;left:-160px;bottom:-120px;background:rgba(42,107,143,.10)"></div>
+<div class="credit">University of the Philippines Resilience Institute</div>
+
+<div class="left">
+  <div class="kick"><span data-logo></span>A new wing of the <b>BAYANIHanda</b> Game Library</div>
+  <h1>TANGHALAN</h1>
+  <p class="acr"><b>T</b>echnology-<b>A</b>ssisted <b>N</b>avigable <b>G</b>allery <b>H</b>ighlighting <b>A</b>rt, <b>L</b>earning <b>a</b>nd <b>N</b>arratives</p>
+  <p class="lead">A walkable 3D museum of connected rooms, where children's art, stories and poems about disaster readiness are exhibited, read aloud, and linked back to the games.</p>
+  <div class="feat">
+    <div class="ft" style="--b:#bfe0ef;--g:linear-gradient(135deg,#6db4d6,#2a6b8f)"><span>🚶</span><div><b>Roam connected rooms</b><small>Third person, room to room, or walk with Bayani</small></div></div>
+    <div class="ft" style="--b:#bfe9d4;--g:linear-gradient(135deg,#5fd39b,#128253)"><span>🖼️</span><div><b>See learners' art</b><small>Framed by DRRM pillar, hung at a child's eye level</small></div></div>
+    <div class="ft" style="--b:#ffd9ad;--g:linear-gradient(135deg,#ffb04d,#f2760c)"><span>📖</span><div><b>Read and listen</b><small>Story stands in every room, read aloud by Bayani or the author</small></div></div>
+    <div class="ft" style="--b:#ddcdfa;--g:linear-gradient(135deg,#c3a6ff,#7a53c6)"><span>🎮</span><div><b>Learn and play</b><small>Every work links to the game on its topic</small></div></div>
+  </div>
+  <div class="facts">
+    <span>🚪 A room for each DRRM pillar</span><span>📖 Story stands</span><span>📶 Works offline</span>
+    <span class="o">🔒 Parent consent, first names only</span><span class="o">🇵🇭 Filipino and English</span>
+  </div>
+</div>
+
+<div class="tab"><div class="scr">
+  <canvas class="stage" data-view='{"dpr":2,"fov":55,"cam":[0.1,2.35,4.4],"look":[0.3,1.2,-6],"me":[0.5,0.9,2.52],"bayani":[2.45,-6.3,-0.3]}'></canvas>
+  <div class="hud">
+    <div class="tl"><span class="ib">←</span></div>
+    <div class="tr"><span class="ib">⚙</span></div><div class="minimap" data-map="mini"></div>
+    <div class="stat" style="top:16px">🏛️ Bulwagan ng Bayanihan <em>4 of 9 seen</em></div>
+    <div class="hint" style="top:66px"><span class="face"><span data-bayani style="width:36px;height:40px;margin-bottom:-3px"></span></span>Walk anywhere! Near a picture or a story stand, tap Look.</div>
+    <div class="stick" style="left:26px;bottom:26px"><i></i></div>
+    <div class="act" style="right:26px;bottom:40px">👀 Look</div>
+  </div>
+</div></div>
+
+<div class="under">
+  <span class="lbl">🚪 Every room opens into the next</span>
+  <div class="call">
+    <div class="fr"><img data-art="bayanihan"></div>
+    <div style="flex:1"><b>Bayanihan!</b><small>by Ana, 10 · Grade 4 · Iloilo</small>
+    <p>“Our neighbors helped move our house away from the river. Now we are safe.”</p></div>
+    <span class="ls">🔊 Listen</span>
+  </div>
+</div>
+
+<div class="flow">
+  <span class="t">How works get in</span>
+  <div class="st"><i>✏️</i><span><b>Learners create</b><small>Art, stories and poems in class</small></span></div><span class="arr">›</span>
+  <div class="st"><i>📨</i><span><b>Teacher submits</b><small>With a parent's consent form</small></span></div><span class="arr">›</span>
+  <div class="st"><i>🔍</i><span><b>Team curates</b><small>Checks the safety message and privacy</small></span></div><span class="arr">›</span>
+  <div class="st"><i>🏛️</i><span><b>Exhibit opens</b><small>A new room in the next app update</small></span></div>
+</div>
+<div class="mock">Mockup · artworks and names are samples</div>
+
+<script src="../../public/engine/three.min.js"></script>
+<script src="art.js"></script><script src="gallery.js"></script><script src="mock.js"></script>
+</body></html>

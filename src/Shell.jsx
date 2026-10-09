@@ -8,6 +8,7 @@ import Result from './screens/Result.jsx';
 import ChampionId, { IdCard } from './screens/ChampionId.jsx';
 import Settings from './screens/Settings.jsx';
 import { TeacherCorner, BuildWithUs } from './screens/GrownUps.jsx';
+import { Tanghalan } from './screens/Tanghalan.jsx';
 import { NavBar, NavRail } from './Nav.jsx';
 import { AskSheet, Sheet, Snack } from './Overlays.jsx';
 
@@ -41,7 +42,7 @@ export default function Shell() {
   const tablet = useMedia('(min-width: 900px)');
   const [s, setS] = useState(() => ({
     screen: 'splash', ws: 0, editMode: false, draft: { nick: '', av: 'turtle', id: null },
-    filter: 'all', gameId: 'fire', mode: 0, modes: {}, from: 'games', result: null,
+    filter: 'all', gameId: 'fire', mode: 0, modes: {}, from: 'games', museumFrom: 'home', result: null,
     ask: false, askKind: 'tip', askN: 0, homeN: 0, jump: 0, sheet: null, sd: null, snack: null,
     names: {}, photos: {}, aboutMore: false, ...loadPrefs(),
   }));
@@ -178,6 +179,7 @@ export default function Shell() {
       case 'addPlayer': go(engine.players().length ? 'players' : 'welcome', { ws: 2 }); break;
       case 'players': if (engine.activeId()) go('home'); break;
       case 'teacher': case 'contribute': go('settings'); break;
+      case 'museum': go(c.museumFrom || 'home'); break;
       default: if (engine.activeId()) go('home'); break;
     }
   };
@@ -205,7 +207,7 @@ export default function Shell() {
     go, refresh, speak, snackShow, afterSplash, newPlayer, editPlayer, savePlayer, pickPlayer, removePlayer,
     resetBadges: () => { engine.resetBadges(); refresh(); },
     openGame, startGame, askItem, openAsk,
-    tabOf: TAB_OF[scr],
+    tabOf: scr === 'museum' ? s.museumFrom : TAB_OF[scr],
   };
 
   let body = null;
@@ -221,9 +223,10 @@ export default function Shell() {
   else if (scr === 'settings') body = <Settings c={c} />;
   else if (scr === 'teacher') body = <TeacherCorner c={c} />;
   else if (scr === 'contribute') body = <BuildWithUs c={c} />;
+  else if (scr === 'museum') body = <Tanghalan c={c} />;
   else if (scr === 'play') body = <div data-screen-label="Gameplay" style={{ position: 'absolute', inset: 0, background: '#0e2233' }} />;
 
-  const rail = tablet && (isTab || ['intro', 'settings', 'teacher', 'contribute'].indexOf(scr) >= 0);
+  const rail = tablet && (isTab || ['intro', 'settings', 'teacher', 'contribute', 'museum'].indexOf(scr) >= 0);
   const bottom = isTab && !tablet;
   const idName = (s.names[activeId] != null ? s.names[activeId] : nick) || 'Champion';
 

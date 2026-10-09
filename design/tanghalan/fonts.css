@@ -1,0 +1,8 @@
+/* Baloo 2 and Nunito come from the app's node_modules (run npm install first); the two
+   handwriting fonts for the children's sample works are in fonts/ (SIL Open Font License). */
+@font-face{font-family:'Baloo 2';font-weight:800;src:url(../../node_modules/@fontsource/baloo-2/files/baloo-2-latin-800-normal.woff2)}
+@font-face{font-family:Nunito;font-weight:700;src:url(../../node_modules/@fontsource/nunito/files/nunito-latin-700-normal.woff2)}
+@font-face{font-family:Nunito;font-weight:800;src:url(../../node_modules/@fontsource/nunito/files/nunito-latin-800-normal.woff2)}
+@font-face{font-family:Nunito;font-weight:900;src:url(../../node_modules/@fontsource/nunito/files/nunito-latin-900-normal.woff2)}
+@font-face{font-family:'Gochi Hand';src:url(fonts/gochi-hand-latin-400-normal.woff2)}
+@font-face{font-family:'Patrick Hand';src:url(fonts/patrick-hand-latin-400-normal.woff2)}

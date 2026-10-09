@@ -1,6 +1,7 @@
 import { sx, pr } from '../ui/sx.js';
 import { Mascot } from '../ui/art.jsx';
 import { P, PO, G, LIVE, howTo, pillarOf } from '../data.js';
+import { MuseumTile } from './Tanghalan.jsx';
 
 const BG = 'radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef)';
 
@@ -79,6 +80,14 @@ export function Games({ c }) {
             </div>
           );
         })}
+        {s.filter === 'all' && (
+          <div style={sx('display:flex;flex-direction:column;gap:12px;margin-top:4px')}>
+            <div style={sx('display:flex;align-items:center;gap:10px;font-size:13px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#4f6572')}>
+              <span>🏛️ More to explore</span><span style={sx('flex:1;height:2px;background:#c8d9e2;border-radius:2px')} />
+            </div>
+            <div style={sx('display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:12px')}><MuseumTile c={c} /></div>
+          </div>
+        )}
       </div>
     </div>
   );
