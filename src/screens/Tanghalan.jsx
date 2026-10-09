@@ -28,7 +28,8 @@ let resume = null; // where you were, so coming back from a game puts you in the
 
 // "Three-dimensional Animated Gallery …", with the letters that spell TANGHALAN picked out
 function FullName({ accent }) {
-  return <>{NAME_PARTS.map(([a, b], i) => <span key={i}>{a && <b style={{ color: accent, fontWeight: 900 }}>{a}</b>}{b}</span>)}</>;
+  // each word stays whole, so "Youth-Generated" never breaks at its hyphen
+  return <>{NAME_PARTS.map(([a, b], i) => <span key={i}><span style={{ whiteSpace: 'nowrap' }}>{a && <b style={{ color: accent, fontWeight: 900 }}>{a}</b>}{b.trimEnd()}</span>{b.endsWith(' ') ? ' ' : ''}</span>)}</>;
 }
 
 const seenIn = (prog, id) => WORKS.filter((w) => w.room === id && prog.seen[w.id]).length;
