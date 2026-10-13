@@ -5,3 +5,8 @@ android/.gradle/
 .DS_Store
 *.log
 design/tanghalan/out/
+
+# Built from stories/ by scripts/build-stories.mjs (npm run dev, npm run build)
+public/stories/*.html
+public/stories/fonts/
+stories/standalone/

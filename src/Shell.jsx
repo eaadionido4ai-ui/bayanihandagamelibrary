@@ -1,6 +1,8 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { engine } from './engine/bridge.js';
-import { AV, LIVE, TIPS, TRIVIA, MAX_PLAYERS, av, game, rankOf, nextRank, howTo } from './data.js';
+import { AV, LIVE, TIPS, TRIVIA, MAX_PLAYERS, av, game, rankOf, nextRank, howTo, isStory } from './data.js';
+import { StoryShelf, StoryIntro, StoryPlay } from './screens/Stories.jsx';
+import { forgetStories, loadStoryPrefs, saveEnding, saveStoryPrefs } from './stories.js';
 import { Splash, Welcome, AddPlayer, Players } from './screens/Onboarding.jsx';
 import Home from './screens/Home.jsx';
 import { Games, Intro } from './screens/Games.jsx';
@@ -16,7 +18,7 @@ import { AskSheet, Sheet, Snack } from './Overlays.jsx';
 const PREFS_KEY = 'bayanihanda_settings_v1';
 const PAD_PHONE = 'calc(env(safe-area-inset-top, 0px) + 22px) 18px 28px';
 const PAD_TABLET = 'calc(env(safe-area-inset-top, 0px) + 28px) 36px 36px';
-const TAB_OF = { home: 'home', games: 'games', intro: 'games', id: 'id', players: 'players' };
+const TAB_OF = { home: 'home', games: 'games', intro: 'games', hv: 'games', story: 'games', id: 'id', players: 'players' };
 
 function loadPrefs() {
   try {
@@ -46,6 +48,7 @@ export default function Shell() {
     filter: 'all', gameId: 'fire', mode: 0, modes: {}, from: 'games', museumFrom: 'home', result: null,
     ask: false, askKind: 'tip', askN: 0, homeN: 0, jump: 0, sheet: null, sd: null, snack: null,
     names: {}, photos: {}, aboutMore: false, ...loadPrefs(),
+    storyId: 'hv-kulog', storyFrom: 'hv', ...loadStoryPrefs(),
   }));
   const [, refresh] = useReducer((x) => x + 1, 0);
   const patch = (p) => setS((prev) => ({ ...prev, ...(typeof p === 'function' ? p(prev) : p) }));
@@ -105,7 +108,7 @@ export default function Shell() {
     speak('Hi, ' + p.nick + '!');
   }
   function removePlayer(id) {
-    engine.removePlayer(id); forgetProgress(id); refresh();
+    engine.removePlayer(id); forgetProgress(id); forgetStories(id); refresh();
     const left = engine.players();
     if (!left.length) go('addPlayer', { draft: { nick: '', av: 'turtle', id: null }, editMode: false });
     else go('players');
@@ -115,6 +118,7 @@ export default function Shell() {
   // games
   function openGame(id) {
     const g = game(id);
+    if (isStory(g)) { go('story', { storyId: id, storyFrom: s.screen === 'home' ? 'home' : 'hv' }); return; }
     if (g.soon) { snackShow('Coming soon! Bayani is still building this game.'); return; }
     const from = ['home', 'games', 'id', 'players', 'museum'].indexOf(s.screen) >= 0 ? s.screen : 'games';
     go('intro', { gameId: id, mode: s.modes[id] || 0, from });
@@ -123,6 +127,20 @@ export default function Shell() {
     if (!engine.ready) { snackShow('The 3D games could not start on this device.'); return; }
     try { window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
     engine.start(id || s.gameId, mode == null ? s.mode : mode);
+  }
+
+  // Handaventures: the shelf, a story, and what happens when a story reaches an ending
+  const openStories = () => go('hv');
+  function startStory() {
+    saveStoryPrefs(s.storyMode, s.storyHero);
+    try { window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
+    go('storyplay');
+  }
+  function storyEnded(st, d) {
+    if (!st || !d || !st.endings.some((e) => e[0] === d.ending)) return;
+    saveEnding(engine.ready ? engine.activeId() : null, st.id, d.ending);
+    if (d.ending === 'hero' && engine.ready && engine.earn(st.id)) snackShow('🏅 New badge: ' + st.badge[0] + '!');
+    refresh();
   }
 
   // engine events: games starting, finishing, quitting, and their HUD buttons
@@ -150,6 +168,7 @@ export default function Shell() {
     if (st.askKind === 'trivia') { const t = TRIVIA[st.askN % TRIVIA.length]; return { kind: '❓ DID YOU KNOW?', text: t[0], game: t[1] }; }
     const list = [];
     if (['intro', 'play', 'result'].indexOf(st.screen) >= 0) { const g = game(st.gameId); list.push(['💡 TIP FOR ' + g.name.toUpperCase(), howTo(g, st.mode).tip, g.id]); }
+    if (st.screen === 'story') { const g = game(st.storyId); list.push(['💡 TIP FOR ' + g.name.toUpperCase(), g.tip, g.id]); }
     if (st.screen === 'id') list.push(['🏆 CHAMPION TIP', next ? 'You have ' + count + ' badge' + (count === 1 ? '' : 's') + '. Earn ' + next.need + ' more to become ' + next.name + '!' : 'You are a Master DRRM Champion! Keep playing to stay sharp.', null]);
     let tips = TIPS;
     if (st.screen === 'games' && st.filter !== 'all') tips = TIPS.filter((t) => game(t[1]).p === st.filter).concat(TIPS.filter((t) => game(t[1]).p !== st.filter));
@@ -183,6 +202,9 @@ export default function Shell() {
       case 'players': if (engine.activeId()) go('home'); break;
       case 'teacher': case 'contribute': go('settings'); break;
       case 'museum': go(c.museumFrom || 'home'); break;
+      case 'hv': go('games'); break;
+      case 'story': go(c.storyFrom || 'hv'); break;
+      case 'storyplay': go('story'); break;
       default: if (engine.activeId()) go('home'); break;
     }
   };
@@ -209,7 +231,7 @@ export default function Shell() {
     players, me, myAv, nick, mine, count, rank, next, countOf: (pid) => countOf(engine.earned(pid)),
     go, refresh, speak, snackShow, afterSplash, newPlayer, editPlayer, savePlayer, pickPlayer, removePlayer,
     resetBadges: () => { engine.resetBadges(); refresh(); },
-    openGame, startGame, askItem, openAsk,
+    openGame, startGame, askItem, openAsk, openStories, startStory, storyEnded,
     setBack: (fn) => { backHook.current = fn; },
     tabOf: scr === 'museum' ? s.museumFrom : TAB_OF[scr],
   };
@@ -228,10 +250,13 @@ export default function Shell() {
   else if (scr === 'teacher') body = <TeacherCorner c={c} />;
   else if (scr === 'contribute') body = <BuildWithUs c={c} />;
   else if (scr === 'museum') body = <Tanghalan c={c} />;
+  else if (scr === 'hv') body = <StoryShelf c={c} />;
+  else if (scr === 'story') body = <StoryIntro c={c} />;
+  else if (scr === 'storyplay') body = <StoryPlay c={c} />;
   else if (scr === 'play') body = <div data-screen-label="Gameplay" style={{ position: 'absolute', inset: 0, background: '#0e2233' }} />;
 
-  const rail = tablet && (isTab || ['intro', 'settings', 'teacher', 'contribute'].indexOf(scr) >= 0);
-  const bottom = isTab && !tablet;
+  const rail = tablet && (isTab || ['intro', 'settings', 'teacher', 'contribute', 'hv', 'story'].indexOf(scr) >= 0);
+  const bottom = (isTab || scr === 'hv') && !tablet;
   const idName = (s.names[activeId] != null ? s.names[activeId] : nick) || 'Champion';
 
   return (

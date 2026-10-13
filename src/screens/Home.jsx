@@ -1,10 +1,12 @@
 import { sx, pr } from '../ui/sx.js';
 import { Mascot, Logo, Wordmark } from '../ui/art.jsx';
-import { P, PO, G, LIVE, TIPS, TRIVIA, game } from '../data.js';
+import { P, PO, G, LIVE, TIPS, TRIVIA, game, isStory } from '../data.js';
+import { loadStories } from '../stories.js';
 import { MuseumCard } from './Tanghalan.jsx';
 
 export default function Home({ c }) {
   const { s, patch, tablet, nick, myAv, count, rank, next, mine } = c;
+  const played = Object.keys(loadStories(c.me ? c.me.id : null)).length > 0;
   const today = new Date();
   const doy = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 864e5);
   const tip = TIPS[doy % TIPS.length], tg = game(tip[1]);
@@ -65,13 +67,17 @@ export default function Home({ c }) {
               {PO.map((pid) => {
                 const p = P[pid], gs = G.filter((x) => x.p === pid), live = gs.filter((x) => !x.soon), soon = gs.length - live.length;
                 const done = live.filter((x) => mine[x.id]).length;
+                const st = live.filter(isStory).length, gm = live.length - st;
                 const card = pr('position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:#fff;border-radius:22px;padding:14px 13px 12px;box-shadow:0 5px 0 rgba(20,48,66,.1);min-height:176px', 'transform:translateY(3px);box-shadow:0 2px 0 rgba(20,48,66,.1)');
                 return (
                   <button key={pid} onClick={() => c.go('games', { filter: pid })} className={card.className} style={{ ...card.style, border: '2px solid ' + p.border }}>
                     <span style={{ ...sx('width:58px;height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)'), background: p.grad }}>{p.icon}</span>
                     <span style={sx('font-size:10.5px;font-weight:900;letter-spacing:.4px;text-transform:uppercase;color:#4f6572;line-height:1.2')}>{p.sub}</span>
                     <span style={sx("font:800 19px/1.05 'Baloo 2',sans-serif")}>{p.name}</span>
-                    <span style={sx('margin-top:auto;font-size:12.5px;font-weight:900;background:#e3eff4;border-radius:999px;padding:4px 10px')}>{live.length}{live.length === 1 ? ' game' : ' games'}{soon ? ' +' + soon + ' soon' : ''}</span>
+                    <span style={sx('margin-top:auto;display:flex;flex-direction:column;align-items:flex-start;gap:5px')}>
+                      {st > 0 && !played && <span style={sx('font-size:10.5px;font-weight:900;letter-spacing:.5px;background:#fff1e3;color:#a84d04;border-radius:999px;padding:3px 8px')}>✨ NEW STORIES</span>}
+                      <span style={sx('font-size:12.5px;font-weight:900;background:#e3eff4;border-radius:999px;padding:4px 10px')}>{gm}{gm === 1 ? ' game' : ' games'}{st ? ' + ' + st + ' stories' : ''}{soon ? ' +' + soon + ' soon' : ''}</span>
+                    </span>
                     <span style={sx('position:absolute;top:12px;right:12px;width:40px;height:40px')} aria-label={done + ' of ' + live.length + ' badges'}>
                       <svg width="40" height="40" viewBox="0 0 40 40" style={{ transform: 'rotate(-90deg)', display: 'block' }}>
                         <circle cx="20" cy="20" r="15" fill="none" stroke="#d5e3ea" strokeWidth="4" />

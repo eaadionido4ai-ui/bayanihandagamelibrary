@@ -271,4 +271,6 @@ export const engine = {
     try { return JSON.parse(localStorage.getItem('bayanihanda_badges_v1::' + pid)) || {}; } catch (e) { return {}; }
   },
   resetBadges() { App.badges.reset(); },
+  // Badges earned outside the 3D engine (the Handaventures stories). True when it is new.
+  earn(id) { return !!(App && App.badges.earn(id)); },
 };
