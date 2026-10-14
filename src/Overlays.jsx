@@ -174,6 +174,7 @@ export function Sheet({ c }) {
           <div style={sx(H2)}>{sd.id === 'hv' ? <HvName accent="#128253" /> : sd.name}</div>
           {sd.id === 'hv' && <span style={sx('font-size:13px;font-weight:800;color:#4f6572')}>Story series · 5 stories</span>}
           {isStory(sd) && <span style={sx('font-size:13px;font-weight:800;color:#4f6572')}>A Handaventures story</span>}
+          {sd.sub && <span style={sx('font-size:13px;font-weight:800;color:#4f6572')}>{sd.sub}</span>}
         </div>
         <Credits blocks={creditsOf(sd)} />
         {sd.credit && <p style={sx('margin:0;text-align:center;font-weight:700;font-style:italic;line-height:1.5;color:#3d5563')}>{sd.credit}</p>}
