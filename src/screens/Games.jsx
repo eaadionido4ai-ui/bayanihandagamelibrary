@@ -1,7 +1,8 @@
 import { sx, pr } from '../ui/sx.js';
 import { Mascot } from '../ui/art.jsx';
-import { P, PO, G, LIVE, howTo, pillarOf } from '../data.js';
+import { P, PO, G, LIVE, STORIES, howTo, pillarOf, isStory } from '../data.js';
 import { MuseumTile } from './Tanghalan.jsx';
+import { StoryShelfCard } from './Stories.jsx';
 
 const BG = 'radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef)';
 
@@ -15,7 +16,7 @@ export function Games({ c }) {
       <div style={sx('max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:14px')}>
         <div>
           <div style={sx("font:800 31px/1.05 'Baloo 2',sans-serif;padding-top:4px")}>Games</div>
-          <div style={sx('font-size:14.5px;font-weight:700;color:#4f6572;margin-top:2px')}>{LIVE.length} games to play, {G.length - LIVE.length} coming soon</div>
+          <div style={sx('font-size:14.5px;font-weight:700;color:#4f6572;margin-top:2px')}>{LIVE.length - STORIES.length} games and {STORIES.length} stories to play, {G.length - LIVE.length} coming soon</div>
         </div>
         <div className="hscroll" style={sx('display:flex;gap:8px;padding:2px 0 6px')}>
           {chips.map((ch) => (
@@ -50,7 +51,7 @@ export function Games({ c }) {
                 </div>
               )}
               <div style={sx('display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:12px')}>
-                {G.filter((x) => x.p === pid).map((g) => (g.soon ? (
+                {G.filter((x) => x.p === pid && !isStory(x)).map((g) => (g.soon ? (
                   <div key={g.id} onClick={() => c.openGame(g.id)} style={sx('display:flex;gap:14px;align-items:center;background:rgba(255,255,255,.55);border:2px dashed #b9ccd8;border-radius:22px;padding:14px;cursor:pointer')}>
                     <span style={sx('width:66px;height:66px;border-radius:20px;flex:none;background:#b9c6cf;display:flex;align-items:center;justify-content:center;font-size:34px;filter:grayscale(.6)')}>{g.icon}</span>
                     <span style={sx('flex:1;min-width:0;display:flex;flex-direction:column;gap:4px')}>
@@ -76,6 +77,7 @@ export function Games({ c }) {
                       style={sx('position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:1.5px solid #d5e3ea;color:#4f6572;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;background:#fff')}>i</button>
                   </div>
                 )))}
+                {STORIES.some((x) => x.p === pid) && <StoryShelfCard c={c} />}
               </div>
             </div>
           );

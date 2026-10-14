@@ -2,7 +2,8 @@ import { useRef, useState } from 'react';
 import { sx, pr } from './ui/sx.js';
 import { Mascot } from './ui/art.jsx';
 import { Toggle } from './screens/Settings.jsx';
-import { LEAD, TRIVIA, game, howTo } from './data.js';
+import { TRIVIA, VALIDATION, CREDITS_LIBRARY, creditsOf, game, howTo, isStory } from './data.js';
+import { HvName } from './screens/Stories.jsx';
 import { renderIdPng, idFileName, savePng, sharePng } from './idcard.js';
 import { GateSheet } from './screens/GrownUps.jsx';
 
@@ -141,6 +142,23 @@ function ShareSheet({ c }) {
   );
 }
 
+// Info tag: the validation notice, then who conceived and who developed it.
+function Credits({ blocks }) {
+  return (
+    <>
+      <span style={sx('align-self:center;display:flex;align-items:center;gap:6px;background:#fff5df;border:2px solid #ffe2a8;color:#7a5400;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:900;text-align:center')}>🧪 {VALIDATION}</span>
+      {blocks.map((b, i) => (
+        <div key={i} style={sx('display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px' + (i ? ';border-top:2px solid #eef2f4;padding-top:12px' : ''))}>
+          <span style={sx('font-size:12px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:#4f6572')}>{b[0]}</span>
+          <span style={sx("font:800 20px/1.15 'Baloo 2',sans-serif;padding-top:3px;color:#16303f")}>{b[1]}</span>
+          <span style={sx('font-size:14.5px;font-weight:700;color:#3d5563')}>{b[2]}</span>
+          <span style={sx('font-size:14.5px;font-weight:800;color:#3d5563')}>{b[3]}</span>
+        </div>
+      ))}
+    </>
+  );
+}
+
 export function Sheet({ c }) {
   const { s, patch, nick } = c;
   const close = () => patch({ sheet: null });
@@ -151,8 +169,13 @@ export function Sheet({ c }) {
   if (s.sheet === 'credit') {
     body = (
       <>
-        <div style={sx('display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px')}><span style={sx('font-size:48px')}>{sd.icon}</span><div style={sx(H2)}>{sd.name}</div></div>
-        <p style={sx('margin:0;text-align:center;font-weight:700;line-height:1.5;color:#25404e')}>Developed by {LEAD}</p>
+        <div style={sx('display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px')}>
+          <span style={sx('font-size:48px')}>{sd.icon}</span>
+          <div style={sx(H2)}>{sd.id === 'hv' ? <HvName accent="#128253" /> : sd.name}</div>
+          {sd.id === 'hv' && <span style={sx('font-size:13px;font-weight:800;color:#4f6572')}>Story series · 5 stories</span>}
+          {isStory(sd) && <span style={sx('font-size:13px;font-weight:800;color:#4f6572')}>A Handaventures story</span>}
+        </div>
+        <Credits blocks={creditsOf(sd)} />
         {sd.credit && <p style={sx('margin:0;text-align:center;font-weight:700;font-style:italic;line-height:1.5;color:#3d5563')}>{sd.credit}</p>}
         <button onClick={close} style={sx(DARK)}>Close</button>
       </>
@@ -186,7 +209,7 @@ export function Sheet({ c }) {
         <p style={sx('margin:0;font-weight:600;line-height:1.55;color:#33505e')}>The name plays on three Filipino words: bayani, a hero; handa, meaning ready; and bayanihan, the spirit of neighbors helping neighbors.</p>
         <p style={sx('margin:0;font-weight:600;line-height:1.55;color:#33505e')}>BAYANIHanda is also meant to grow as a shared library. It gives educators and developers a place to contribute their own preparedness games and lessons and have that work reach more classrooms and communities. In the spirit of bayanihan, the collection is managed and shared as an open resource, so good ideas for disaster readiness can spread freely.</p>
         <div style={sx('height:1px;background:#d5e3ea')} />
-        <p style={sx('margin:0;font-weight:700;font-size:14px;line-height:1.5;color:#4f6572')}>Lead developer: Edward Andrew A. Dionido, Lead Science Research Specialist II, University of the Philippines Resilience Institute. Built with the assistance of AI.</p>
+        <Credits blocks={CREDITS_LIBRARY} />
         <button onClick={close} style={sx(DARK)}>Close</button>
       </>
     );

@@ -12,6 +12,7 @@ npm install
 npm run dev        # http://localhost:5173
 npm run build      # production build in dist/
 npm run preview    # serve dist/ at http://localhost:4173
+npm run test:stories   # play every Handaventures story in a simulated browser
 ```
 
 Wider than 900px, the app uses the tablet layout (side rail); narrower, it uses the
@@ -48,7 +49,7 @@ npx @capacitor/assets generate --android
 
 ## Brand
 
-Logo 1b, the Bayanihan house: four neighbours in the pillar colours lifting a house together.
+Logo 1b, the Bayanihan house: four neighbors in the pillar colors lifting a house together.
 
 | File | Used for |
 | --- | --- |
@@ -66,6 +67,7 @@ Logo 1b, the Bayanihan house: four neighbours in the pillar colours lifting a ho
 | Bridge | `src/engine/bridge.js` | Starts games with the mode picked on the intro screen, shows the game layer, turns each game's result into the new Results screen, opens the app's sheets from the in-game buttons, and handles speech. |
 | HUD style | `src/engine/game-hud.css` | Restyles the real HUDs to the design: corner buttons, status pill, Bayani hint bubble, side buttons, bottom sheets. |
 | Museum | `src/museum/`, `src/screens/Tanghalan.jsx` | TANGHALAN, the walkable 3D museum (below). |
+| Stories | `stories/`, `scripts/build-stories.mjs`, `src/screens/Stories.jsx` | Handaventures, the story series (below). |
 
 To pick up a newer version of the web app, replace the file in `project/uploads/` and
 run `npm run extract-engine`. The bridge relies on the engine's element ids, on
@@ -90,6 +92,74 @@ Settings has a "For grown-ups" section behind a multiplication question:
   class progress and printables. Lesson content still needs writing and review.
 - **Build with us**: how to contribute games, lessons and translations. Contact us
   opens an email to eadionido@up.edu.ph (`CONTACT_EMAIL` in `src/screens/GrownUps.jsx`).
+
+## Handaventures, the story series
+
+Handaventures ("Be ready for anything.") is a series of five choose-your-path stories
+under **Get Ready**, the Preparedness pillar. A child talks with family, makes choices and
+sees what happens; every choice changes the ending, and each story has four endings.
+
+| Story | Hazard | Hero badge |
+| --- | --- | --- |
+| Bagyong Kulog | Typhoon | Storm Hero |
+| Bagyong Agos | Flood | Flood Hero |
+| The Big Shake | Earthquake | Shake Hero |
+| Smoke at Night | Fire | Smoke Hero |
+| Lockdown at School | Lockdown (play it with a grown-up first) | Calm Hero |
+
+- **One card stands for the series.** Under Get Ready (and in All), the Games screen shows
+  a single storybook card. Tapping it opens the shelf with the five stories and the
+  player's progress (endings found, hero badges).
+- **Each story has an intro:** Bayani's tip, chat style or cartoon style, Ate or Kuya,
+  how to play, and the endings found so far. Then the story plays inside the app, in the
+  library's look, with a back button to the intro.
+- **Progress is kept per player** in `bayanihanda_stories_v1::<player>` (the endings
+  found). Reaching a story's Hero ending earns its badge, stored with the other badges, so
+  it shows on the Champion ID. The style and character picked are remembered on the device
+  in `bayanihanda_story_prefs_v1`.
+
+How it is built:
+
+| Part | Where |
+| --- | --- |
+| Shared story engine (scenes, chat and cartoon styles, endings) | `stories/engine.html` |
+| The five stories (script, choices, endings, lessons) | `stories/story-*.js` |
+| Build: one page per story, offline fonts | `scripts/build-stories.mjs` writes `public/stories/*.html` and `public/stories/fonts/` |
+| Cover pictures and character faces | `public/stories/art/` |
+| Storybook card, shelf, intro, story frame | `src/screens/Stories.jsx` |
+| Story list, badges, endings, tips | `STORIES` and `HV` in `src/data.js` |
+| Progress and preferences | `src/stories.js` |
+| Tests | `stories/tests/` |
+
+The story pages are built from `stories/` every time you run `npm run dev` or
+`npm run build` (so the GitHub Pages deploy and `npm run android:sync` include them), and
+are not committed. To change a story, edit its `stories/story-*.js` file, or
+`stories/engine.html` for all of them.
+
+Inside the app a story opens as
+`stories/<file>.html?embed=1&mode=chat|vn&hero=ate|kuya&found=<endings>`: it skips its
+own start screen, wears the library's look, keeps nothing on the device by itself, and
+tells the library when an ending is found, when the style changes and when the player
+goes back (`postMessage` with `source: 'handaventures'`).
+
+`npm run test:stories` plays every ending of every story in both styles and as both
+characters, then checks each story the way the library shows it. It also writes
+`stories/standalone/`, single-file copies of the stories (with web fonts) that work
+outside the app.
+
+## Credits on the info tags
+
+Every game's info tag (the **i** button) starts with the notice **Subject for code and
+content validation**, then says who made it:
+
+- Games and features: *Conceptualized and developed with AI assistance by* Edward Andrew
+  A. Dionido, Science Research Specialist II, UPRI.
+- Handaventures: *Concept by* Celine Tatco, Senior Project Associate, UPRI, and
+  *Developed with AI assistance by* Edward Andrew A. Dionido, Science Research
+  Specialist II, UPRI.
+
+The texts are in `src/data.js` (`VALIDATION`, `CREDITS_LIBRARY`, `CREDITS_HV`). Behind
+BAYANIHanda in Settings shows the same credit.
 
 ## TANGHALAN, the museum
 
@@ -142,6 +212,8 @@ works, collected through teachers with parents' consent:
   as in the web app. **Nobody Left Behind** doesn't exist yet.
 - **TANGHALAN shows sample works.** Real works need parents' consent forms and review
   before they replace the samples.
+- **Handaventures and the games are subject for code and content validation,** as their
+  info tags say.
 - **Not yet tested on a phone.** Everything was checked in Chromium at phone (412×915)
   and tablet (1280×800) sizes, with software WebGL.
 

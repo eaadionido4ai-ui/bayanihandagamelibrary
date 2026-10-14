@@ -15,6 +15,66 @@ export const P = {
 
 export const PO = ['mit', 'prep', 'resp', 'rec'];
 
+// Info tags (the i buttons and Credits). Every tag shows the validation notice, then
+// blocks of [label, name, position, office].
+export const VALIDATION = 'Subject for code and content validation';
+const EA = ['Edward Andrew A. Dionido', 'Science Research Specialist II', 'UPRI'];
+export const CREDITS_LIBRARY = [['Conceptualized and developed with AI assistance by', ...EA]];
+export const CREDITS_HV = [['Concept by', 'Celine Tatco', 'Senior Project Associate', 'UPRI'], ['Developed with AI assistance by', ...EA]];
+
+// Handaventures: five choose-your-path stories under Get Ready. They open from one storybook
+// card, play in a frame (public/stories/, built from stories/ by scripts/build-stories.mjs),
+// and the Hero ending earns the story's badge. sid is the story's own id inside the engine.
+export const HV = {
+  id: 'hv', p: 'prep', name: 'Handaventures', icon: '📖', tagline: 'Be ready for anything.',
+  short: 'Five choose-your-path stories. Every choice changes the ending.',
+};
+const story = (o) => ({ p: 'prep', series: 'hv', ...o });
+export const STORIES = [
+  story({
+    id: 'hv-kulog', sid: 'typhoon', file: 'bagyong-kulog.html', art: 'kulog', name: 'Bagyong Kulog', icon: '🌀', hazard: 'Typhoon',
+    short: 'A typhoon is heading to your town. Help your family get ready before it arrives.',
+    desc: 'A typhoon named Bagyong Kulog is heading to your town. Talk with your family, make choices, and see what happens.',
+    badge: ['Storm Hero', '🌀'],
+    endings: [['hero', 'Typhoon Ready Hero', '⭐'], ['safe', 'Safe and Sound', '🏠'], ['lucky', 'Lucky Night', '🍀'], ['eye', 'Caught in the Eye', '🌀']],
+    tip: 'A sunny morning can fool you. Typhoons can arrive fast, and getting ready takes time.',
+  }),
+  story({
+    id: 'hv-agos', sid: 'flood', file: 'bagyong-agos.html', art: 'agos', name: 'Bagyong Agos', icon: '🌊', hazard: 'Flood',
+    short: 'Heavy rain and a rising creek. Decide when to move things up and when to go.',
+    desc: 'Bagyong Agos is bringing heavy rain, and your house is near a creek. Talk with your family, make choices, and see what happens when the water rises.',
+    badge: ['Flood Hero', '🌊'],
+    endings: [['hero', 'Flood Smart Hero', '⭐'], ['safe', 'High and Dry', '🏠'], ['lucky', 'Lucky Escape', '🍀'], ['back', 'Back Through the Water', '🌊']],
+    tip: 'Never play, wade or swim in floodwater. It can hide open manholes and sharp things, and it can carry germs.',
+  }),
+  story({
+    id: 'hv-shake', sid: 'quake', file: 'big-shake.html', art: 'shake', name: 'The Big Shake', icon: '🏫', hazard: 'Earthquake',
+    short: 'The ground shakes during class. What will you do when it starts?',
+    desc: 'It is a normal Monday at school, until the ground starts to shake. Talk with your teacher and classmates, make choices, and see what happens.',
+    badge: ['Shake Hero', '🏫'],
+    endings: [['hero', 'Quake Ready Hero', '⭐'], ['safe', 'Steady and Safe', '🏠'], ['lucky', 'Shaky Day', '🍀'], ['back', 'Back Inside', '🏫']],
+    tip: 'After an earthquake, wait in an open area away from buildings, walls, trees and power lines.',
+  }),
+  story({
+    id: 'hv-smoke', sid: 'fire', file: 'smoke-at-night.html', art: 'smoke', name: 'Smoke at Night', icon: '🔥', hazard: 'Fire',
+    short: 'The smoke alarm beeps in the middle of the night. Get your family out safely.',
+    desc: 'It is a quiet Friday night at home, until the smoke alarm starts beeping. Talk with your family, make choices, and see what happens.',
+    badge: ['Smoke Hero', '🔥'],
+    endings: [['hero', 'Fire Safe Hero', '⭐'], ['safe', 'Out and Safe', '🏠'], ['lucky', 'Smoky Night', '🍀'], ['back', 'Back Into the Smoke', '🔥']],
+    tip: 'Too many plugs on one extension cord can overheat and start a fire. Tell a grown-up if a cord feels warm.',
+  }),
+  story({
+    id: 'hv-lockdown', sid: 'lockdown', file: 'lockdown-at-school.html', art: 'lockdown', name: 'Lockdown at School', icon: '🔒', hazard: 'Lockdown',
+    short: 'The principal calls a lockdown. Stay calm and quiet with your class.',
+    desc: 'It is a normal Wednesday at school, until the principal calls a lockdown. Listen to your teacher, make choices, and see what happens.',
+    badge: ['Calm Hero', '🔒'], grownUp: true,
+    note: 'For grown-ups first: this story is about a school lockdown because a dangerous person may be on campus. No one is hurt, and no weapons or violence are shown. Please preview it, play it together with your child, and follow your own school\'s lockdown procedure.',
+    endings: [['hero', 'Calm and Quiet Hero', '⭐'], ['safe', 'Safe Behind the Door', '🏠'], ['lucky', 'Close Call', '🍀'], ['door', 'Never Open the Door', '🚪']],
+    tip: 'During a lockdown, stay quiet, stay out of sight, and listen to your teacher. Never open the door for anyone.',
+  }),
+];
+export const isStory = (g) => !!g && g.series === 'hv';
+
 // modes: [icon, name, description]. steps: [number, title, text].
 // badgeStars: stars needed for the badge, as scored by the game itself.
 export const G = [
@@ -119,12 +179,13 @@ export const G = [
     next: 'Next map',
     remind: 'Water always flows downhill and pools in low places. Keep the waterway clear.',
   },
+  ...STORIES,
 ];
 
 export const LIVE = G.filter((g) => !g.soon);
 
 // Champion ID badge order, as on the web app's scorecard.
-export const BADGES = ['hazard', 'gobag', 'fire', 'nobody', 'bleed', 'cpr', 'quake', 'path', 'cares', 'cleanup', 'sapa'];
+export const BADGES = ['hazard', 'gobag', 'fire', 'nobody', 'bleed', 'cpr', 'quake', 'path', 'cares', 'cleanup', 'sapa', 'hv-kulog', 'hv-agos', 'hv-shake', 'hv-smoke', 'hv-lockdown'];
 
 export const RANKS = [[0, 'Getting Ready'], [1, 'Rising Champion'], [2, 'Junior Champion'], [4, 'DRRM Champion'], [6, 'Master DRRM Champion']];
 
@@ -137,6 +198,10 @@ export const TIPS = [
   ['Know where your evacuation area is, and walk the route with your family.', 'path'],
   ['Trash in creeks blocks the water. Keep waterways clear so homes stay dry.', 'sapa'],
   ['Trees and mangroves soak up and slow down water. Strong communities use green and gray protection.', 'cares'],
+  ['A sunny morning can fool you. Typhoons can arrive fast, and getting ready takes time.', 'hv-kulog'],
+  ['Never play or wade in floodwater. It can hide open manholes and carry germs that make people sick.', 'hv-agos'],
+  ['After an earthquake, wait in an open area away from buildings, walls, trees and power lines.', 'hv-shake'],
+  ['If a cord or outlet feels warm, tell a grown-up. Too many plugs on one cord can start a fire.', 'hv-smoke'],
 ];
 
 export const TRIVIA = [
@@ -150,7 +215,7 @@ export const TRIVIA = [
   ['Finding and fixing hazards before a disaster is called mitigation.', 'hazard'],
 ];
 
-export const LEAD = 'Edward Andrew A. Dionido, Lead Science Research Specialist II, UP Resilience Institute. Built with the assistance of AI.';
+export const creditsOf = (g) => (g && (g.id === HV.id || isStory(g)) ? CREDITS_HV : CREDITS_LIBRARY);
 
 export const MAX_PLAYERS = 10;
 
