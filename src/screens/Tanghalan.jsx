@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { sx, pr } from '../ui/sx.js';
 import { Mascot } from '../ui/art.jsx';
 import { P, game } from '../data.js';
-import { ROOMS, DOORS, WORKS, KINDS, SAMPLE_NOTE, NAME_PARTS, room, roomAt } from '../museum/content.js';
+import { ROOMS, DOORS, WORKS, KINDS, SAMPLE_NOTE, NAME_PARTS, PEEK_ROOMS, room, roomAt } from '../museum/content.js';
 import { createMuseum } from '../museum/runtime.js';
 import { loadProgress, saveProgress } from '../museum/store.js';
 import { readLines, stopReading } from '../museum/speech.js';
@@ -35,34 +35,141 @@ function FullName({ accent }) {
 const seenIn = (prog, id) => WORKS.filter((w) => w.room === id && prog.seen[w.id]).length;
 
 // ---------- the way in, on Home and Games (after the games, so the library comes first) ----------
-function Frame({ src, w, color, ratio }) {
-  return (
-    <span style={{ ...sx('display:block;background:#fdfbf5;padding:2px;box-shadow:0 2px 4px rgba(0,0,0,.2)'), width: w, border: '3px solid ' + color }}>
-      <img src={IMG + src + '.webp'} alt="" style={{ display: 'block', width: '100%', aspectRatio: ratio }} />
-    </span>
-  );
+// The museum card: a carousel of rooms in 3D and kids' drawings, a different few each day.
+// It moves on by itself (never with reduced motion, off screen, or while someone is using it),
+// swipes, and every picture walks you into its room.
+const PEEK = 'tanghalan/peek/';
+const DRAWINGS = WORKS.filter((w) => w.kind === 'art');
+const FRAME = { bulwagan: '#f0b429', kuwentuhan: '#eaa100', mit: '#2a6b8f', prep: '#128253', resp: '#e8700b', rec: '#7a53c6' };
+const GAP = 10;
+const EVERY = 4500;
+const SLIDE = 'flex:none;position:relative;display:block;width:min(280px,calc(100% - 52px));aspect-ratio:16/9;border-radius:16px;overflow:hidden;scroll-snap-align:start;text-align:left;color:#fff;background:#17344a';
+const SCHIP = 'position:absolute;left:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;font-weight:900;background:rgba(14,34,51,.82);border-radius:999px;padding:4px 9px';
+const STRIPE = 'position:absolute;left:0;right:0;bottom:0;height:4px;background:repeating-linear-gradient(90deg,#128253 0 35px,#e8700b 35px 70px,#7a53c6 70px 105px,#2a6b8f 105px 140px)';
+const calm = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+
+// Five pictures for the day: a room, a drawing, a room, a drawing, a room.
+export function slidesOf(day) {
+  const r = (i) => room(PEEK_ROOMS[(day * 3 + i) % PEEK_ROOMS.length]);
+  const w = (i) => DRAWINGS[(day * 2 + i) % DRAWINGS.length];
+  return [{ room: r(0) }, { work: w(0) }, { room: r(1) }, { work: w(1) }, { room: r(2) }];
 }
-function Entry({ c, from, big }) {
-  const n = Object.keys(loadProgress(c.me ? c.me.id : 'guest').seen).length;
-  const size = big ? 66 : 60;
-  const card = pr('display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:2px solid #d5e3ea;border-radius:22px;padding:12px 14px;box-shadow:0 5px 0 rgba(20,48,66,.08)', 'transform:translateY(3px);box-shadow:0 2px 0 rgba(20,48,66,.08)');
+
+function Slide({ s, onPick }) {
+  if (s.room) {
+    const r = s.room;
+    return (
+      <button onClick={() => onPick(r.id)} aria-label={'Walk into ' + r.name + ' in 3D'} style={sx(SLIDE + ';box-shadow:0 6px 14px rgba(0,0,0,.35)')}>
+        <img src={PEEK + r.id + '.webp'} alt="" draggable="false" style={sx('display:block;width:100%;height:100%;object-fit:cover')} />
+        <span style={sx(SCHIP + ';bottom:8px;max-width:calc(100% - 56px)')}>{r.icon} {r.name}</span>
+        <span style={sx('position:absolute;right:8px;bottom:8px;font-size:11px;font-weight:900;background:#ffd873;color:#4a2a00;border-radius:999px;padding:4px 8px')}>3D</span>
+      </button>
+    );
+  }
+  const w = s.work;
   return (
-    <button onClick={() => c.go('museum', { museumFrom: from })} className={card.className} style={card.style}>
-      <span style={{ ...sx('flex:none;border-radius:18px;background:#efe5d2;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.08)'), width: size, height: size }}>
-        <Frame src="baha" w={Math.round(size * 0.41)} color="#f2760c" ratio="4/3" />
-        <Frame src="gobag" w={Math.round(size * 0.29)} color="#128253" ratio="3/4" />
+    <button onClick={() => onPick(w.room)} aria-label={w.title + ', by ' + w.by + ', ' + w.age + '. Walk into its room'}
+      style={{ ...sx(SLIDE), background: 'radial-gradient(60% 75% at 50% 0%,rgba(255,224,140,.32),rgba(255,224,140,0)),#17344a' }}>
+      <span style={sx('position:absolute;left:0;right:0;top:8px;height:3px;background:#d9b25a')} />
+      <span style={sx('position:absolute;left:calc(50% - 1px);top:11px;width:1.5px;height:7px;background:rgba(255,255,255,.5)')} />
+      <span style={{ ...sx('position:absolute;left:50%;top:18px;transform:translateX(-50%);display:block;background:#fdfbf5;padding:4px;box-shadow:0 8px 16px rgba(0,0,0,.45)'), border: '5px solid ' + (FRAME[w.room] || '#f0b429') }}>
+        <img src={IMG + w.id + '.webp'} alt="" draggable="false" style={sx('display:block;height:90px;width:auto;max-width:160px')} />
       </span>
-      <span style={sx('flex:1;min-width:0;display:flex;flex-direction:column;gap:4px')}>
-        <span style={sx("font:800 18px/1.1 'Baloo 2',sans-serif;padding-top:3px")}>TANGHALAN</span>
-        <span style={sx('font-size:13px;font-weight:700;color:#4f6572;line-height:1.35')}>Walk through a museum of art and stories made by kids.</span>
-        <span style={sx('align-self:flex-start;font-size:10.5px;font-weight:900;letter-spacing:.5px;border-radius:999px;padding:3px 8px;' + (n ? 'background:#e5f6ee;color:#0c5c3a' : 'background:#fff1e3;color:#a84d04'))}>{n ? '✓ ' + n + ' OF ' + TOTAL + ' WORKS SEEN' : '🏛️ NEW · VISIT THE MUSEUM'}</span>
-      </span>
-      <span style={sx('flex:none;font-size:22px;font-weight:900;color:#8fa3b0')}>›</span>
+      <span style={sx(SCHIP + ';bottom:10px;max-width:calc(100% - 16px)')}>🖍️ {w.title} · {w.by}, {w.age}</span>
+      <span style={sx(STRIPE)} />
     </button>
   );
 }
-export function MuseumCard({ c }) { return <Entry c={c} from="home" />; }
-export function MuseumTile({ c }) { return <Entry c={c} from="games" big />; }
+
+function MuseumEntry({ c, from }) {
+  const prog = loadProgress(c.me ? c.me.id : 'guest');
+  const seen = Object.keys(prog.seen).length, visited = Object.keys(prog.rooms).length;
+  const fresh = !seen && !visited;
+  const wide = !!c.tablet && from === 'games';
+  const [slides] = useState(() => slidesOf(Math.floor(Date.now() / 864e5)));
+  const [at, setAt] = useState(0);
+  const reel = useRef(null), hold = useRef(0);
+  const enter = (roomId) => c.go('museum', { museumFrom: from, museumRoom: roomId || null });
+
+  const measure = () => {
+    const el = reel.current, first = el && el.firstElementChild;
+    return first ? { el, step: first.offsetWidth + GAP, max: el.scrollWidth - el.clientWidth } : null;
+  };
+  const current = (m) => (m.el.scrollLeft >= m.max - 2 ? slides.length - 1 : Math.round(m.el.scrollLeft / m.step));
+  const show = (i, byHand) => {
+    const m = measure();
+    if (!m) return;
+    if (byHand) hold.current = Date.now() + 9000;
+    m.el.scrollTo({ left: Math.min(i * m.step, m.max), behavior: calm() ? 'auto' : 'smooth' });
+  };
+  const busy = () => { hold.current = Date.now() + 9000; };
+  useEffect(() => {
+    if (calm()) return undefined;
+    let onScreen = true;
+    const io = typeof IntersectionObserver !== 'undefined' && reel.current ? new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; }) : null;
+    if (io) io.observe(reel.current);
+    const t = setInterval(() => {
+      const m = measure();
+      if (!m || !onScreen || document.hidden || Date.now() < hold.current) return;
+      const i = current(m);
+      show(i >= slides.length - 1 ? 0 : i + 1);
+    }, EVERY);
+    return () => { clearInterval(t); if (io) io.disconnect(); };
+  }, []);
+
+  const head = (
+    <span style={sx('display:block' + (wide ? '' : ';padding:0 52px 0 18px'))}>
+      <span style={sx('display:inline-block;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;background:rgba(255,255,255,.14);border-radius:999px;padding:4px 10px')}>{fresh ? '✨ New · 3D museum' : '🏛️ 3D museum'}</span>
+      <span style={sx("display:block;font:800 " + (wide ? 40 : 34) + "px/1 'Baloo 2',sans-serif;letter-spacing:1.5px;color:#ffd873;margin-top:10px;padding-top:4px")}>TANGHALAN</span>
+    </span>
+  );
+  const words = (
+    <span style={sx('display:block' + (wide ? '' : ';padding:0 18px'))}>
+      <span style={sx('display:block;font-size:17px;font-weight:900')}>Halika, pasok!</span>
+      <span style={sx('display:block;font-size:14px;font-weight:700;line-height:1.4;margin-top:2px;color:#e3edf3')}>A 3D museum of art and stories by kids.</span>
+    </span>
+  );
+  const go = pr('display:flex;align-items:center;gap:6px;background:#fff;color:#16303f;font-weight:900;font-size:14px;padding:8px 14px;border-radius:999px;box-shadow:0 3px 0 rgba(0,0,0,.25);white-space:nowrap', 'transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.25)');
+  const foot = (
+    <span style={sx('display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap' + (wide ? '' : ';padding:0 18px'))}>
+      <span style={sx('font-size:13px;font-weight:900')}>{fresh ? ROOMS.length + ' rooms · ' + TOTAL + ' works' : visited + ' of ' + ROOMS.length + ' rooms · ' + seen + ' of ' + TOTAL + ' works'}</span>
+      <button onClick={() => enter()} className={go.className} style={go.style}>{fresh ? 'Enter the museum ›' : 'Go back in ›'}</button>
+    </span>
+  );
+  const pictures = (
+    <div ref={reel} className="hscroll" role="group" aria-roledescription="carousel" aria-label="Pictures from TANGHALAN"
+      onScroll={() => { const m = measure(); if (m) setAt(current(m)); }} onPointerDown={busy} onWheel={busy} onFocus={busy}
+      style={sx('display:flex;gap:' + GAP + 'px;scroll-snap-type:x mandatory;scroll-padding-left:' + (wide ? 0 : 18) + 'px;padding:' + (wide ? '0 0 12px' : '0 0 12px 18px') + ';margin-bottom:-12px')}>
+      {slides.map((s, i) => <Slide key={i} s={s} onPick={enter} />)}
+      <span aria-hidden="true" style={sx('flex:none;width:8px')} />
+    </div>
+  );
+  const dots = (
+    <span style={sx('display:flex;justify-content:center;align-items:center')}>
+      {slides.map((s, i) => (
+        <button key={i} onClick={() => show(i, true)} aria-label={'Picture ' + (i + 1) + ' of ' + slides.length} aria-current={i === at ? 'true' : undefined}
+          style={sx('width:24px;height:24px;display:flex;align-items:center;justify-content:center')}>
+          <span style={sx('display:block;height:7px;border-radius:999px;transition:width .25s ease,background-color .25s ease;' + (i === at ? 'width:18px;background-color:#ffd873' : 'width:7px;background-color:rgba(255,255,255,.35)'))} />
+        </button>
+      ))}
+    </span>
+  );
+  return (
+    <div style={{ position: 'relative', gridColumn: wide ? '1 / -1' : undefined }}>
+      <div data-museum-card="" onClick={(e) => { if (!e.target.closest('button')) enter(); }}
+        style={sx('display:flex;' + (wide ? 'align-items:center;gap:20px;padding:22px 0 22px 26px' : 'flex-direction:column;gap:12px;padding:16px 0 14px') + ';cursor:pointer;border-radius:26px;color:#fff;overflow:hidden;background:linear-gradient(160deg,#21445a,#0e2233);box-shadow:0 6px 0 rgba(0,0,0,.16)')}>
+        {wide
+          ? <><span style={sx('flex:0 0 38%;min-width:0;display:flex;flex-direction:column;gap:14px')}>{head}{words}{foot}</span>
+            <span style={sx('flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;padding-top:26px')}>{pictures}{dots}</span></>
+          : <>{head}{pictures}{dots}{words}{foot}</>}
+      </div>
+      <button onClick={() => c.patch({ sheet: 'credit', sd: { id: 'tanghalan', name: 'TANGHALAN', icon: '🏛️', sub: '3D museum · ' + ROOMS.length + ' rooms' } })} aria-label="Who made TANGHALAN"
+        style={sx('position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.7);color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.18)')}>i</button>
+    </div>
+  );
+}
+export function MuseumCard({ c }) { return <MuseumEntry c={c} from="home" />; }
+export function MuseumTile({ c }) { return <MuseumEntry c={c} from="games" />; }
 
 // ---------- the museum map: the same rooms and doors as the 3D world ----------
 function MapSVG({ roomId, pos, visited, me, mini }) {
@@ -344,9 +451,10 @@ export function Tanghalan({ c }) {
   const [load, setLoad] = useState(0);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
-  // coming back from a game: start where you left
-  const back = resume && resume.pid === pid && Date.now() - resume.at < 30 * 60e3 && roomAt(resume.x, resume.z) ? resume : null;
-  const [roomId, setRoomId] = useState(() => (back ? roomAt(back.x, back.z).id : 'lobby'));
+  // a room picked on the museum card; else, coming back from a game, start where you left
+  const [ask] = useState(() => (s.museumRoom ? room(s.museumRoom) : null));
+  const back = !ask && resume && resume.pid === pid && Date.now() - resume.at < 30 * 60e3 && roomAt(resume.x, resume.z) ? resume : null;
+  const [roomId, setRoomId] = useState(() => (ask ? ask.id : back ? roomAt(back.x, back.z).id : 'lobby'));
   const [near, setNear] = useState(null);
   const [hint, setHint] = useState(null);
   const [open, setOpen] = useState(null);
@@ -408,6 +516,8 @@ export function Tanghalan({ c }) {
     }
     rt.current = m;
     if (back) m.place(back);
+    else if (ask) m.goTo(ask.id);
+    if (s.museumRoom) c.patch({ museumRoom: null }); // used once, so a game's Museum button still returns you to your spot
     return () => {
       resume = { ...m.position(), pid, at: Date.now() };
       clearTimeout(hintT.current); stopReading(); m.dispose(); rt.current = null;

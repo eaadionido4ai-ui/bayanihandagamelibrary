@@ -167,6 +167,12 @@ TANGHALAN (Three-dimensional Animated Gallery Highlighting Youth-Generated Artwo
 Learnings and Narratives) is a walkable 3D museum inside the library. It opens from a card under the adventures on
 Home and from the end of the Games list, so the games stay first.
 
+- **The museum card** is a carousel: rooms in 3D and kids' drawings in turn, a different few each
+  day. It moves on by itself every few seconds (not with reduced motion, and never while someone is
+  using it), and it can be swiped. Tapping a picture walks you straight into its room. The room
+  pictures are in `public/tanghalan/peek/`, taken from the museum itself by
+  `design/tanghalan/peeks.cjs`; the rooms it uses are `PEEK_ROOMS` in `src/museum/content.js`.
+
 - **One connected space.** Nine rooms in a 3 × 3 grid open into each other: the Lobby, the
   Bulwagan ng Bayanihan (featured hall), a room for each pillar, the Kuwentuhan Corner for
   stories, and two game rooms.
@@ -198,7 +204,8 @@ works, collected through teachers with parents' consent:
 | --- | --- |
 | Rooms, doors, works, game stations | `src/museum/content.js` |
 | The 3D museum (three.js from `public/engine/`) | `src/museum/world.js`, `characters.js`, `runtime.js` |
-| Screen, controls, sheets, Home and Games cards | `src/screens/Tanghalan.jsx` |
+| Screen, controls, sheets, the museum card on Home and Games | `src/screens/Tanghalan.jsx` |
+| Room pictures for the museum card | `public/tanghalan/peek/`, made by `design/tanghalan/peeks.cjs` |
 | Read-aloud, progress | `src/museum/speech.js`, `store.js` |
 | Sample pictures and how they are drawn | `design/tanghalan/` (see its README) |
 

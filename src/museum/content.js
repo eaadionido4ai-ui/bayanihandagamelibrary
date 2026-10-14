@@ -52,6 +52,10 @@ export const DOORS = [
   { a: 'prep', b: 'gobagroom', axis: 'x', at: -12, from: 10.0, to: 12.6 },
 ];
 
+// Rooms shown in 3D on the museum card (Home and Games), each a picture in public/tanghalan/peek/
+// made by design/tanghalan/peeks.cjs. The card takes a few of them each day, between kids' drawings.
+export const PEEK_ROOMS = ['kuwentuhan', 'prep', 'rec', 'gobagroom', 'resp', 'mit', 'fireroom'];
+
 // The game stations in the game rooms: walk up and tap Play to start the game.
 export const STATIONS = [
   { id: 'station-fire', room: 'fireroom', game: 'fire', at: [-9, -19.25] },
