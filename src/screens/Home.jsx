@@ -49,7 +49,7 @@ export default function Home({ c }) {
                 <span style={sx('font-size:12px;font-weight:800;color:#7a5400')}>{today.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</span>
               </div>
               <p style={sx('margin:0;font-weight:800;font-size:16.5px;line-height:1.4;text-wrap:pretty')}>{tip[0]}</p>
-              <button onClick={() => c.openGame(tg.id)} {...pr('align-self:flex-start;display:flex;align-items:center;gap:8px;background:#128253;color:#fff;font-weight:900;font-size:15px;padding:10px 16px;border-radius:999px;box-shadow:0 4px 0 #0b5e3b', 'transform:translateY(3px);box-shadow:0 1px 0 #0b5e3b')}>{tg.icon} Play {tg.name}</button>
+              {!tg.soon && <button onClick={() => c.openGame(tg.id)} {...pr('align-self:flex-start;display:flex;align-items:center;gap:8px;background:#128253;color:#fff;font-weight:900;font-size:15px;padding:10px 16px;border-radius:999px;box-shadow:0 4px 0 #0b5e3b', 'transform:translateY(3px);box-shadow:0 1px 0 #0b5e3b')}>{tg.icon} Play {tg.name}</button>}
             </div>
             <button onClick={() => c.go('id')} {...pr('display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:linear-gradient(135deg,#ffd76a,#f7a23a);color:#4a2a00;border-radius:22px;box-shadow:0 5px 0 #c85e07;padding:14px 16px', 'transform:translateY(3px);box-shadow:0 2px 0 #c85e07')}>
               <span style={sx('font-size:32px;flex:none')}>🏆</span>

@@ -122,8 +122,9 @@ export const G = [
   { id: 'nobody', p: 'resp', soon: true, name: 'Nobody Left Behind', icon: '🚪', short: 'Watch a classroom evacuation and notice if anyone is still inside.', badge: ['No One Left', '🚪'] },
   { id: 'bleed', p: 'resp', soon: true, name: 'Stop the Bleed', icon: '🩹', short: 'Put on gloves, cover the wound, then press hard to stop the bleeding.', badge: ['Stop Bleed', '🩹'] },
   { id: 'cpr', p: 'resp', soon: true, name: 'Hands-Only CPR', icon: '💓', short: 'Call for help, then push hard and fast on the chest in time with the beat.', badge: ['CPR Hero', '❤️'] },
+  // Paused for improvement (Oct 2026): shown as Coming soon, code kept. Remove soon: true to bring it back.
   {
-    id: 'quake', p: 'resp', name: 'Duck, Cover, and Hold', icon: '🏗️', short: 'Watch the coach, then copy the moves: drop, cover, hold on, walk out.',
+    id: 'quake', p: 'resp', soon: true, name: 'Duck, Cover, and Hold', icon: '🏗️', short: 'Watch the coach, then copy the moves: drop, cover, hold on, walk out.',
     desc: 'Watch the coach, then copy the moves: drop, cover under the sturdy table, hold on, then walk out.',
     badge: ['Quake Ready', '🏗️'], badgeStars: 2,
     steps: [['1', 'Watch the coach', 'The coach shows you a move, then adds another each round: drop, cover, hold on, walk out.'], ['2', 'Copy the moves', 'Tap the same moves back in the same order using the Drop, Cover, Hold on, and Walk out buttons.'], ['3', 'Keep the order right', 'Drop first, then cover under the sturdy table, hold on until the shaking stops, and only then walk out.'], ['4', 'Learn it by heart', 'Each round is a little faster, so the right order sticks in your memory.']],
@@ -168,8 +169,9 @@ export const G = [
     next: 'Other cleanup',
     remind: 'Green bin is biodegradable, blue bin is recyclable, and red bin is hazardous or special waste.',
   },
+  // Paused for improvement (Oct 2026): shown as Coming soon, code kept. Remove soon: true to bring it back.
   {
-    id: 'cares', p: 'rec', name: 'CARES: Community and Resilience', icon: '🏘️', short: 'Build a community by a stream, protect it, then simulate a flood.',
+    id: 'cares', p: 'rec', soon: true, name: 'CARES: Community and Resilience', icon: '🏘️', short: 'Build a community by a stream, protect it, then simulate a flood.',
     desc: 'Build a community beside a stream, reach your population goal, and add green and gray protection. Then pick a hazard and simulate: water flows to the lowest ground, so see whose homes stay safe.',
     badge: ['Community Builder', '🏘️'], modesLabel: 'Pick a map',
     modes: [['🌊', 'River in the lowlands', 'A river runs along the low ground. Build up on the high ground and keep back from the water.'], ['💧', 'River on one side', 'The river runs down the west side. The safe high ground is across to the east.'], ['🏔️', 'Valley in the middle', 'A stream cuts a valley down the middle. High ground rises on both sides.'], ['🐌', 'The river bend', 'The river bends around a corner. The safe high ground is the far side, away from the bend.']],
