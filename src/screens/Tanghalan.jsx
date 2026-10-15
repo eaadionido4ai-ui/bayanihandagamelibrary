@@ -20,7 +20,7 @@ const SHORT = { bulwagan: 'Bulwagan', kuwentuhan: 'Kuwentuhan', mit: 'Stop Hazar
 const BAYANI_LINES = [
   'Hi! Each room has a color, like the adventures: blue, green, orange and purple.',
   'The floating 👀 and 📖 bubbles mark the works you have not seen yet.',
-  'Every work comes with a game. Look for Play in my tip!',
+  'Most works come with a game. Look for Play in my tip!',
   'Lost? Tap the map at the top to see where you are.',
   'Want to play? Find the game stations in the Go Bag Room and the Fire Safety Room!',
 ];
@@ -340,7 +340,9 @@ function WorkSheet({ c, id, lang, setLang, prog, save, onClose, onPick }) {
         <span style={sx('flex:none')}><Mascot size={52} /></span>
         <div style={sx('flex:1;min-width:0;background:#fff5df;border:2px solid #ffe2a8;border-radius:20px 20px 20px 6px;padding:12px 14px;display:flex;flex-direction:column;gap:9px')}>
           <div style={sx('font-weight:800;font-size:14.5px;line-height:1.45;color:#25404e')}><b style={sx('color:#7a5400')}>Bayani's tip:</b> {w.note}</div>
-          <button onClick={() => { stopReading(); c.openGame(g.id); }} {...pr('align-self:flex-start;display:flex;align-items:center;gap:8px;background:#128253;color:#fff;font-weight:900;font-size:14.5px;padding:9px 15px;border-radius:999px;box-shadow:0 4px 0 #0b5e3b', 'transform:translateY(3px);box-shadow:0 1px 0 #0b5e3b')}>{g.icon} Play {g.name}</button>
+          {g.soon
+            ? <span style={sx('align-self:flex-start;display:flex;align-items:center;gap:8px;background:#eef2f4;color:#4f6572;font-weight:900;font-size:13.5px;padding:8px 14px;border-radius:999px;border:2px dashed #b9ccd8')}>{g.icon} {g.name}: coming soon</span>
+            : <button onClick={() => { stopReading(); c.openGame(g.id); }} {...pr('align-self:flex-start;display:flex;align-items:center;gap:8px;background:#128253;color:#fff;font-weight:900;font-size:14.5px;padding:9px 15px;border-radius:999px;box-shadow:0 4px 0 #0b5e3b', 'transform:translateY(3px);box-shadow:0 1px 0 #0b5e3b')}>{g.icon} Play {g.name}</button>}
         </div>
       </div>
     </Sheet>

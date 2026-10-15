@@ -217,6 +217,10 @@ works, collected through teachers with parents' consent:
   Capacitor plugins (`@capacitor/filesystem`, `@capacitor/share`, and a print plugin).
 - **Hands-Only CPR and Stop the Bleed** are playable in the engine but stay "Coming soon",
   as in the web app. **Nobody Left Behind** doesn't exist yet.
+- **CARES and Duck, Cover, and Hold are paused for improvement** (October 2026). Both keep
+  their code and show as "Coming soon" cards; their badges show as "Soon" on the Champion
+  ID, and the daily tips and museum works linked to them no longer offer a Play button. To
+  bring one back, remove `soon: true` from its entry in `src/data.js`.
 - **TANGHALAN shows sample works.** Real works need parents' consent forms and review
   before they replace the samples.
 - **Handaventures and the games are subject for code and content validation,** as their
