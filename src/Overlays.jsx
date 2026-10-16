@@ -6,6 +6,7 @@ import { TRIVIA, VALIDATION, CREDITS_LIBRARY, creditsOf, game, howTo, isStory } 
 import { HvName } from './screens/Stories.jsx';
 import { renderIdPng, idFileName, savePng, sharePng } from './idcard.js';
 import { GateSheet } from './screens/GrownUps.jsx';
+import { TourTab, TourWelcome, askLine } from './screens/Tour.jsx';
 
 const BACKDROP = 'position:absolute;inset:0;background:rgba(14,34,51,.5);animation:bh-fade .2s both';
 const H2 = "font:800 23px/1.1 'Baloo 2',sans-serif";
@@ -18,9 +19,13 @@ export function AskSheet({ c }) {
   const { s, patch, tablet, nick } = c;
   const it = c.askItem();
   const g = it.game ? game(it.game) : null;
+  // The tour opens full screen, so it is offered everywhere except in the middle of a game.
+  const touring = s.screen !== 'play' && s.screen !== 'storyplay';
+  const fs = touring ? 14.5 : 15;
   const tab = (on, label, set) => (on
-    ? <span style={sx('flex:1;text-align:center;padding:10px;border-radius:999px;background:#d9650a;color:#fff;font-weight:900;font-size:15px;box-shadow:0 3px 0 #a34a05')}>{label}</span>
-    : <button onClick={set} style={sx('flex:1;padding:10px;border-radius:999px;font-weight:800;font-size:15px;color:#3d5563')}>{label}</button>);
+    ? <span style={{ ...sx('flex:1 1 0;text-align:center;padding:10px 4px;border-radius:999px;background:#d9650a;color:#fff;font-weight:900;box-shadow:0 3px 0 #a34a05;white-space:nowrap'), fontSize: fs }}>{label}</span>
+    : <button onClick={set} style={{ ...sx('flex:1 1 0;padding:10px 4px;border-radius:999px;font-weight:800;color:#3d5563;white-space:nowrap'), fontSize: fs }}>{label}</button>);
+  const tour = touring && s.askKind === 'tour';
   return (
     <div style={sx('position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;justify-content:flex-end;align-items:center')}>
       <div onClick={() => patch({ ask: false })} style={sx(BACKDROP)} />
@@ -37,16 +42,21 @@ export function AskSheet({ c }) {
         <div style={sx('display:flex;background:#eef3f6;border-radius:999px;padding:4px;gap:4px')}>
           {tab(s.askKind === 'tip', '💡 Safety tip', () => patch({ askKind: 'tip', askN: 0, jump: s.jump + 1 }))}
           {tab(s.askKind === 'trivia', '❓ Fun fact', () => patch({ askKind: 'trivia', askN: Math.floor(Math.random() * TRIVIA.length), jump: s.jump + 1 }))}
+          {touring && tab(tour, '🏝️ Tour', () => { patch({ askKind: 'tour', jump: s.jump + 1 }); c.speak(askLine); })}
         </div>
-        <div style={sx('background:#fff5df;border:2px solid #ffe2a8;border-radius:22px;padding:14px 48px 16px 16px;position:relative;min-height:110px')} aria-live="polite">
-          <div style={sx('font-size:12px;font-weight:900;letter-spacing:1px;color:#7a5400')}>{it.kind}</div>
-          <p style={sx('margin:5px 0 0;font-weight:800;font-size:17.5px;line-height:1.42;text-wrap:pretty')}>{it.text}</p>
-          <button onClick={() => c.speak(it.text, true)} aria-label="Read aloud" style={sx('position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;background:#fff;font-size:16px;box-shadow:0 2px 0 #ffe2a8;display:flex;align-items:center;justify-content:center')}>🔊</button>
-        </div>
-        <div style={sx('display:flex;gap:10px;flex-wrap:wrap')}>
-          <button onClick={() => patch({ askN: s.askN + 1, jump: s.jump + 1 })} {...pr('flex:1 1 140px;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;border-radius:999px;padding:12px 16px;font-weight:900;font-size:15px', 'transform:translateY(3px)')}>🔁 Another one</button>
-          {g && !g.soon && s.screen !== 'play' && <button onClick={() => c.openGame(g.id)} {...pr('flex:1 1 180px;background:#128253;color:#fff;box-shadow:0 4px 0 #0b5e3b;border-radius:999px;padding:12px 16px;font-weight:900;font-size:15px', 'transform:translateY(3px)')}>{g.icon} Play {g.name}</button>}
-        </div>
+        {tour ? <TourTab c={c} /> : (
+          <>
+            <div style={sx('background:#fff5df;border:2px solid #ffe2a8;border-radius:22px;padding:14px 48px 16px 16px;position:relative;min-height:110px')} aria-live="polite">
+              <div style={sx('font-size:12px;font-weight:900;letter-spacing:1px;color:#7a5400')}>{it.kind}</div>
+              <p style={sx('margin:5px 0 0;font-weight:800;font-size:17.5px;line-height:1.42;text-wrap:pretty')}>{it.text}</p>
+              <button onClick={() => c.speak(it.text, true)} aria-label="Read aloud" style={sx('position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;background:#fff;font-size:16px;box-shadow:0 2px 0 #ffe2a8;display:flex;align-items:center;justify-content:center')}>🔊</button>
+            </div>
+            <div style={sx('display:flex;gap:10px;flex-wrap:wrap')}>
+              <button onClick={() => patch({ askN: s.askN + 1, jump: s.jump + 1 })} {...pr('flex:1 1 140px;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;border-radius:999px;padding:12px 16px;font-weight:900;font-size:15px', 'transform:translateY(3px)')}>🔁 Another one</button>
+              {g && !g.soon && s.screen !== 'play' && <button onClick={() => c.openGame(g.id)} {...pr('flex:1 1 180px;background:#128253;color:#fff;box-shadow:0 4px 0 #0b5e3b;border-radius:999px;padding:12px 16px;font-weight:900;font-size:15px', 'transform:translateY(3px)')}>{g.icon} Play {g.name}</button>}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -181,7 +191,8 @@ export function Sheet({ c }) {
         <button onClick={close} style={sx(DARK)}>Close</button>
       </>
     );
-  } else if (s.sheet === 'share') body = <ShareSheet c={c} />;
+  } else if (s.sheet === 'tour') body = <TourWelcome c={c} />;
+  else if (s.sheet === 'share') body = <ShareSheet c={c} />;
   else if (s.sheet === 'gate') body = <GateSheet key={sd.a + 'x' + sd.b} c={c} />;
   else if (s.sheet === 'photo') body = <PhotoSheet c={c} />;
   else if (s.sheet === 'remove') {

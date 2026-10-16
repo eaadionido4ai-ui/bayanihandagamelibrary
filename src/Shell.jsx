@@ -11,6 +11,8 @@ import ChampionId, { IdCard } from './screens/ChampionId.jsx';
 import Settings from './screens/Settings.jsx';
 import { TeacherCorner, BuildWithUs } from './screens/GrownUps.jsx';
 import { Tanghalan } from './screens/Tanghalan.jsx';
+import { TourPlay, welcomeLine } from './screens/Tour.jsx';
+import { cardOffer, forgetTour, loadTour, quietOffer, saveTour } from './tour.js';
 import { forgetProgress } from './museum/store.js';
 import { NavBar, NavRail } from './Nav.jsx';
 import { AskSheet, Sheet, Snack } from './Overlays.jsx';
@@ -105,10 +107,10 @@ export default function Shell() {
     if (s.editMode) return editPlayer(p);
     engine.selectPlayer(p.id); refresh();
     go('home', { homeN: 0, jump: s.jump + 1 });
-    speak('Hi, ' + p.nick + '!');
+    speak('Hi, ' + p.nick + '!' + (cardOffer(p.id) ? ' Want me to show you around? Tap Show me!' : ''));
   }
   function removePlayer(id) {
-    engine.removePlayer(id); forgetProgress(id); forgetStories(id); refresh();
+    engine.removePlayer(id); forgetProgress(id); forgetStories(id); forgetTour(id); refresh();
     const left = engine.players();
     if (!left.length) go('addPlayer', { draft: { nick: '', av: 'turtle', id: null }, editMode: false });
     else go('players');
@@ -143,6 +145,29 @@ export default function Shell() {
     refresh();
   }
 
+  // Bayani's island tour: offered once with the welcome sheet, then in Bayani's card on Home until it is done,
+  // and always in Ask Bayani. It opens full screen and returns to where it was opened.
+  const TOUR_BACK = ['home', 'games', 'id', 'players', 'settings', 'hv', 'story', 'intro', 'result'];
+  function openTour(from) {
+    const pid = engine.ready ? engine.activeId() : null;
+    saveTour(pid, { offered: true }); quietOffer(pid);
+    try { window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
+    const back = from || s.screen;
+    go('tour', { tourFrom: TOUR_BACK.indexOf(back) >= 0 ? back : 'home' });
+  }
+  function tourDone() { saveTour(engine.ready ? engine.activeId() : null, { offered: true, done: true }); }
+  // reason: skip, try (a Try it button) or end; to: where Try it or Start playing leads
+  function closeTour(reason, to) {
+    if (reason === 'skip' || reason === 'try' || reason === 'end') tourDone();
+    const gid = typeof to === 'string' && to.indexOf('game:') === 0 ? to.slice(5) : null;
+    if (to === 'games') go('games', { filter: 'all' });
+    else if (to === 'stories') go('hv');
+    else if (to === 'museum') go('museum', { museumFrom: 'home', museumRoom: null });
+    else if (to === 'id') go('id');
+    else if (gid && LIVE.some((g) => g.id === gid)) openGame(gid);
+    else go(s.tourFrom || 'home');
+  }
+
   // engine events: games starting, finishing, quitting, and their HUD buttons
   useEffect(() => engine.on((type, d) => {
     if (type === 'play') setS((p) => ({ ...p, screen: 'play', gameId: d.gameId, mode: d.mode, modes: { ...p.modes, [d.gameId]: d.mode }, sheet: null, ask: false }));
@@ -162,6 +187,19 @@ export default function Shell() {
     const t = setTimeout(() => { if (sRef.current.screen === 'splash') afterSplash(); }, 2600);
     return () => clearTimeout(t);
   }, [s.screen]);
+
+  // A player's first visit to Home: once Home is in view, Bayani offers the tour with the welcome sheet.
+  useEffect(() => {
+    if (s.screen !== 'home' || s.ask || s.sheet || !activeId || loadTour(activeId).offered) return undefined;
+    const t = setTimeout(() => {
+      const cur = sRef.current;
+      if (cur.screen !== 'home' || cur.ask || cur.sheet || !engine.ready || engine.activeId() !== activeId) return;
+      saveTour(activeId, { offered: true }); quietOffer(activeId);
+      patch({ sheet: 'tour' });
+      speak(welcomeLine(nick));
+    }, 1100);
+    return () => clearTimeout(t);
+  }, [s.screen, s.ask, s.sheet, activeId]);
 
   // Ask Bayani: a tip for the screen you are on, or a fun fact.
   function askItem(st = s) {
@@ -190,8 +228,8 @@ export default function Shell() {
   const backHook = useRef(null); // a screen's own back step, such as closing the museum's sheets
   backRef.current = () => {
     const c = sRef.current;
+    if (c.sheet) return patch({ sheet: null }); // a sheet can sit over Ask Bayani (the tour's credits)
     if (c.ask) return patch({ ask: false });
-    if (c.sheet) return patch({ sheet: null });
     if (backHook.current && backHook.current()) return undefined;
     switch (c.screen) {
       case 'play': if (!engine.closeGamePopup()) { engine.stop(); patch({ screen: 'intro' }); } break;
@@ -205,6 +243,7 @@ export default function Shell() {
       case 'hv': go('games'); break;
       case 'story': go(c.storyFrom || 'hv'); break;
       case 'storyplay': go('story'); break;
+      case 'tour': go(c.tourFrom || 'home'); break;
       default: if (engine.activeId()) go('home'); break;
     }
   };
@@ -232,6 +271,7 @@ export default function Shell() {
     go, refresh, speak, snackShow, afterSplash, newPlayer, editPlayer, savePlayer, pickPlayer, removePlayer,
     resetBadges: () => { engine.resetBadges(); refresh(); },
     openGame, startGame, askItem, openAsk, openStories, startStory, storyEnded,
+    openTour, closeTour, tourDone, tourOffer: !!activeId && cardOffer(activeId),
     setBack: (fn) => { backHook.current = fn; },
     tabOf: scr === 'museum' ? s.museumFrom : TAB_OF[scr],
   };
@@ -253,6 +293,7 @@ export default function Shell() {
   else if (scr === 'hv') body = <StoryShelf c={c} />;
   else if (scr === 'story') body = <StoryIntro c={c} />;
   else if (scr === 'storyplay') body = <StoryPlay c={c} />;
+  else if (scr === 'tour') body = <TourPlay c={c} />;
   else if (scr === 'play') body = <div data-screen-label="Gameplay" style={{ position: 'absolute', inset: 0, background: '#0e2233' }} />;
 
   const rail = tablet && (isTab || ['intro', 'settings', 'teacher', 'contribute', 'hv', 'story'].indexOf(scr) >= 0);
