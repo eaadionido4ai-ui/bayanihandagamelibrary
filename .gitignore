@@ -10,3 +10,7 @@ design/tanghalan/out/
 public/stories/*.html
 public/stories/fonts/
 stories/standalone/
+
+# Built from tour/ by scripts/build-tour.mjs (npm run dev, npm run build, npm run tour:pitch)
+public/tour/
+tour/standalone/

@@ -13,6 +13,7 @@ npm run dev        # http://localhost:5173
 npm run build      # production build in dist/
 npm run preview    # serve dist/ at http://localhost:4173
 npm run test:stories   # play every Handaventures story in a simulated browser
+npm run tour:pitch     # the presenter's 3D tour: one offline file in tour/standalone/
 ```
 
 Wider than 900px, the app uses the tablet layout (side rail); narrower, it uses the
@@ -68,6 +69,7 @@ Logo 1b, the Bayanihan house: four neighbors in the pillar colors lifting a hous
 | HUD style | `src/engine/game-hud.css` | Restyles the real HUDs to the design: corner buttons, status pill, Bayani hint bubble, side buttons, bottom sheets. |
 | Museum | `src/museum/`, `src/screens/Tanghalan.jsx` | TANGHALAN, the walkable 3D museum (below). |
 | Stories | `stories/`, `scripts/build-stories.mjs`, `src/screens/Stories.jsx` | Handaventures, the story series (below). |
+| Island tour | `tour/`, `scripts/build-tour.mjs`, `src/screens/Tour.jsx`, `src/tour.js` | Bayani's 3D island tour of the library, and the presenter's tour for pitches (below). |
 
 To pick up a newer version of the web app, replace the file in `project/uploads/` and
 run `npm run extract-engine`. The bridge relies on the engine's element ids, on
@@ -146,6 +148,48 @@ goes back (`postMessage` with `source: 'handaventures'`).
 characters, then checks each story the way the library shows it. It also writes
 `stories/standalone/`, single-file copies of the stories (with web fonts) that work
 outside the app.
+
+## Bayani's island tour
+
+Bayani shows new players around BAYANIHanda Island, a small 3D island with one landmark for each part of
+the library: the four pillar signs, the HANDAventures story board, the creek and the game tablet, the
+TANGHALAN museum and the Champion ID medal.
+
+- **First visit:** once Home is in view, Bayani offers the tour in a welcome sheet: "Yes, show me!" or
+  "Maybe later".
+- **Later visits:** until the player takes the tour, Bayani's greeting card on Home offers it, with
+  "Show me!" and "Later". "Later" waits until the app is opened again.
+- **Anytime:** Ask Bayani has a Tour tab (not during a game, since the tour opens full screen).
+- **The tour:** one stop at a time, at the child's pace. Bayani reads each stop aloud (the voice button
+  turns that off), stepping stones show how far along the child is, and **Try it!** opens the real thing:
+  the Games screen, the story shelf, a game, the museum or the Champion ID. **Skip** ends it, and Back
+  returns to where it was opened. The last screen has "Tour again" and "Start playing".
+- **Only what kids can play now:** the library tells the tour which games are open, so a stop that names
+  games leaves out any game that is "Coming soon" (the Learn by doing stop names up to three).
+- **Progress** is kept per player in `bayanihanda_tour_v1::<player>` (`offered`, and `done` once the player
+  finishes the tour, skips it or leaves it with Try it).
+- **No 3D on the device?** The tour still runs, over a picture of the island.
+
+How it is built:
+
+| Part | Where |
+| --- | --- |
+| The tour, one file with two modes: Bayani's tour for kids, and the presenter's tour for talks and pitches | `tour/tour.html` |
+| Pictures: app screens for the presenter's tour, kids' art on the island, the island picture | `tour/screens/`, `tour/art/`, `tour/island.webp` |
+| Build | `scripts/build-tour.mjs` writes `public/tour/` (every `npm run dev` and `npm run build`; not committed) |
+| Frame, welcome sheet, Ask Bayani tab | `src/screens/Tour.jsx` |
+| Bayani's card offer | `src/screens/Home.jsx` |
+| Offer and progress | `src/tour.js`, `openTour` and `closeTour` in `src/Shell.jsx` |
+
+Inside the app the tour opens as
+`tour/index.html?embed=1&name=<player>&sound=0|1&voice=0|1&live=<open game ids>` and tells the library
+what Bayani says, when the tour is done, and where to go when it closes (`postMessage` with
+`source: 'bayani-tour'`: `say`, `hush`, `done`, `close`).
+
+**The presenter's tour** (`npm run tour:pitch`) is the same island with a one-minute guided mode, numbered
+stops, the app's screens beside the island and a presenter script. It writes
+`tour/standalone/BAYANIHanda-3D-Tour.html`, one file that runs with no internet, and `tour/standalone/web/`
+for a web host. When the app's screens change, retake the pictures in `tour/screens/`.
 
 ## Credits on the info tags
 

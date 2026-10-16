@@ -2,6 +2,7 @@ import { sx, pr } from '../ui/sx.js';
 import { Mascot, Logo, Wordmark } from '../ui/art.jsx';
 import { P, PO, G, LIVE, TIPS, TRIVIA, game, isStory } from '../data.js';
 import { loadStories } from '../stories.js';
+import { quietOffer } from '../tour.js';
 import { MuseumCard } from './Tanghalan.jsx';
 
 export default function Home({ c }) {
@@ -17,7 +18,15 @@ export default function Home({ c }) {
     { t: 'Did you know?', s: TRIVIA[Math.floor(s.homeN / 4) % TRIVIA.length][0] },
   ];
   const line = lines[s.homeN % lines.length], nextLine = lines[(s.homeN + 1) % lines.length];
-  const tapMascot = () => { patch({ homeN: s.homeN + 1, jump: s.jump + 1 }); c.speak(nextLine.t + ' ' + nextLine.s); };
+  // Bayani offers his island tour here until the player takes it ("Later" waits until the app opens again)
+  const offer = c.tourOffer;
+  const offerLine = { t: 'Hi, ' + nick + '! I’m Bayani.', s: 'Want me to show you around? It only takes a minute.' };
+  const said = offer ? offerLine : line;
+  const tapMascot = () => {
+    if (offer) { patch({ jump: s.jump + 1 }); c.speak(offerLine.t + ' ' + offerLine.s); return; }
+    patch({ homeN: s.homeN + 1, jump: s.jump + 1 }); c.speak(nextLine.t + ' ' + nextLine.s);
+  };
+  const later = () => { quietOffer(c.me ? c.me.id : null); c.refresh(); };
 
   return (
     <div data-screen-label="Home" className="scroll" style={{ ...sx('position:absolute;inset:0;background:radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef)'), padding: c.pad }}>
@@ -32,16 +41,26 @@ export default function Home({ c }) {
         </div>
         <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:18px;align-items:start')}>
           <div style={sx('display:flex;flex-direction:column;gap:16px')}>
-            <div style={sx('display:flex;align-items:flex-end;gap:12px;background:#fff;border-radius:24px;padding:14px 14px 12px;border:2px solid #d5e3ea;box-shadow:0 5px 0 rgba(20,48,66,.08)')}>
-              <button onClick={tapMascot} aria-label="Tap Bayani" style={sx('flex:none;display:flex;flex-direction:column;align-items:center;gap:4px')}>
-                <Mascot key={'hm' + s.jump} size={tablet ? 84 : 72} jump bob />
-                <span style={sx('font-size:11.5px;font-weight:900;color:#a84d04;background:#fff1e3;border-radius:999px;padding:2px 9px')}>Tap me!</span>
-              </button>
-              <div style={sx('flex:1;min-width:0;align-self:stretch;background:#eef6fa;border-radius:18px;padding:12px 40px 12px 14px;position:relative;display:flex;flex-direction:column;justify-content:center')} aria-live="polite">
-                <p style={sx("margin:0;font:800 20px/1.15 'Baloo 2',sans-serif")}>{line.t}</p>
-                <p style={sx('margin:4px 0 0;font-size:14.5px;color:#3d5563;font-weight:700;line-height:1.4;text-wrap:pretty')}>{line.s}</p>
-                <button onClick={() => c.speak(line.t + ' ' + line.s, true)} aria-label="Read aloud" style={sx('position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:#fff;font-size:14px;box-shadow:0 2px 0 #d5e3ea;display:flex;align-items:center;justify-content:center')}>🔊</button>
+            <div style={sx(offer
+              ? 'display:flex;flex-direction:column;gap:12px;background:#fff;border-radius:24px;padding:14px 14px 16px;border:2px solid #ffd873;box-shadow:0 5px 0 rgba(20,48,66,.08),0 0 0 5px rgba(255,216,115,.35)'
+              : 'display:flex;flex-direction:column;background:#fff;border-radius:24px;padding:14px 14px 12px;border:2px solid #d5e3ea;box-shadow:0 5px 0 rgba(20,48,66,.08)')}>
+              <div style={sx('display:flex;align-items:flex-end;gap:12px')}>
+                <button onClick={tapMascot} aria-label="Tap Bayani" style={sx('flex:none;display:flex;flex-direction:column;align-items:center;gap:4px')}>
+                  <Mascot key={'hm' + s.jump} size={tablet ? 84 : 72} wave={offer} jump bob />
+                  <span style={sx('font-size:11.5px;font-weight:900;color:#a84d04;background:#fff1e3;border-radius:999px;padding:2px 9px')}>Tap me!</span>
+                </button>
+                <div style={sx('flex:1;min-width:0;align-self:stretch;background:#eef6fa;border-radius:18px;padding:12px 40px 12px 14px;position:relative;display:flex;flex-direction:column;justify-content:center')} aria-live="polite">
+                  <p style={sx("margin:0;font:800 20px/1.15 'Baloo 2',sans-serif")}>{said.t}</p>
+                  <p style={sx('margin:4px 0 0;font-size:14.5px;color:#3d5563;font-weight:700;line-height:1.4;text-wrap:pretty')}>{said.s}</p>
+                  <button onClick={() => c.speak(said.t + ' ' + said.s, true)} aria-label="Read aloud" style={sx('position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:#fff;font-size:14px;box-shadow:0 2px 0 #d5e3ea;display:flex;align-items:center;justify-content:center')}>🔊</button>
+                </div>
               </div>
+              {offer && (
+                <div style={sx('display:flex;gap:10px')}>
+                  <button onClick={() => c.openTour('home')} {...pr('flex:1.5 1 0;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:#128253;color:#fff;font-weight:900;font-size:16px;padding:12px 16px;border-radius:999px;box-shadow:0 4px 0 #0b5e3b', 'transform:translateY(3px);box-shadow:0 1px 0 #0b5e3b')}>🏝️ Show me!</button>
+                  <button onClick={later} {...pr('flex:1 1 0;min-height:50px;background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;border-radius:999px;padding:12px;font-weight:900;font-size:15px;color:#3d5563', 'transform:translateY(3px)')}>Later</button>
+                </div>
+              )}
             </div>
             <div style={sx('background:#fff5df;border:2px solid #ffe2a8;border-radius:24px;padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px')}>
               <div style={sx('display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap')}>
