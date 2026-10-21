@@ -118,10 +118,12 @@ during and after a hazard).
 | Smoke at Night | Fire | Smoke Hero |
 | Lockdown at School | Lockdown (play it with a grown-up first) | Calm Hero |
 
-- **One card stands for the series.** On Home it sits below the four pillar cards, above
-  the TANGHALAN card; on Games it heads More to explore, before the museum. Tapping it opens
-  the shelf with the five stories and the player's progress (endings found, hero badges),
-  and Back returns to where it was opened.
+- **One card stands for the series.** On Home it sits below the four pillar cards, next to
+  the TANGHALAN card; on Games it heads More to explore, next to the museum. Where there is
+  room (a tablet, or a phone turned sideways) the two cards sit side by side at the same
+  height; on a phone held upright, Handaventures comes first and TANGHALAN below it. Tapping
+  it opens the shelf with the five stories and the player's progress (endings found, hero
+  badges), and Back returns to where it was opened.
 - **Before, during and after.** Every story shows the stops it covers: chips on the shelf,
   and in its intro one line each for what happens before, during and after the hazard. A
   stop with no scene yet is dashed and says Coming soon (Lockdown at School has no before
@@ -253,7 +255,8 @@ BAYANIHanda in Settings shows the same credit.
 
 TANGHALAN (Three-dimensional Animated Gallery Highlighting Youth-Generated Artworks,
 Learnings and Narratives) is a walkable 3D museum inside the library. It opens from a card under the adventures on
-Home and from the end of the Games list, so the games stay first.
+Home and from the end of the Games list, so the games stay first; the card sits beside the Handaventures card where
+there is room.
 
 - **The museum card** is a carousel: rooms in 3D and kids' drawings in turn, a different few each
   day. It moves on by itself every few seconds (not with reduced motion, and never while someone is

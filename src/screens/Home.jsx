@@ -105,7 +105,10 @@ export default function Home({ c }) {
                 );
               })}
             </div>
-            {/* Handaventures and TANGHALAN have places of their own, below the pillars */}
+          </div>
+          {/* Handaventures and TANGHALAN have places of their own, below the pillars: side by side where
+              there is room (a tablet, or a phone turned sideways), one above the other on a phone held upright */}
+          <div style={sx('grid-column:1 / -1;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px')}>
             <StoryShelfCard c={c} from="home" />
             <MuseumCard c={c} />
           </div>

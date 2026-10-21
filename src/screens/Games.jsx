@@ -86,7 +86,8 @@ export function Games({ c }) {
             <div style={sx('display:flex;align-items:center;gap:10px;font-size:13px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#4f6572')}>
               <span>✨ More to explore</span><span style={sx('flex:1;height:2px;background:#c8d9e2;border-radius:2px')} />
             </div>
-            <div style={sx('display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:12px')}>
+            {/* side by side where there is room, one above the other on a phone held upright */}
+            <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px')}>
               <StoryShelfCard c={c} from="games" />
               <MuseumTile c={c} />
             </div>

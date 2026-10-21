@@ -85,17 +85,18 @@ function Dots({ n, of }) {
 }
 
 // The storybook card that stands for all five stories, on Home (from="home") and on Games (from="games").
+// Where there is room (a tablet, or a phone turned sideways) it sits beside the TANGHALAN card and fills the
+// height of its cell, so the two cards line up; on a phone held upright they stack.
 export function StoryShelfCard({ c, from }) {
   const p = progressOf(c.me ? c.me.id : null);
-  const wide = !!c.tablet && from === 'games';
-  const card = pr('display:flex;flex-direction:' + (wide ? 'row;align-items:center;gap:28px;padding:22px 26px' : 'column;gap:12px;padding:18px') + ';width:100%;text-align:left;border-radius:26px;color:#fff;overflow:hidden;box-shadow:0 6px 0 rgba(0,0,0,.14);background:' + GREEN,
+  const card = pr('display:flex;flex-direction:column;justify-content:space-between;gap:12px;padding:18px;width:100%;height:100%;text-align:left;border-radius:26px;color:#fff;overflow:hidden;box-shadow:0 6px 0 rgba(0,0,0,.14);background:' + GREEN,
     'transform:translateY(3px);box-shadow:0 3px 0 rgba(0,0,0,.14)');
   const head = (
     <span style={sx('display:block;padding-right:34px')}>
       <span style={sx(TAG)}>{p.found ? '📖 Story series' : '✨ New · Story series'}</span>
-      <span style={sx("display:block;font:800 " + (wide ? 36 : 30) + "px/1 'Baloo 2',sans-serif;margin-top:10px;padding-top:4px")}><HvName /></span>
+      <span style={sx("display:block;font:800 30px/1 'Baloo 2',sans-serif;margin-top:10px;padding-top:4px")}><HvName /></span>
       <span style={sx('display:block;font-size:15px;font-weight:800;margin-top:4px')}>{HV.tagline}</span>
-      {wide && <span style={sx('display:block;font-size:14.5px;font-weight:700;margin-top:6px;opacity:.92;line-height:1.4')}>{HV.short}</span>}
+      {c.tablet && <span style={sx('display:block;font-size:14.5px;font-weight:700;margin-top:6px;opacity:.92;line-height:1.4')}>{HV.short}</span>}
       <span aria-label="Before, during and after a hazard" style={sx('display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:10px')}>
         {JOURNEY.map(([k, label], i) => (
           <span key={k} style={sx('display:flex;align-items:center;gap:5px')}>
@@ -107,7 +108,7 @@ export function StoryShelfCard({ c, from }) {
     </span>
   );
   const fan = (
-    <span aria-hidden="true" style={sx('position:relative;display:block;width:100%;max-width:' + (wide ? 440 : 340) + 'px;align-self:center;aspect-ratio:318/104')}>
+    <span aria-hidden="true" style={sx('position:relative;display:block;width:100%;max-width:420px;align-self:center;aspect-ratio:318/104')}>
       {STORIES.map((st, i) => (
         <img key={st.id} src={ART + st.art + '.webp'} alt=""
           style={{ ...sx('position:absolute;width:37.7%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;border:3px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.28);box-sizing:border-box'), left: FAN[i][0] + '%', top: FAN[i][1] + '%', transform: 'rotate(' + FAN[i][2] + 'deg)', zIndex: FAN[i][3] }} />
@@ -115,18 +116,14 @@ export function StoryShelfCard({ c, from }) {
     </span>
   );
   const foot = (
-    <span style={sx('display:flex;align-items:center;justify-content:' + (wide ? 'flex-start;gap:16px' : 'space-between;gap:10px') + ';flex-wrap:wrap')}>
+    <span style={sx('display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap')}>
       <span style={sx('font-size:13px;font-weight:900')}>{STORIES.length} stories · {p.found} of {p.total} endings</span>
       <span style={sx('display:flex;align-items:center;gap:6px;background:#fff;color:#0c5c3a;font-weight:900;font-size:14px;padding:8px 14px;border-radius:999px;box-shadow:0 3px 0 rgba(0,0,0,.2);white-space:nowrap')}>Open the stories ›</span>
     </span>
   );
   return (
-    <div style={sx('position:relative;grid-column:1 / -1')}>
-      <button onClick={() => c.openStories(from)} className={card.className} style={card.style}>
-        {wide
-          ? <><span style={sx('flex:1;min-width:0;display:flex;flex-direction:column;gap:16px')}>{head}{foot}</span><span style={sx('flex:0 0 46%;display:flex;justify-content:center;padding:6px 0')}>{fan}</span></>
-          : <>{head}{fan}{foot}</>}
-      </button>
+    <div style={sx('position:relative;height:100%')}>
+      <button onClick={() => c.openStories(from)} className={card.className} style={card.style}>{head}{fan}{foot}</button>
       <button onClick={() => c.patch({ sheet: 'credit', sd: HV })} aria-label="Who made Handaventures"
         style={sx('position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.7);color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.18)')}>i</button>
     </div>
