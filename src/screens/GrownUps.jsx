@@ -79,8 +79,8 @@ function ClassProgress({ c }) {
 function LessonGuide() {
   const steps = [
     ['Warm-up (5 min).', 'Ask: what do you do when the ground shakes?'],
-    ['Play (15 min).', 'Pairs play the drill game; aim for 2+ stars.'],
-    ['Do it for real (10 min).', 'Whole class practises drop, cover, hold under desks.'],
+    ['Play (15 min).', 'Pairs play Quake in Order, then say why each step comes where it does.'],
+    ['Do it for real (10 min).', 'Whole class practices drop, cover, hold under desks.'],
     ['Talk (10 min).', "Read Bayani's real-life reminder together."],
   ];
   return (

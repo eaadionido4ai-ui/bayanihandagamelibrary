@@ -5,13 +5,15 @@
   "description": "BAYANIHanda Game Library: DRRM learning games for children, as an offline Android app.",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/build-stories.mjs && node scripts/build-tour.mjs && vite",
-    "build": "node scripts/build-stories.mjs && node scripts/build-tour.mjs && vite build",
+    "dev": "node scripts/build-stories.mjs && node scripts/build-tour.mjs && node scripts/build-games.mjs && vite",
+    "build": "node scripts/build-stories.mjs && node scripts/build-tour.mjs && node scripts/build-games.mjs && vite build",
     "preview": "vite preview",
     "stories": "node scripts/build-stories.mjs",
     "tour": "node scripts/build-tour.mjs",
     "tour:pitch": "node scripts/build-tour.mjs --pitch",
+    "games": "node scripts/build-games.mjs",
     "test:stories": "node scripts/build-stories.mjs --standalone && node stories/tests/run.cjs",
+    "test:games": "node scripts/build-games.mjs --standalone && node games/tests/quake-in-order.test.cjs",
     "extract-engine": "node scripts/extract-engine.mjs",
     "android:sync": "npm run build && cap sync android",
     "android:open": "cap open android"

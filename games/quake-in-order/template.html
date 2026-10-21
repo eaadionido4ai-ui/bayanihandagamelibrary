@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f2760c">
+<title>Quake in Order</title>
+<!--@FONTS-->
+<style>/*@CSS*/</style>
+</head>
+<body data-look="lively">
+<div class="app">
+  <div class="bar">
+    <button class="ibtn" id="back" aria-label="Back">&#8592;</button>
+    <div class="ttl" id="ttl">Quake in Order</div>
+    <button class="ibtn" id="info" aria-label="About this game">i</button>
+  </div>
+  <div class="lookrow"><span>Look</span><div class="seg" role="group" aria-label="Look">
+    <button data-look="minimal">Minimalist</button><button data-look="lively">Engaging</button>
+  </div></div>
+
+  <!-- 1. the story -->
+  <section class="screen on" id="s-intro">
+    <div class="scroll">
+      <div class="pad"><div class="chips"><span class="chip">Act Fast</span><span class="chip">Earthquake</span></div></div>
+      <div class="hero" id="hero"></div>
+      <div class="bayani"><!--@MASCOT--><div class="bubble"><span id="bubt">It's math class. Your seat is <b>right next to the door</b>. Suddenly, the ground starts to shake! <b>Put the 7 steps in order</b>, then tap Simulate to see what happens.</span><button class="spk" id="spk" aria-label="Read aloud">&#128266;</button></div></div>
+      <div class="card story plain">
+        <h2>The ground starts to shake!</h2>
+        <p>It's math class. Your seat is right next to the classroom door. Suddenly, the ground starts to shake.</p>
+        <div class="mission">Put the 7 steps in the right order. Then tap Simulate to see what happens.</div>
+      </div>
+    </div>
+    <div class="foot"><button class="cta" id="go">Put the steps in order</button></div>
+  </section>
+
+  <!-- 2. order the steps -->
+  <section class="screen" id="s-order">
+    <div class="scroll pad">
+      <div class="hint" id="ohint">Drag the cards, or use the arrows. The first step goes at the top.</div>
+      <div class="list" id="list"></div>
+    </div>
+    <div class="foot"><button class="cta" id="simulate">Simulate &#9654;</button></div>
+  </section>
+
+  <!-- 3. the simulation -->
+  <section class="screen" id="s-sim">
+    <div class="simview" id="simview">
+      <div class="olay" id="olay"></div>
+      <div class="shake" id="shake">Shaking!</div>
+      <div class="cap" id="cap"><div class="g" id="capg">1</div><div id="capt">Get ready…</div></div>
+    </div>
+    <div class="strip" id="strip"></div>
+    <div class="simfoot"><button class="cta ghost" id="skip">Skip to results</button></div>
+  </section>
+
+  <!-- 4. how it went -->
+  <section class="screen" id="s-res">
+    <div class="scroll">
+      <div class="card verdict" id="verdict"></div>
+      <div class="sect">Your order</div>
+      <div class="rlist" id="rlist"></div>
+      <details class="card right"><summary>The right order, and why</summary><ol id="right"></ol></details>
+      <div class="btns">
+        <button class="cta" id="again">Change my order</button>
+        <button class="cta ghost" id="replay">Watch again</button>
+        <button class="cta ghost" id="demo">See it done right</button>
+        <button class="cta ghost" id="done" hidden>Done</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="sheet" id="sheet"><div class="in">
+  <h3>About Quake in Order</h3>
+  <p><b>Subject for code and content validation.</b> Conceptualized and developed with AI assistance by Edward Andrew A. Dionido, Science Research Specialist II, UPRI.</p>
+  <p>Part of the BAYANIHanda Game Library, under Act Fast.</p>
+  <p class="note">The steps follow Duck, Cover, and Hold, with one more: if your seat is next to the door, open it first, so a door frame bent by the shaking can't trap you.</p>
+  <button class="cta" id="close">OK</button>
+</div></div>
+<canvas class="confetti" id="confetti"></canvas>
+<!--@THREE-->
+<script>/*@APP*/</script>
+</body>
+</html>

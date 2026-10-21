@@ -22,20 +22,25 @@ const EA = ['Edward Andrew A. Dionido', 'Science Research Specialist II', 'UPRI'
 export const CREDITS_LIBRARY = [['Conceptualized and developed with AI assistance by', ...EA]];
 export const CREDITS_HV = [['Concept by', 'Celine Tatco', 'Senior Project Associate', 'UPRI'], ['Developed with AI assistance by', ...EA]];
 
-// Handaventures: five choose-your-path stories under Get Ready. They open from one storybook
-// card, play in a frame (public/stories/, built from stories/ by scripts/build-stories.mjs),
-// and the Hero ending earns the story's badge. sid is the story's own id inside the engine.
+// Handaventures: five choose-your-path stories that take a hazard from before, through during, to after.
+// They have a place of their own, like TANGHALAN: a card on Home below the four pillars and a tile on Games,
+// so the pillars hold only their standalone games. They open from that storybook card, play in a frame
+// (public/stories/, built from stories/ by scripts/build-stories.mjs), and the Hero ending earns the story's
+// badge. sid is the story's own id inside the engine. journey: what the story covers before, during and
+// after its hazard (null where the story has no scene yet).
 export const HV = {
-  id: 'hv', p: 'prep', name: 'Handaventures', icon: '📖', tagline: 'Be ready for anything.',
-  short: 'Five choose-your-path stories. Every choice changes the ending.',
+  id: 'hv', name: 'Handaventures', icon: '📖', tagline: 'Be ready for anything.',
+  short: 'Choose-your-path stories about what to do before, during and after a hazard. Every choice changes the ending.',
 };
-const story = (o) => ({ p: 'prep', series: 'hv', ...o });
+export const JOURNEY = [['before', 'Before'], ['during', 'During'], ['after', 'After']];
+const story = (o) => ({ series: 'hv', ...o });
 export const STORIES = [
   story({
     id: 'hv-kulog', sid: 'typhoon', file: 'bagyong-kulog.html', art: 'kulog', name: 'Bagyong Kulog', icon: '🌀', hazard: 'Typhoon',
     short: 'A typhoon is heading to your town. Help your family get ready before it arrives.',
     desc: 'A typhoon named Bagyong Kulog is heading to your town. Talk with your family, make choices, and see what happens.',
     badge: ['Storm Hero', '🌀'],
+    journey: { before: 'Hear the news, pack the go bag and get the house ready.', during: 'Stay safe inside through the brownout and the strong winds.', after: 'Stay away from a fallen wire the morning after.' },
     endings: [['hero', 'Typhoon Ready Hero', '⭐'], ['safe', 'Safe and Sound', '🏠'], ['lucky', 'Lucky Night', '🍀'], ['eye', 'Caught in the Eye', '🌀']],
     tip: 'A sunny morning can fool you. Typhoons can arrive fast, and getting ready takes time.',
   }),
@@ -44,6 +49,7 @@ export const STORIES = [
     short: 'Heavy rain and a rising creek. Decide when to move things up and when to go.',
     desc: 'Bagyong Agos is bringing heavy rain, and your house is near a creek. Talk with your family, make choices, and see what happens when the water rises.',
     badge: ['Flood Hero', '🌊'],
+    journey: { before: 'Move things up high and pack the go bag as the creek rises.', during: 'Leave early and stay at the evacuation center.', after: 'Go home safely and get a floodwater scratch checked.' },
     endings: [['hero', 'Flood Smart Hero', '⭐'], ['safe', 'High and Dry', '🏠'], ['lucky', 'Lucky Escape', '🍀'], ['back', 'Back Through the Water', '🌊']],
     tip: 'Never play, wade or swim in floodwater. It can hide open manholes and sharp things, and it can carry germs.',
   }),
@@ -52,6 +58,7 @@ export const STORIES = [
     short: 'The ground shakes during class. What will you do when it starts?',
     desc: 'It is a normal Monday at school, until the ground starts to shake. Talk with your teacher and classmates, make choices, and see what happens.',
     badge: ['Shake Hero', '🏫'],
+    journey: { before: 'Spot things in the classroom that could fall.', during: 'Duck, cover and hold while the ground shakes.', after: 'Walk out, stay in the open through an aftershock and go home safely.' },
     endings: [['hero', 'Quake Ready Hero', '⭐'], ['safe', 'Steady and Safe', '🏠'], ['lucky', 'Shaky Day', '🍀'], ['back', 'Back Inside', '🏫']],
     tip: 'After an earthquake, wait in an open area away from buildings, walls, trees and power lines.',
   }),
@@ -60,6 +67,7 @@ export const STORIES = [
     short: 'The smoke alarm beeps in the middle of the night. Get your family out safely.',
     desc: 'It is a quiet Friday night at home, until the smoke alarm starts beeping. Talk with your family, make choices, and see what happens.',
     badge: ['Smoke Hero', '🔥'],
+    journey: { before: 'Notice too many plugs on one warm extension cord.', during: 'Hear the smoke alarm, get out and call for help.', after: 'Talk about how you feel the next morning.' },
     endings: [['hero', 'Fire Safe Hero', '⭐'], ['safe', 'Out and Safe', '🏠'], ['lucky', 'Smoky Night', '🍀'], ['back', 'Back Into the Smoke', '🔥']],
     tip: 'Too many plugs on one extension cord can overheat and start a fire. Tell a grown-up if a cord feels warm.',
   }),
@@ -68,6 +76,7 @@ export const STORIES = [
     short: 'The principal calls a lockdown. Stay calm and quiet with your class.',
     desc: 'It is a normal Wednesday at school, until the principal calls a lockdown. Listen to your teacher, make choices, and see what happens.',
     badge: ['Calm Hero', '🔒'], grownUp: true,
+    journey: { before: null, during: 'Stay quiet and out of sight, and never open the door.', after: 'Wait to meet your family, then talk about how you feel.' },
     note: 'For grown-ups first: this story is about a school lockdown because a dangerous person may be on campus. No one is hurt, and no weapons or violence are shown. Please preview it, play it together with your child, and follow your own school\'s lockdown procedure.',
     endings: [['hero', 'Calm and Quiet Hero', '⭐'], ['safe', 'Safe Behind the Door', '🏠'], ['lucky', 'Close Call', '🍀'], ['door', 'Never Open the Door', '🚪']],
     tip: 'During a lockdown, stay quiet, stay out of sight, and listen to your teacher. Never open the door for anyone.',
@@ -122,16 +131,18 @@ export const G = [
   { id: 'nobody', p: 'resp', soon: true, name: 'Nobody Left Behind', icon: '🚪', short: 'Watch a classroom evacuation and notice if anyone is still inside.', badge: ['No One Left', '🚪'] },
   { id: 'bleed', p: 'resp', soon: true, name: 'Stop the Bleed', icon: '🩹', short: 'Put on gloves, cover the wound, then press hard to stop the bleeding.', badge: ['Stop Bleed', '🩹'] },
   { id: 'cpr', p: 'resp', soon: true, name: 'Hands-Only CPR', icon: '💓', short: 'Call for help, then push hard and fast on the chest in time with the beat.', badge: ['CPR Hero', '❤️'] },
-  // Paused for improvement (Oct 2026): shown as Coming soon, code kept. Remove soon: true to bring it back.
+  // Quake in Order (Oct 2026) takes the place of the paused Duck, Cover, and Hold drill, whose code stays in the
+  // engine. It is a page of its own, built from games/quake-in-order/ into public/games/, and plays in a frame
+  // (frame:). A round where every step is safe, with the player's own order, earns the Quake Ready badge.
   {
-    id: 'quake', p: 'resp', soon: true, name: 'Duck, Cover, and Hold', icon: '🏗️', short: 'Watch the coach, then copy the moves: drop, cover, hold on, walk out.',
-    desc: 'Watch the coach, then copy the moves: drop, cover under the sturdy table, hold on, then walk out.',
-    badge: ['Quake Ready', '🏗️'], badgeStars: 2,
-    steps: [['1', 'Watch the coach', 'The coach shows you a move, then adds another each round: drop, cover, hold on, walk out.'], ['2', 'Copy the moves', 'Tap the same moves back in the same order using the Drop, Cover, Hold on, and Walk out buttons.'], ['3', 'Keep the order right', 'Drop first, then cover under the sturdy table, hold on until the shaking stops, and only then walk out.'], ['4', 'Learn it by heart', 'Each round is a little faster, so the right order sticks in your memory.']],
-    tip: 'Try it with your whole body too. When the coach drops, covers, and holds, copy the move yourself.',
-    note: 'Practicing the drill this way makes the right moves automatic when a real earthquake comes.',
-    start: 'Start the drill',
-    remind: 'In a real earthquake, hold on under a sturdy table until the shaking stops. Then walk out calmly.',
+    id: 'quake', p: 'resp', name: 'Quake in Order', icon: '🏗️', frame: 'games/quake-in-order.html',
+    short: 'Put the earthquake steps in order, then watch your class act them out in 3D.',
+    desc: 'The ground shakes during math class, and your seat is next to the door. Put the steps of Duck, Cover, and Hold in order, then watch what happens.',
+    badge: ['Quake Ready', '🏗️'],
+    steps: [['1', 'Read the story', 'It is math class, and your seat is right next to the door. Then the ground starts to shake.'], ['2', 'Put the steps in order', 'Drag the 7 cards, or use the arrows. The first step goes at the top.'], ['3', 'Simulate', 'Watch your class act out your order in 3D, step by step.'], ['4', 'See how it went', 'Each step shows whether it kept you safe, and why. Change your order and try again.']],
+    tip: 'If your seat is next to the door, open it first. A strong quake can bend the door frame and jam the door shut.',
+    note: 'Get every step safe to earn the Quake Ready badge. On the results, See it done right shows the right order.',
+    remind: 'In a real earthquake, duck, cover and hold on under a sturdy desk until the shaking stops. Then walk out calmly with your class.',
   },
   {
     id: 'path', p: 'resp', name: 'Safe Path', icon: '🧭', short: 'Move tile by tile to the evacuation area, away from danger.',
@@ -194,6 +205,7 @@ export const RANKS = [[0, 'Getting Ready'], [1, 'Rising Champion'], [2, 'Junior 
 export const TIPS = [
   ['Pack a flashlight in your go bag. If the lights go out, you can still find your way.', 'gobag'],
   ['When the ground shakes: drop, cover, and hold on. Walk out only when the shaking stops.', 'quake'],
+  ['If your seat is next to the door when the ground shakes, open it first, so a bent door frame cannot trap your class.', 'quake'],
   ['Only fight a small fire, and only with a clear way out behind you.', 'fire'],
   ['Tall cabinets can tip over in an earthquake. Ask a grown-up to tie them to the wall.', 'hazard'],
   ['After a flood, never touch wet outlets or fallen wires. Tell an adult right away.', 'cleanup'],

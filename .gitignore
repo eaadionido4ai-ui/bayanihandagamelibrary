@@ -14,3 +14,7 @@ stories/standalone/
 # Built from tour/ by scripts/build-tour.mjs (npm run dev, npm run build, npm run tour:pitch)
 public/tour/
 tour/standalone/
+
+# Built from games/ by scripts/build-games.mjs (npm run dev, npm run build, npm run test:games)
+public/games/
+games/standalone/
