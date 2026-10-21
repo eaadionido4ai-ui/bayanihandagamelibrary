@@ -35,7 +35,8 @@ function FullName({ accent }) {
 const seenIn = (prog, id) => WORKS.filter((w) => w.room === id && prog.seen[w.id]).length;
 
 // ---------- the way in, on Home and Games (after the games, so the library comes first) ----------
-// The museum card: a carousel of rooms in 3D and kids' drawings, a different few each day.
+// The museum card: a carousel of rooms in 3D and kids' drawings, a different few each day. Where there is room
+// (a tablet, or a phone turned sideways) it sits beside the Handaventures card, filling the height of its cell.
 // It moves on by itself (never with reduced motion, off screen, or while someone is using it),
 // swipes, and every picture walks you into its room.
 const PEEK = 'tanghalan/peek/';
@@ -85,7 +86,6 @@ function MuseumEntry({ c, from }) {
   const prog = loadProgress(c.me ? c.me.id : 'guest');
   const seen = Object.keys(prog.seen).length, visited = Object.keys(prog.rooms).length;
   const fresh = !seen && !visited;
-  const wide = !!c.tablet && from === 'games';
   const [slides] = useState(() => slidesOf(Math.floor(Date.now() / 864e5)));
   const [at, setAt] = useState(0);
   const reel = useRef(null), hold = useRef(0);
@@ -118,20 +118,20 @@ function MuseumEntry({ c, from }) {
   }, []);
 
   const head = (
-    <span style={sx('display:block' + (wide ? '' : ';padding:0 52px 0 18px'))}>
+    <span style={sx('display:block;padding:0 52px 0 18px')}>
       <span style={sx('display:inline-block;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;background:rgba(255,255,255,.14);border-radius:999px;padding:4px 10px')}>{fresh ? '✨ New · 3D museum' : '🏛️ 3D museum'}</span>
-      <span style={sx("display:block;font:800 " + (wide ? 40 : 34) + "px/1 'Baloo 2',sans-serif;letter-spacing:1.5px;color:#ffd873;margin-top:10px;padding-top:4px")}>TANGHALAN</span>
+      <span style={sx("display:block;font:800 34px/1 'Baloo 2',sans-serif;letter-spacing:1.5px;color:#ffd873;margin-top:10px;padding-top:4px")}>TANGHALAN</span>
     </span>
   );
   const words = (
-    <span style={sx('display:block' + (wide ? '' : ';padding:0 18px'))}>
+    <span style={sx('display:block;padding:0 18px')}>
       <span style={sx('display:block;font-size:17px;font-weight:900')}>Halika, pasok!</span>
       <span style={sx('display:block;font-size:14px;font-weight:700;line-height:1.4;margin-top:2px;color:#e3edf3')}>A 3D museum of art and stories by kids.</span>
     </span>
   );
   const go = pr('display:flex;align-items:center;gap:6px;background:#fff;color:#16303f;font-weight:900;font-size:14px;padding:8px 14px;border-radius:999px;box-shadow:0 3px 0 rgba(0,0,0,.25);white-space:nowrap', 'transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.25)');
   const foot = (
-    <span style={sx('display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap' + (wide ? '' : ';padding:0 18px'))}>
+    <span style={sx('display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:0 18px;margin-top:auto')}>
       <span style={sx('font-size:13px;font-weight:900')}>{fresh ? ROOMS.length + ' rooms · ' + TOTAL + ' works' : visited + ' of ' + ROOMS.length + ' rooms · ' + seen + ' of ' + TOTAL + ' works'}</span>
       <button onClick={() => enter()} className={go.className} style={go.style}>{fresh ? 'Enter the museum ›' : 'Go back in ›'}</button>
     </span>
@@ -139,7 +139,7 @@ function MuseumEntry({ c, from }) {
   const pictures = (
     <div ref={reel} className="hscroll" role="group" aria-roledescription="carousel" aria-label="Pictures from TANGHALAN"
       onScroll={() => { const m = measure(); if (m) setAt(current(m)); }} onPointerDown={busy} onWheel={busy} onFocus={busy}
-      style={sx('display:flex;gap:' + GAP + 'px;scroll-snap-type:x mandatory;scroll-padding-left:' + (wide ? 0 : 18) + 'px;padding:' + (wide ? '0 0 12px' : '0 0 12px 18px') + ';margin-bottom:-12px')}>
+      style={sx('display:flex;gap:' + GAP + 'px;scroll-snap-type:x mandatory;scroll-padding-left:18px;padding:0 0 12px 18px;margin-bottom:-12px')}>
       {slides.map((s, i) => <Slide key={i} s={s} onPick={enter} />)}
       <span aria-hidden="true" style={sx('flex:none;width:8px')} />
     </div>
@@ -155,13 +155,10 @@ function MuseumEntry({ c, from }) {
     </span>
   );
   return (
-    <div style={{ position: 'relative', gridColumn: wide ? '1 / -1' : undefined }}>
+    <div style={sx('position:relative;height:100%')}>
       <div data-museum-card="" onClick={(e) => { if (!e.target.closest('button')) enter(); }}
-        style={sx('display:flex;' + (wide ? 'align-items:center;gap:20px;padding:22px 0 22px 26px' : 'flex-direction:column;gap:12px;padding:16px 0 14px') + ';cursor:pointer;border-radius:26px;color:#fff;overflow:hidden;background:linear-gradient(160deg,#21445a,#0e2233);box-shadow:0 6px 0 rgba(0,0,0,.16)')}>
-        {wide
-          ? <><span style={sx('flex:0 0 38%;min-width:0;display:flex;flex-direction:column;gap:14px')}>{head}{words}{foot}</span>
-            <span style={sx('flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;padding-top:26px')}>{pictures}{dots}</span></>
-          : <>{head}{pictures}{dots}{words}{foot}</>}
+        style={sx('display:flex;flex-direction:column;gap:12px;padding:16px 0 14px;height:100%;box-sizing:border-box;cursor:pointer;border-radius:26px;color:#fff;overflow:hidden;background:linear-gradient(160deg,#21445a,#0e2233);box-shadow:0 6px 0 rgba(0,0,0,.16)')}>
+        {head}{pictures}{dots}{words}{foot}
       </div>
       <button onClick={() => c.patch({ sheet: 'credit', sd: { id: 'tanghalan', name: 'TANGHALAN', icon: '🏛️', sub: '3D museum · ' + ROOMS.length + ' rooms' } })} aria-label="Who made TANGHALAN"
         style={sx('position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.7);color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.18)')}>i</button>
