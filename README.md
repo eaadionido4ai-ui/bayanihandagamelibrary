@@ -13,6 +13,7 @@ npm run dev        # http://localhost:5173
 npm run build      # production build in dist/
 npm run preview    # serve dist/ at http://localhost:4173
 npm run test:stories   # play every Handaventures story in a simulated browser
+npm run test:games     # check Quake in Order (its rules, and the way the library shows it)
 npm run tour:pitch     # the presenter's 3D tour: one offline file in tour/standalone/
 ```
 
@@ -69,6 +70,7 @@ Logo 1b, the Bayanihan house: four neighbors in the pillar colors lifting a hous
 | HUD style | `src/engine/game-hud.css` | Restyles the real HUDs to the design: corner buttons, status pill, Bayani hint bubble, side buttons, bottom sheets. |
 | Museum | `src/museum/`, `src/screens/Tanghalan.jsx` | TANGHALAN, the walkable 3D museum (below). |
 | Stories | `stories/`, `scripts/build-stories.mjs`, `src/screens/Stories.jsx` | Handaventures, the story series (below). |
+| Games in a frame | `games/`, `scripts/build-games.mjs`, `src/screens/GameFrame.jsx` | Games that are pages of their own, like Quake in Order (below). |
 | Island tour | `tour/`, `scripts/build-tour.mjs`, `src/screens/Tour.jsx`, `src/tour.js` | Bayani's 3D island tour of the library, and the presenter's tour for pitches (below). |
 
 To pick up a newer version of the web app, replace the file in `project/uploads/` and
@@ -84,7 +86,9 @@ photos stay in memory only, as the app's privacy note promises.
 Duck, Cover, and Hold never started in the web app ("3D view is not available on this
 device"), because `QuakeGame` calls a `_label` helper it doesn't define. The bridge
 lends it Hazard Hunt's identical helper at startup (`applyEngineFixes` in
-`src/engine/bridge.js`), so `public/engine/games.js` stays an exact copy.
+`src/engine/bridge.js`), so `public/engine/games.js` stays an exact copy. Since October
+2026 the library shows Quake in Order in its place (below); the drill's code stays in
+the engine.
 
 ## For grown-ups
 
@@ -97,9 +101,14 @@ Settings has a "For grown-ups" section behind a multiplication question:
 
 ## Handaventures, the story series
 
-Handaventures ("Be ready for anything.") is a series of five choose-your-path stories
-under **Get Ready**, the Preparedness pillar. A child talks with family, makes choices and
+Handaventures ("Be ready for anything.") is a series of five choose-your-path stories about
+what to do before, during and after a hazard. A child talks with family, makes choices and
 sees what happens; every choice changes the ending, and each story has four endings.
+
+Handaventures has a place of its own, like TANGHALAN: the four pillars on Home and Games
+hold only their standalone games, each one standing for its pillar, and the stories sit
+beside them (October 2026, after the judges asked for games that teach what to do before,
+during and after a hazard).
 
 | Story | Hazard | Hero badge |
 | --- | --- | --- |
@@ -109,9 +118,14 @@ sees what happens; every choice changes the ending, and each story has four endi
 | Smoke at Night | Fire | Smoke Hero |
 | Lockdown at School | Lockdown (play it with a grown-up first) | Calm Hero |
 
-- **One card stands for the series.** Under Get Ready (and in All), the Games screen shows
-  a single storybook card. Tapping it opens the shelf with the five stories and the
-  player's progress (endings found, hero badges).
+- **One card stands for the series.** On Home it sits below the four pillar cards, above
+  the TANGHALAN card; on Games it heads More to explore, before the museum. Tapping it opens
+  the shelf with the five stories and the player's progress (endings found, hero badges),
+  and Back returns to where it was opened.
+- **Before, during and after.** Every story shows the stops it covers: chips on the shelf,
+  and in its intro one line each for what happens before, during and after the hazard. A
+  stop with no scene yet is dashed and says Coming soon (Lockdown at School has no before
+  scene yet). The lines are `journey` on each story in `src/data.js`.
 - **Each story has an intro:** Bayani's tip, chat style or cartoon style, Ate or Kuya,
   how to play, and the endings found so far. Then the story plays inside the app, in the
   library's look, with a back button to the intro.
@@ -129,7 +143,7 @@ How it is built:
 | Build: one page per story, offline fonts | `scripts/build-stories.mjs` writes `public/stories/*.html` and `public/stories/fonts/` |
 | Cover pictures and character faces | `public/stories/art/` |
 | Storybook card, shelf, intro, story frame | `src/screens/Stories.jsx` |
-| Story list, badges, endings, tips | `STORIES` and `HV` in `src/data.js` |
+| Story list, badges, endings, tips, before, during and after | `STORIES`, `HV` and `JOURNEY` in `src/data.js` |
 | Progress and preferences | `src/stories.js` |
 | Tests | `stories/tests/` |
 
@@ -190,6 +204,36 @@ what Bayani says, when the tour is done, and where to go when it closes (`postMe
 stops, the app's screens beside the island and a presenter script. It writes
 `tour/standalone/BAYANIHanda-3D-Tour.html`, one file that runs with no internet, and `tour/standalone/web/`
 for a web host. When the app's screens change, retake the pictures in `tour/screens/`.
+
+## Quake in Order
+
+Quake in Order (Act Fast) takes the place of the paused Duck, Cover, and Hold drill. It is
+math class, the player's seat is right next to the door, and the ground starts to shake.
+The player puts seven steps in order (open the door, duck, cover, hold, wait, walk out, go
+to the open field), taps Simulate, and a 3D classroom acts out exactly that order: the
+door jams if no one opened it, the desk slides if no one holds on, and the teacher counts
+everyone at the field. Each step is graded safe, could be better, or not safe, with the
+reason, and See it done right plays the right order.
+
+- **The badge.** A round where every step is safe, with the player's own order, earns
+  Quake Ready, the badge Duck, Cover, and Hold had.
+- **In the library** it opens like the other games (card, intro, Start) and plays in a
+  frame as `games/quake-in-order.html?embed=1`: the library's Engaging look, a back button
+  and a Done button that return to the intro, and nothing kept on the device by itself. It
+  tells the library when a round ends, what Bayani should read aloud and when the player
+  leaves (`postMessage` with `source: 'bayani-game'`: `result`, `say`, `hush`, `exit`).
+- **No 3D on the device?** It still plays, with drawings in place of the classroom.
+- **On its own** (`npm run test:games` writes `games/standalone/Quake-in-Order.html`), it is
+  one file with everything inside, with a switch between the Engaging and Minimalist looks,
+  for review and sharing.
+
+| Part | Where |
+| --- | --- |
+| The game: story, steps, rules, 3D classroom, results | `games/quake-in-order/` (`template.html`, `style.css`, `app.js`) |
+| Build | `scripts/build-games.mjs` writes `public/games/` (every `npm run dev` and `npm run build`; not committed) |
+| Card, intro, badge | the `quake` entry in `src/data.js` (`frame:` marks a game that plays in a frame) |
+| Frame | `src/screens/GameFrame.jsx`, `startGame` and `gameEnded` in `src/Shell.jsx` |
+| Tests | `games/tests/` |
 
 ## Credits on the info tags
 
@@ -261,10 +305,12 @@ works, collected through teachers with parents' consent:
   Capacitor plugins (`@capacitor/filesystem`, `@capacitor/share`, and a print plugin).
 - **Hands-Only CPR and Stop the Bleed** are playable in the engine but stay "Coming soon",
   as in the web app. **Nobody Left Behind** doesn't exist yet.
-- **CARES and Duck, Cover, and Hold are paused for improvement** (October 2026). Both keep
-  their code and show as "Coming soon" cards; their badges show as "Soon" on the Champion
-  ID, and the daily tips and museum works linked to them no longer offer a Play button. To
-  bring one back, remove `soon: true` from its entry in `src/data.js`.
+- **CARES is paused for improvement** (October 2026). It keeps its code and shows as a
+  "Coming soon" card; its badge shows as "Soon" on the Champion ID, and the daily tips and
+  museum works linked to it no longer offer a Play button. To bring it back, remove
+  `soon: true` from its entry in `src/data.js`. Duck, Cover, and Hold, paused at the same
+  time, is now Quake in Order.
+- **Lockdown at School has no before scene yet,** so its before stop shows as Coming soon.
 - **TANGHALAN shows sample works.** Real works need parents' consent forms and review
   before they replace the samples.
 - **Handaventures and the games are subject for code and content validation,** as their

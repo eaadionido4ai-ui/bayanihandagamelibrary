@@ -20,7 +20,7 @@ export function AskSheet({ c }) {
   const it = c.askItem();
   const g = it.game ? game(it.game) : null;
   // The tour opens full screen, so it is offered everywhere except in the middle of a game.
-  const touring = s.screen !== 'play' && s.screen !== 'storyplay';
+  const touring = ['play', 'storyplay', 'gameframe'].indexOf(s.screen) < 0;
   const fs = touring ? 14.5 : 15;
   const tab = (on, label, set) => (on
     ? <span style={{ ...sx('flex:1 1 0;text-align:center;padding:10px 4px;border-radius:999px;background:#d9650a;color:#fff;font-weight:900;box-shadow:0 3px 0 #a34a05;white-space:nowrap'), fontSize: fs }}>{label}</span>

@@ -2,6 +2,7 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 import { engine } from './engine/bridge.js';
 import { AV, LIVE, TIPS, TRIVIA, MAX_PLAYERS, av, game, rankOf, nextRank, howTo, isStory } from './data.js';
 import { StoryShelf, StoryIntro, StoryPlay } from './screens/Stories.jsx';
+import { GamePlay } from './screens/GameFrame.jsx';
 import { forgetStories, loadStoryPrefs, saveEnding, saveStoryPrefs } from './stories.js';
 import { Splash, Welcome, AddPlayer, Players } from './screens/Onboarding.jsx';
 import Home from './screens/Home.jsx';
@@ -20,7 +21,7 @@ import { AskSheet, Sheet, Snack } from './Overlays.jsx';
 const PREFS_KEY = 'bayanihanda_settings_v1';
 const PAD_PHONE = 'calc(env(safe-area-inset-top, 0px) + 22px) 18px 28px';
 const PAD_TABLET = 'calc(env(safe-area-inset-top, 0px) + 28px) 36px 36px';
-const TAB_OF = { home: 'home', games: 'games', intro: 'games', hv: 'games', story: 'games', id: 'id', players: 'players' };
+const TAB_OF = { home: 'home', games: 'games', intro: 'games', story: 'games', id: 'id', players: 'players' };
 
 function loadPrefs() {
   try {
@@ -50,7 +51,7 @@ export default function Shell() {
     filter: 'all', gameId: 'fire', mode: 0, modes: {}, from: 'games', museumFrom: 'home', result: null,
     ask: false, askKind: 'tip', askN: 0, homeN: 0, jump: 0, sheet: null, sd: null, snack: null,
     names: {}, photos: {}, aboutMore: false, ...loadPrefs(),
-    storyId: 'hv-kulog', storyFrom: 'hv', ...loadStoryPrefs(),
+    storyId: 'hv-kulog', storyFrom: 'hv', hvFrom: 'games', ...loadStoryPrefs(),
   }));
   const [, refresh] = useReducer((x) => x + 1, 0);
   const patch = (p) => setS((prev) => ({ ...prev, ...(typeof p === 'function' ? p(prev) : p) }));
@@ -126,13 +127,28 @@ export default function Shell() {
     go('intro', { gameId: id, mode: s.modes[id] || 0, from });
   }
   function startGame(id, mode) {
+    // A game that is a page of its own (Quake in Order) plays in a frame instead of the 3D engine.
+    const g = game(id || s.gameId);
+    if (g.frame) {
+      try { window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
+      go('gameframe', { gameId: g.id });
+      return;
+    }
     if (!engine.ready) { snackShow('The 3D games could not start on this device.'); return; }
     try { window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
     engine.start(id || s.gameId, mode == null ? s.mode : mode);
   }
 
-  // Handaventures: the shelf, a story, and what happens when a story reaches an ending
-  const openStories = () => go('hv');
+  // A game in a frame finished a round. A safe round, played with the player's own order, earns its badge.
+  function gameEnded(g, d) {
+    if (!g || !d || d.demo || !d.safe) return;
+    if (engine.ready && engine.earn(g.id)) snackShow('🏅 New badge: ' + g.badge[0] + '!');
+    refresh();
+  }
+
+  // Handaventures: the shelf, a story, and what happens when a story reaches an ending.
+  // The shelf opens from its card on Home or its tile on Games, and Back returns there.
+  const openStories = (from) => go('hv', { hvFrom: from === 'home' ? 'home' : 'games' });
   function startStory() {
     saveStoryPrefs(s.storyMode, s.storyHero);
     try { window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
@@ -161,7 +177,7 @@ export default function Shell() {
     if (reason === 'skip' || reason === 'try' || reason === 'end') tourDone();
     const gid = typeof to === 'string' && to.indexOf('game:') === 0 ? to.slice(5) : null;
     if (to === 'games') go('games', { filter: 'all' });
-    else if (to === 'stories') go('hv');
+    else if (to === 'stories') openStories('home');
     else if (to === 'museum') go('museum', { museumFrom: 'home', museumRoom: null });
     else if (to === 'id') go('id');
     else if (gid && LIVE.some((g) => g.id === gid)) openGame(gid);
@@ -205,7 +221,7 @@ export default function Shell() {
   function askItem(st = s) {
     if (st.askKind === 'trivia') { const t = TRIVIA[st.askN % TRIVIA.length]; return { kind: '❓ DID YOU KNOW?', text: t[0], game: t[1] }; }
     const list = [];
-    if (['intro', 'play', 'result'].indexOf(st.screen) >= 0) { const g = game(st.gameId); list.push(['💡 TIP FOR ' + g.name.toUpperCase(), howTo(g, st.mode).tip, g.id]); }
+    if (['intro', 'play', 'result', 'gameframe'].indexOf(st.screen) >= 0) { const g = game(st.gameId); list.push(['💡 TIP FOR ' + g.name.toUpperCase(), howTo(g, st.mode).tip, g.id]); }
     if (st.screen === 'story') { const g = game(st.storyId); list.push(['💡 TIP FOR ' + g.name.toUpperCase(), g.tip, g.id]); }
     if (st.screen === 'id') list.push(['🏆 CHAMPION TIP', next ? 'You have ' + count + ' badge' + (count === 1 ? '' : 's') + '. Earn ' + next.need + ' more to become ' + next.name + '!' : 'You are a Master DRRM Champion! Keep playing to stay sharp.', null]);
     let tips = TIPS;
@@ -240,9 +256,10 @@ export default function Shell() {
       case 'players': if (engine.activeId()) go('home'); break;
       case 'teacher': case 'contribute': go('settings'); break;
       case 'museum': go(c.museumFrom || 'home'); break;
-      case 'hv': go('games'); break;
+      case 'hv': go(c.hvFrom || 'games'); break;
       case 'story': go(c.storyFrom || 'hv'); break;
       case 'storyplay': go('story'); break;
+      case 'gameframe': go('intro'); break;
       case 'tour': go(c.tourFrom || 'home'); break;
       default: if (engine.activeId()) go('home'); break;
     }
@@ -270,10 +287,10 @@ export default function Shell() {
     players, me, myAv, nick, mine, count, rank, next, countOf: (pid) => countOf(engine.earned(pid)),
     go, refresh, speak, snackShow, afterSplash, newPlayer, editPlayer, savePlayer, pickPlayer, removePlayer,
     resetBadges: () => { engine.resetBadges(); refresh(); },
-    openGame, startGame, askItem, openAsk, openStories, startStory, storyEnded,
+    openGame, startGame, gameEnded, askItem, openAsk, openStories, startStory, storyEnded,
     openTour, closeTour, tourDone, tourOffer: !!activeId && cardOffer(activeId),
     setBack: (fn) => { backHook.current = fn; },
-    tabOf: scr === 'museum' ? s.museumFrom : TAB_OF[scr],
+    tabOf: scr === 'museum' ? s.museumFrom : scr === 'hv' || (scr === 'story' && s.storyFrom === 'hv') ? s.hvFrom || 'games' : TAB_OF[scr],
   };
 
   let body = null;
@@ -293,6 +310,7 @@ export default function Shell() {
   else if (scr === 'hv') body = <StoryShelf c={c} />;
   else if (scr === 'story') body = <StoryIntro c={c} />;
   else if (scr === 'storyplay') body = <StoryPlay c={c} />;
+  else if (scr === 'gameframe') body = <GamePlay c={c} />;
   else if (scr === 'tour') body = <TourPlay c={c} />;
   else if (scr === 'play') body = <div data-screen-label="Gameplay" style={{ position: 'absolute', inset: 0, background: '#0e2233' }} />;
 

@@ -77,7 +77,6 @@ export function Games({ c }) {
                       style={sx('position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:1.5px solid #d5e3ea;color:#4f6572;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;background:#fff')}>i</button>
                   </div>
                 )))}
-                {STORIES.some((x) => x.p === pid) && <StoryShelfCard c={c} />}
               </div>
             </div>
           );
@@ -85,9 +84,12 @@ export function Games({ c }) {
         {s.filter === 'all' && (
           <div style={sx('display:flex;flex-direction:column;gap:12px;margin-top:4px')}>
             <div style={sx('display:flex;align-items:center;gap:10px;font-size:13px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#4f6572')}>
-              <span>🏛️ More to explore</span><span style={sx('flex:1;height:2px;background:#c8d9e2;border-radius:2px')} />
+              <span>✨ More to explore</span><span style={sx('flex:1;height:2px;background:#c8d9e2;border-radius:2px')} />
             </div>
-            <div style={sx('display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:12px')}><MuseumTile c={c} /></div>
+            <div style={sx('display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:12px')}>
+              <StoryShelfCard c={c} from="games" />
+              <MuseumTile c={c} />
+            </div>
           </div>
         )}
       </div>

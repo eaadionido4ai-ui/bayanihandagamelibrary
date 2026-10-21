@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { sx, pr } from '../ui/sx.js';
 import { Mascot } from '../ui/art.jsx';
-import { HV, STORIES, game } from '../data.js';
+import { HV, JOURNEY, STORIES, game } from '../data.js';
 import { foundIn, loadStories } from '../stories.js';
 
-// Handaventures, the story series under Get Ready (design option B, the storybook shelf):
-// the storybook card on the Games screen, the shelf of five stories, a story's intro,
-// and the frame the story plays in. The stories themselves are built from stories/.
+// Handaventures, the story series (design option B, the storybook shelf). It has a place of its own, like
+// TANGHALAN: the storybook card on Home (below the four pillars) and on Games (More to explore), the shelf of
+// five stories, a story's intro, and the frame the story plays in. Each story shows what it covers before,
+// during and after its hazard. The stories themselves are built from stories/.
 
 const BG = 'radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef)';
 const GREEN = 'linear-gradient(135deg,#1e9c66,#0c5c3a)';
@@ -28,6 +29,51 @@ function progressOf(pid) {
   return { found, total };
 }
 
+// Before, during and after: the stops a story covers, in the colors of the pillars they belong to
+// (getting ready, acting fast, bouncing back). A stop with no scene yet is dashed.
+const STOP = { before: ['#0c5c3a', '#e5f6ee'], during: ['#a84d04', '#fff1e3'], after: ['#5a3a9e', '#f1ebfd'] };
+const has = (st, k) => !!(st.journey && st.journey[k]);
+const covers = (st) => {
+  const yes = JOURNEY.filter(([k]) => has(st, k)).map(([, l]) => l.toLowerCase());
+  const no = JOURNEY.filter(([k]) => !has(st, k)).map(([, l]) => l.toLowerCase());
+  return 'Covers ' + yes.join(', ').replace(/, ([^,]*)$/, ' and $1') + (no.length ? '. Coming soon: ' + no.join(', ') : '');
+};
+
+export function JourneyChips({ st }) {
+  return (
+    <span role="img" aria-label={covers(st)} style={sx('display:flex;gap:4px;flex-wrap:wrap')}>
+      {JOURNEY.map(([k, label]) => (has(st, k)
+        ? <span key={k} style={{ ...sx('font-size:10.5px;font-weight:900;border-radius:999px;padding:2px 7px'), color: STOP[k][0], background: STOP[k][1] }}>{label}</span>
+        : <span key={k} style={sx('font-size:10.5px;font-weight:900;border-radius:999px;padding:1px 6px;border:1.5px dashed #b9ccd8;color:#6d8592')}>{label}</span>))}
+    </span>
+  );
+}
+
+// The journey in a story's intro: what happens before, during and after, so a teacher sees it at a glance.
+function Journey({ st, wide }) {
+  return (
+    <div style={sx('display:grid;grid-template-columns:' + (wide ? 'repeat(3,minmax(0,1fr))' : '1fr') + ';gap:10px')}>
+      {JOURNEY.map(([k, label], i) => (has(st, k) ? (
+        <div key={k} style={{ ...sx('background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 4px 0 rgba(20,48,66,.08);display:flex;gap:10px;align-items:flex-start'), borderLeft: '5px solid ' + STOP[k][0] }}>
+          <span style={{ ...sx("width:30px;height:30px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font:800 16px/1 'Baloo 2',sans-serif;padding-top:2px"), background: STOP[k][0] }}>{i + 1}</span>
+          <span style={sx('min-width:0')}>
+            <b style={{ ...sx('display:block;font-size:12px;font-weight:900;letter-spacing:1px;text-transform:uppercase'), color: STOP[k][0] }}>{label}</b>
+            <span style={sx('display:block;font-size:14px;font-weight:700;line-height:1.4;color:#25404e;margin-top:2px')}>{st.journey[k]}</span>
+          </span>
+        </div>
+      ) : (
+        <div key={k} style={sx('border:2px dashed #b9ccd8;background:rgba(255,255,255,.55);border-radius:18px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start')}>
+          <span style={sx("width:30px;height:30px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;color:#6d8592;border:2px dashed #b9ccd8;font:800 16px/1 'Baloo 2',sans-serif;padding-top:2px;box-sizing:border-box")}>{i + 1}</span>
+          <span style={sx('min-width:0')}>
+            <b style={sx('display:block;font-size:12px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:#4f6572')}>{label}</b>
+            <span style={sx('display:block;font-size:14px;font-weight:700;line-height:1.4;color:#4f6572;margin-top:2px')}>Coming soon: a scene for this part of the story.</span>
+          </span>
+        </div>
+      )))}
+    </div>
+  );
+}
+
 function Dots({ n, of }) {
   return (
     <span style={sx('display:flex;gap:4px')} aria-label={n + ' of ' + of + ' endings found'}>
@@ -38,10 +84,10 @@ function Dots({ n, of }) {
   );
 }
 
-// The storybook card that stands for all five stories under Get Ready.
-export function StoryShelfCard({ c }) {
+// The storybook card that stands for all five stories, on Home (from="home") and on Games (from="games").
+export function StoryShelfCard({ c, from }) {
   const p = progressOf(c.me ? c.me.id : null);
-  const wide = !!c.tablet;
+  const wide = !!c.tablet && from === 'games';
   const card = pr('display:flex;flex-direction:' + (wide ? 'row;align-items:center;gap:28px;padding:22px 26px' : 'column;gap:12px;padding:18px') + ';width:100%;text-align:left;border-radius:26px;color:#fff;overflow:hidden;box-shadow:0 6px 0 rgba(0,0,0,.14);background:' + GREEN,
     'transform:translateY(3px);box-shadow:0 3px 0 rgba(0,0,0,.14)');
   const head = (
@@ -50,6 +96,14 @@ export function StoryShelfCard({ c }) {
       <span style={sx("display:block;font:800 " + (wide ? 36 : 30) + "px/1 'Baloo 2',sans-serif;margin-top:10px;padding-top:4px")}><HvName /></span>
       <span style={sx('display:block;font-size:15px;font-weight:800;margin-top:4px')}>{HV.tagline}</span>
       {wide && <span style={sx('display:block;font-size:14.5px;font-weight:700;margin-top:6px;opacity:.92;line-height:1.4')}>{HV.short}</span>}
+      <span aria-label="Before, during and after a hazard" style={sx('display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:10px')}>
+        {JOURNEY.map(([k, label], i) => (
+          <span key={k} style={sx('display:flex;align-items:center;gap:5px')}>
+            {i > 0 && <span aria-hidden="true" style={sx('font-weight:900;opacity:.75')}>›</span>}
+            <span style={sx('font-size:12px;font-weight:900;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 10px')}>{label}</span>
+          </span>
+        ))}
+      </span>
     </span>
   );
   const fan = (
@@ -68,7 +122,7 @@ export function StoryShelfCard({ c }) {
   );
   return (
     <div style={sx('position:relative;grid-column:1 / -1')}>
-      <button onClick={c.openStories} className={card.className} style={card.style}>
+      <button onClick={() => c.openStories(from)} className={card.className} style={card.style}>
         {wide
           ? <><span style={sx('flex:1;min-width:0;display:flex;flex-direction:column;gap:16px')}>{head}{foot}</span><span style={sx('flex:0 0 46%;display:flex;justify-content:center;padding:6px 0')}>{fan}</span></>
           : <>{head}{fan}{foot}</>}
@@ -95,14 +149,14 @@ export function StoryShelf({ c }) {
     <div data-screen-label="Handaventures" className="scroll" style={{ ...sx('position:absolute;inset:0'), background: BG, padding: c.pad }}>
       <div style={sx('max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px')}>
         <div style={sx('display:flex;align-items:center;gap:10px')}>
-          <button onClick={() => c.go('games')} aria-label="Back" style={sx(BACK)}>←</button>
+          <button onClick={() => c.go(c.s.hvFrom || 'games')} aria-label="Back" style={sx(BACK)}>←</button>
           <div style={sx('flex:1')} />
           <button onClick={() => c.patch({ sheet: 'credit', sd: HV })} style={sx(PILL)}>ⓘ Credits</button>
         </div>
 
         <div style={{ ...sx('border-radius:28px;color:#fff;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 6px 0 rgba(0,0,0,.12)'), background: GREEN }}>
           <div>
-            <span style={sx(TAG)}>🎒 Get Ready · Story series</span>
+            <span style={sx(TAG)}>📖 Story series · Before, during, after</span>
             <h1 style={sx("margin:10px 0 0;font:800 34px/1 'Baloo 2',sans-serif;padding-top:4px")}><HvName /></h1>
             <p style={sx('margin:4px 0 0;font-size:15px;font-weight:800')}>{HV.tagline} {HV.short}</p>
           </div>
@@ -126,6 +180,7 @@ export function StoryShelf({ c }) {
             <span style={sx('flex:1;min-width:0;display:flex;flex-direction:column;gap:4px' + (wide ? ';justify-content:center' : ''))}>
               <span style={sx("font:800 " + (wide ? 24 : 20) + "px/1.1 'Baloo 2',sans-serif;padding-top:3px")}>{first.name}</span>
               <span style={sx('font-size:' + (wide ? 14.5 : 13.5) + 'px;font-weight:700;color:#4f6572;line-height:1.35')}>{first.short}</span>
+              <span style={sx('margin-top:4px')}><JourneyChips st={first} /></span>
               <span style={sx('margin-top:4px')}><Dots n={foundOf(first)} of={first.endings.length} /></span>
             </span>
             {wide
@@ -144,6 +199,7 @@ export function StoryShelf({ c }) {
               </span>
               <span style={sx('display:flex;flex-direction:column;gap:6px;padding:10px 12px 12px')}>
                 <span style={sx("font:800 16.5px/1.1 'Baloo 2',sans-serif;padding-top:2px")}>{st.name}</span>
+                <JourneyChips st={st} />
                 <Dots n={foundOf(st)} of={st.endings.length} />
               </span>
             </button>
@@ -181,13 +237,16 @@ export function StoryIntro({ c }) {
           <div style={{ ...sx('border-radius:28px;color:#fff;padding:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;box-shadow:0 6px 0 rgba(0,0,0,.12)'), background: GREEN }}>
             <span style={sx('width:86px;height:86px;border-radius:26px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:48px;flex:none;box-shadow:0 4px 0 rgba(0,0,0,.15)')}>{st.icon}</span>
             <div style={sx('flex:1 1 200px;min-width:0')}>
-              <span style={sx(TAG)}>🎒 Get Ready · Handaventures</span>
+              <span style={sx(TAG)}>📖 Handaventures · {st.hazard}</span>
               <h1 style={sx("margin:8px 0 0;font:800 28px/1.05 'Baloo 2',sans-serif")}>{st.name}</h1>
               <p style={sx('margin:6px 0 0;font-size:15px;font-weight:700;line-height:1.45;text-wrap:pretty')}>{st.desc}</p>
             </div>
           </div>
 
           {st.note && <p style={sx('margin:0;background:#fff1e3;border:2px solid #ffd9ad;border-radius:18px;padding:12px 14px;font-size:14.5px;font-weight:800;line-height:1.45;color:#7a3b00')}>👪 {st.note}</p>}
+
+          <div style={sx(H2)}>Before, during and after</div>
+          <Journey st={st} wide={!!c.tablet} />
 
           <div style={sx('display:flex;align-items:flex-end;gap:10px')}>
             <span style={sx('flex:none')}><Mascot size={56} bob /></span>
