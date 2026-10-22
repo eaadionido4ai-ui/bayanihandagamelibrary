@@ -13,7 +13,7 @@ npm run dev        # http://localhost:5173
 npm run build      # production build in dist/
 npm run preview    # serve dist/ at http://localhost:4173
 npm run test:stories   # play every Handaventures story in a simulated browser
-npm run test:games     # check Quake in Order (its rules, and the way the library shows it)
+npm run test:games     # check the order games (their rules, and the way the library shows them)
 npm run tour:pitch     # the presenter's 3D tour: one offline file in tour/standalone/
 ```
 
@@ -70,7 +70,7 @@ Logo 1b, the Bayanihan house: four neighbors in the pillar colors lifting a hous
 | HUD style | `src/engine/game-hud.css` | Restyles the real HUDs to the design: corner buttons, status pill, Bayani hint bubble, side buttons, bottom sheets. |
 | Museum | `src/museum/`, `src/screens/Tanghalan.jsx` | TANGHALAN, the walkable 3D museum (below). |
 | Stories | `stories/`, `scripts/build-stories.mjs`, `src/screens/Stories.jsx` | Handaventures, the story series (below). |
-| Games in a frame | `games/`, `scripts/build-games.mjs`, `src/screens/GameFrame.jsx` | Games that are pages of their own, like Quake in Order (below). |
+| Games in a frame | `games/`, `scripts/build-games.mjs`, `src/screens/GameFrame.jsx` | Games that are pages of their own: the order games, Quake in Order, Heart in Order and Press On (below). |
 | Island tour | `tour/`, `scripts/build-tour.mjs`, `src/screens/Tour.jsx`, `src/tour.js` | Bayani's 3D island tour of the library, and the presenter's tour for pitches (below). |
 
 To pick up a newer version of the web app, replace the file in `project/uploads/` and
@@ -207,35 +207,53 @@ stops, the app's screens beside the island and a presenter script. It writes
 `tour/standalone/BAYANIHanda-3D-Tour.html`, one file that runs with no internet, and `tour/standalone/web/`
 for a web host. When the app's screens change, retake the pictures in `tour/screens/`.
 
-## Quake in Order
+## The order games: Quake in Order, Heart in Order and Press On
 
-Quake in Order (Act Fast) takes the place of the paused Duck, Cover, and Hold drill. It is
-math class, the player's seat is right next to the door, and the ground starts to shake.
-The player puts seven steps in order (open the door, duck, cover, hold, wait, walk out, go
-to the open field), taps Simulate, and a 3D classroom acts out exactly that order: the
-door jams if no one opened it, the desk slides if no one holds on, and the teacher counts
-everyone at the field. Each step is graded safe, could be better, or not safe, with the
-reason, and See it done right plays the right order.
+Three games under Act Fast share one engine. The player puts the steps of a response in order, taps Simulate,
+and a 3D scene acts out exactly that order. Each step is graded safe, could be better, or not safe, with the
+reason; See it done right plays the right order. Each game has two levels, picked on the library's intro.
 
-- **The badge.** A round where every step is safe, with the player's own order, earns
-  Quake Ready, the badge Duck, Cover, and Hold had.
-- **In the library** it opens like the other games (card, intro, Start) and plays in a
-  frame as `games/quake-in-order.html?embed=1`: the library's Engaging look, a back button
-  and a Done button that return to the intro, and nothing kept on the device by itself. It
-  tells the library when a round ends, what Bayani should read aloud and when the player
-  leaves (`postMessage` with `source: 'bayani-game'`: `result`, `say`, `hush`, `exit`).
-- **No 3D on the device?** It still plays, with drawings in place of the classroom.
-- **On its own** (`npm run test:games` writes `games/standalone/Quake-in-Order.html`), it is
-  one file with everything inside, with a switch between the Engaging and Minimalist looks,
-  for review and sharing.
+- **Quake in Order** takes the place of the paused Duck, Cover, and Hold drill. It is math class and the ground
+  starts to shake. *Easy*: duck, cover and hold, while Tonton, who sits nearest the door, opens it; the game
+  repeats that whoever sits nearest the door opens it first. *Difficult*: the player's own seat is next to the
+  door, so the seven steps are open the door, duck, cover, hold, wait, walk out, and line up at the open field.
+  The door jams if no one opened it, the desk slides if no one holds on, and the teacher counts everyone at the
+  field.
+- **Heart in Order** (CPR) and **Press On** (bleeding control) bring back the paused first aid games. Both happen
+  in a first aid class, on Manny the practice manikin and on a practice arm with a pretend cut, so no one is hurt
+  and no blood is shown. *Easy* follows Check, Call, Compress (CPR) and Alert, Bleeding, Compress (bleeding), for
+  younger players. *Difficult* has seven steps each, from looking around first (water near a plugged-in fan;
+  broken glass) to keeping going until help takes over. Where first aid courses differ, both orders count as
+  right: calling 911 before or after checking breathing, and gloves before or after the call. After a round, a
+  hands-on practice: push to the beat (100 to 120 a minute), or press and hold for 10 seconds.
+- **Gentle outcomes.** A not safe step is explained and can be retried; nothing shows anyone hurt. Nurse Lea steps
+  in when someone goes near before looking around.
+- **The badge.** A round where every step is safe, with the player's own order, earns the game's badge at either
+  level: Quake Ready, CPR Hero, Bleeding Stopper.
+- **In the library** each opens like the other games (card, intro with the level, Start) and plays in a frame as
+  `games/<game>.html?embed=1&level=easy|hard&sound=0|1`: the library's Engaging look, a back button and a Done
+  button that return to the intro, and nothing kept on the device by itself. It tells the library when a round
+  ends, what Bayani should read aloud and when the player leaves (`postMessage` with `source: 'bayani-game'`:
+  `result`, `say`, `hush`, `exit`).
+- **No 3D on the device?** They still play, with drawings in place of the scene.
+- **On their own** (`npm run test:games` writes `games/standalone/Quake-in-Order.html`, `Heart-in-Order.html` and
+  `Press-On.html`), each is one file with everything inside, a level picker, and a switch between the Engaging
+  and Minimalist looks, for review and sharing.
 
 | Part | Where |
 | --- | --- |
-| The game: story, steps, rules, 3D classroom, results | `games/quake-in-order/` (`template.html`, `style.css`, `app.js`) |
+| The engine: screens, ordering, simulation player, results, practice, library link | `games/shared/core.js`, `core.css`, `template.html` |
+| 3D helpers (shapes, figures, poses, tracks, camera, labels) | `games/shared/kit3d.js` |
+| The first aid classroom (Nurse Lea, the class, signs, the AED) | `games/shared/aidroom.js` |
+| Each game: words, steps, levels, rules, scene, pictures | `games/quake-in-order/game.js`, `games/heart-in-order/game.js`, `games/press-on/game.js` |
 | Build | `scripts/build-games.mjs` writes `public/games/` (every `npm run dev` and `npm run build`; not committed) |
-| Card, intro, badge | the `quake` entry in `src/data.js` (`frame:` marks a game that plays in a frame) |
+| Cards, intros, levels, badges | the `quake`, `cpr` and `bleed` entries in `src/data.js` (`frame:` and `frameModes:`) |
 | Frame | `src/screens/GameFrame.jsx`, `startGame` and `gameEnded` in `src/Shell.jsx` |
-| Tests | `games/tests/` |
+| Tests | `games/tests/` (`npm run test:games`): every order of every level, the library flow, the single files |
+
+The first aid scenes use the green first aid sign (a white cross on green), never the red cross, which RA 10530
+protects. "Stop the Bleed" is a trademark of the US Department of Defense, so the bleeding game has a name of its
+own.
 
 ## Credits on the info tags
 
@@ -306,8 +324,9 @@ works, collected through teachers with parents' consent:
   Share opens the system share sheet where the browser supports it, and Print uses the
   browser's print dialog. The Android WebView supports none of these on its own; it needs
   Capacitor plugins (`@capacitor/filesystem`, `@capacitor/share`, and a print plugin).
-- **Hands-Only CPR and Stop the Bleed** are playable in the engine but stay "Coming soon",
-  as in the web app. **Nobody Left Behind** doesn't exist yet.
+- **The engine's Hands-Only CPR and Stop the Bleed** stay in its code. Since October 2026
+  the library shows Heart in Order and Press On in their place (above). **Nobody Left
+  Behind** doesn't exist yet.
 - **CARES is paused for improvement** (October 2026). It keeps its code and shows as a
   "Coming soon" card; its badge shows as "Soon" on the Champion ID, and the daily tips and
   museum works linked to it no longer offer a Play button. To bring it back, remove

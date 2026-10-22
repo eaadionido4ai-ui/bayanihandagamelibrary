@@ -129,20 +129,58 @@ export const G = [
     remind: 'Only fight a small fire, and only with a clear way out behind you. If the fire is big, spreading, or the room fills with smoke, get out fast, close the door, pull the fire alarm, and call for help.',
   },
   { id: 'nobody', p: 'resp', soon: true, name: 'Nobody Left Behind', icon: '🚪', short: 'Watch a classroom evacuation and notice if anyone is still inside.', badge: ['No One Left', '🚪'] },
-  { id: 'bleed', p: 'resp', soon: true, name: 'Stop the Bleed', icon: '🩹', short: 'Put on gloves, cover the wound, then press hard to stop the bleeding.', badge: ['Stop Bleed', '🩹'] },
-  { id: 'cpr', p: 'resp', soon: true, name: 'Hands-Only CPR', icon: '💓', short: 'Call for help, then push hard and fast on the chest in time with the beat.', badge: ['CPR Hero', '❤️'] },
-  // Quake in Order (Oct 2026) takes the place of the paused Duck, Cover, and Hold drill, whose code stays in the
-  // engine. It is a page of its own, built from games/quake-in-order/ into public/games/, and plays in a frame
-  // (frame:). A round where every step is safe, with the player's own order, earns the Quake Ready badge.
+  // The order games (Oct 2026), pages of their own built from games/ into public/games/ by scripts/build-games.mjs.
+  // They play in a frame (frame:), at the level picked here (frameModes, passed as &level=). A round where every step
+  // is safe, with the player's own order, earns the badge at either level.
+  // Quake in Order takes the place of the paused Duck, Cover, and Hold drill, whose code stays in the engine.
   {
-    id: 'quake', p: 'resp', name: 'Quake in Order', icon: '🏗️', frame: 'games/quake-in-order.html',
+    id: 'quake', p: 'resp', name: 'Quake in Order', icon: '🏗️', frame: 'games/quake-in-order.html', frameModes: ['easy', 'hard'],
     short: 'Put the earthquake steps in order, then watch your class act them out in 3D.',
-    desc: 'The ground shakes during math class, and your seat is next to the door. Put the steps of Duck, Cover, and Hold in order, then watch what happens.',
-    badge: ['Quake Ready', '🏗️'],
-    steps: [['1', 'Read the story', 'It is math class, and your seat is right next to the door. Then the ground starts to shake.'], ['2', 'Put the steps in order', 'Drag the 7 cards, or use the arrows. The first step goes at the top.'], ['3', 'Simulate', 'Watch your class act out your order in 3D, step by step.'], ['4', 'See how it went', 'Each step shows whether it kept you safe, and why. Change your order and try again.']],
-    tip: 'If your seat is next to the door, open it first. A strong quake can bend the door frame and jam the door shut.',
+    desc: 'The ground shakes during math class. Put the steps of Duck, Cover, and Hold in order, then watch what happens. Whoever sits nearest the door opens it first.',
+    badge: ['Quake Ready', '🏗️'], modesLabel: 'Pick a level',
+    modes: [['🙂', 'Easy', 'Duck, cover and hold. Tonton sits nearest the door, so he opens it.'], ['🎯', 'Difficult', 'Your seat is next to the door. Open it, then duck, cover, hold, wait, walk out, and line up at the field.']],
+    byMode: [
+      {
+        steps: [['1', 'Read the story', 'It is math class. Tonton sits nearest the door, so he opens it when the ground shakes.'], ['2', 'Put the steps in order', 'Drag the 3 cards, or use the arrows. The first step goes at the top.'], ['3', 'Simulate', 'Watch your class act out your order in 3D, step by step.'], ['4', 'See how it went', 'Each step shows whether it kept you safe, and why. Change your order and try again.']],
+        tip: 'Whoever sits nearest the door opens it first. A strong quake can bend the door frame and jam the door shut.',
+      },
+      {
+        steps: [['1', 'Read the story', 'It is math class, and your seat is right next to the door. Then the ground starts to shake.'], ['2', 'Put the steps in order', 'Drag the 7 cards, or use the arrows. The first step goes at the top.'], ['3', 'Simulate', 'Watch your class act out your order in 3D, step by step.'], ['4', 'See how it went', 'Each step shows whether it kept you safe, and why. Change your order and try again.']],
+        tip: 'If your seat is next to the door, open it first. A strong quake can bend the door frame and jam the door shut.',
+      },
+    ],
     note: 'Get every step safe to earn the Quake Ready badge. On the results, See it done right shows the right order.',
     remind: 'In a real earthquake, duck, cover and hold on under a sturdy desk until the shaking stops. Then walk out calmly with your class.',
+  },
+  // Heart in Order and Press On bring back the paused CPR and bleeding games. Both happen in a first aid class, on a
+  // practice manikin and a practice arm, so no one is hurt and no blood is shown.
+  {
+    id: 'cpr', p: 'resp', name: 'Heart in Order', icon: '💓', frame: 'games/heart-in-order.html', frameModes: ['easy', 'hard'],
+    short: 'Put the CPR steps in order, then watch them done on Manny, the class practice manikin.',
+    desc: 'It is first aid class, and Manny, the practice manikin, is on the mat. Put the steps of hands-only CPR in order, then watch what happens.',
+    badge: ['CPR Hero', '❤️'], modesLabel: 'Pick a level',
+    modes: [['🙂', 'Easy', 'Check, call 911, and push hard and fast. Good for younger players.'], ['🎯', 'Difficult', 'All seven steps, from looking around first to the AED and keeping going until help takes over.']],
+    byMode: [
+      { steps: [['1', 'Read the story', 'Nurse Lea asks the class to pretend Manny fell down and is not moving.'], ['2', 'Put the steps in order', 'Drag the 3 cards, or use the arrows. The first step goes at the top.'], ['3', 'Simulate', 'Watch your order done on Manny in 3D, step by step.'], ['4', 'See how it went', 'Each step shows whether it helped, and why. Then practice pushing to the beat.']] },
+      { steps: [['1', 'Read the story', 'Nurse Lea asks the class to pretend Manny fell down and is not moving.'], ['2', 'Put the steps in order', 'Drag the 7 cards, or use the arrows. The first step goes at the top.'], ['3', 'Simulate', 'Watch your order done on Manny in 3D, step by step.'], ['4', 'See how it went', 'Each step shows whether it helped, and why. Then practice pushing to the beat.']] },
+    ],
+    tip: 'Push hard and fast in the middle of the chest, 100 to 120 times a minute, and do not stop until help takes over.',
+    note: 'Get every step right to earn the CPR Hero badge. After a round, try pushing to the beat.',
+    remind: 'In real life, call 911 and get a grown-up. Learn CPR from a trained teacher, on a practice manikin like Manny.',
+  },
+  {
+    id: 'bleed', p: 'resp', name: 'Press On', icon: '🩹', frame: 'games/press-on.html', frameModes: ['easy', 'hard'],
+    short: 'Put the steps for stopping bad bleeding in order, then watch them done on a practice arm.',
+    desc: 'It is first aid class, and a practice arm with a pretend cut is on the mat. Put the steps for stopping bad bleeding in order, then watch what happens.',
+    badge: ['Bleeding Stopper', '🩹'], modesLabel: 'Pick a level',
+    modes: [['🙂', 'Easy', 'Get help, find the cut, then cover it and press hard. Good for younger players.'], ['🎯', 'Difficult', 'All seven steps, from looking around first to gloves, gauze, and pressing until help takes over.']],
+    byMode: [
+      { steps: [['1', 'Read the story', 'Nurse Lea asks the class to pretend the practice arm is bleeding a lot.'], ['2', 'Put the steps in order', 'Drag the 3 cards, or use the arrows. The first step goes at the top.'], ['3', 'Simulate', 'Watch your order done on the practice arm in 3D, step by step.'], ['4', 'See how it went', 'Each step shows whether it helped, and why. Then practice pressing and holding.']] },
+      { steps: [['1', 'Read the story', 'Nurse Lea asks the class to pretend the practice arm is bleeding a lot.'], ['2', 'Put the steps in order', 'Drag the 7 cards, or use the arrows. The first step goes at the top.'], ['3', 'Simulate', 'Watch your order done on the practice arm in 3D, step by step.'], ['4', 'See how it went', 'Each step shows whether it helped, and why. Then practice pressing and holding.']] },
+    ],
+    tip: 'Press hard on the cut with both hands and do not let go. If it soaks through, add more cloth on top.',
+    note: 'Get every step right to earn the Bleeding Stopper badge. After a round, try pressing and holding for 10 seconds.',
+    remind: 'In real life, call 911 and get a grown-up. Learn first aid from a trained teacher.',
   },
   {
     id: 'path', p: 'resp', name: 'Safe Path', icon: '🧭', short: 'Move tile by tile to the evacuation area, away from danger.',
@@ -205,7 +243,9 @@ export const RANKS = [[0, 'Getting Ready'], [1, 'Rising Champion'], [2, 'Junior 
 export const TIPS = [
   ['Pack a flashlight in your go bag. If the lights go out, you can still find your way.', 'gobag'],
   ['When the ground shakes: drop, cover, and hold on. Walk out only when the shaking stops.', 'quake'],
-  ['If your seat is next to the door when the ground shakes, open it first, so a bent door frame cannot trap your class.', 'quake'],
+  ['When the ground shakes, whoever sits nearest the door opens it first, so a bent door frame cannot trap the class.', 'quake'],
+  ['If someone falls down and will not wake up, call 911 or get a grown-up right away. Then push hard and fast in the middle of the chest.', 'cpr'],
+  ['If someone is bleeding a lot, call 911, then press hard on the cut with a clean cloth and do not let go.', 'bleed'],
   ['Only fight a small fire, and only with a clear way out behind you.', 'fire'],
   ['Tall cabinets can tip over in an earthquake. Ask a grown-up to tie them to the wall.', 'hazard'],
   ['After a flood, never touch wet outlets or fallen wires. Tell an adult right away.', 'cleanup'],
@@ -222,6 +262,7 @@ export const TRIVIA = [
   ['Bayanihan is the spirit of neighbors helping neighbors. Long ago, a whole barangay would lift a family\'s house together and carry it to a new spot!', null],
   ['BAYANIHanda plays on three Filipino words: bayani, a hero; handa, meaning ready; and bayanihan, neighbors helping neighbors.', null],
   ['PASS is how you use a fire extinguisher: Pull, Aim, Squeeze, Sweep.', 'fire'],
+  ['An AED is a small machine that can help a heart beat right again. It talks you through every step, so anyone can use it.', 'cpr'],
   ['Mangrove roots are like a green wall by the sea. They slow down big waves and storm surge.', 'cares'],
   ['Water always flows downhill and pools in the lowest places. Homes on high ground stay drier in a flood.', 'cares'],
   ['Small creeks are branches of the river system. When we block them, the water overflows into homes.', 'sapa'],

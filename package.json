@@ -13,7 +13,7 @@
     "tour:pitch": "node scripts/build-tour.mjs --pitch",
     "games": "node scripts/build-games.mjs",
     "test:stories": "node scripts/build-stories.mjs --standalone && node stories/tests/run.cjs",
-    "test:games": "node scripts/build-games.mjs --standalone && node games/tests/quake-in-order.test.cjs",
+    "test:games": "node scripts/build-games.mjs --standalone && node games/tests/run.cjs",
     "extract-engine": "node scripts/extract-engine.mjs",
     "android:sync": "npm run build && cap sync android",
     "android:open": "cap open android"

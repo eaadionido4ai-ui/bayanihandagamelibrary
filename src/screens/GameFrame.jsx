@@ -3,15 +3,21 @@ import { sx } from '../ui/sx.js';
 import { game } from '../data.js';
 
 // Games that are pages of their own (built from games/ into public/games/ by scripts/build-games.mjs) play in a
-// frame, the way the Handaventures stories do. For now that is Quake in Order. The game tells the library when a
-// round ends, what Bayani should read aloud, and when the player leaves (postMessage with source 'bayani-game').
+// frame, the way the Handaventures stories do: the order games (Quake in Order, Heart in Order and Press On). The
+// frame opens at the level picked on the intro (&level=) and with the sound setting (&sound=). The game tells the
+// library when a round ends, what Bayani should read aloud, and when the player leaves (postMessage with source
+// 'bayani-game').
+export function frameSrc(g, mode, sound) {
+  const level = g.frameModes ? g.frameModes[mode] || g.frameModes[0] : null;
+  return g.frame + '?embed=1' + (level ? '&level=' + level : '') + '&sound=' + (sound ? 1 : 0);
+}
 export function GamePlay({ c }) {
   const g = game(c.s.gameId);
   const frame = useRef(null);
   const live = useRef(c);
   live.current = c;
   // Fixed at the start, so earning a badge never reloads the game.
-  const [src] = useState(() => g.frame + '?embed=1');
+  const [src] = useState(() => frameSrc(g, c.s.mode, c.s.sound));
   useEffect(() => {
     function onMessage(e) {
       const d = e.data;
