@@ -48,7 +48,7 @@ export default function Settings({ c }) {
           <p style={sx('margin:6px 0 0;line-height:1.55;color:#25404e;font-weight:600;font-size:15px')}>BAYANIHanda Game Library turns everyday safety lessons into short, playable adventures for children. The games are grouped around the four parts of disaster risk reduction and management: preventing and reducing hazards, preparing before a disaster, responding when one strikes, and recovering afterward.</p>
           {s.aboutMore && (
             <>
-              <p style={sx(ABOUT_P)}>The concepts behind each pillar are turned into short, hands-on games so learning about disasters becomes fun instead of frightening. The playful approach draws young learners in and helps the lessons stick. Every game runs fully offline on a phone or tablet, keeps no personal data, and speaks its tips aloud so younger and older children can play side by side.</p>
+              <p style={sx(ABOUT_P)}>The concepts behind each pillar are turned into short, hands-on games so learning about disasters becomes fun instead of frightening. The playful approach draws young learners in and helps the lessons stick. Every game runs fully offline on a phone or tablet, keeps the few details a grown-up enters (a nickname, a birthday and the grown-up's name) on the device only, and speaks its tips aloud so younger and older children can play side by side.</p>
               <p style={sx(ABOUT_P)}>Finish a game with flying colors and you earn a badge for your Champion ID. Together the games build the calm, ready habits that help a child act well in the first minutes of an emergency.</p>
             </>
           )}

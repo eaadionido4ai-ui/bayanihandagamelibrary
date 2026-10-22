@@ -133,6 +133,46 @@ function applyEngineFixes() {
   if (W.QuakeGame && !W.QuakeGame._label && W.HazardHunt && W.HazardHunt._label) {
     W.QuakeGame._label = W.HazardHunt._label;
   }
+  // The first aid kits (October 2026). The web app drew the Go Bag and Hazard Hunt kits with a red cross, an
+  // emblem the Philippines protects for the Red Cross (RA 10530, which also covers look-alikes). Redraw both as
+  // the first aid sign instead, a white cross on green (ISO 7010 E003), as in the order games.
+  const recolor = (g, map) => g.traverse((o) => {
+    const to = o.isMesh && o.material && o.material.color ? map[o.material.color.getHex()] : undefined;
+    if (to !== undefined) o.material.color.setHex(to);
+  });
+  if (W.GoBag && W.GoBag._make && !W.GoBag._make.firstAid) {
+    const make = W.GoBag._make;
+    W.GoBag._make = function (id) {
+      const g = make.apply(this, arguments);
+      if (id !== 'firstaid' || !g) return g;
+      // a green box and lid, and a white cross on the front where the latch was (the cross on top, under the
+      // handle, goes)
+      g.traverse((o) => {
+        if (!o.isMesh) return;
+        const hex = o.material.color.getHex();
+        if (hex === 0xc0c4c8 || (hex === 0xffffff && Math.abs(o.position.y - 0.15) < 1e-6)) o.visible = false;
+      });
+      recolor(g, { 0xf0f0f0: 0x1e9c5a, 0xd23b3b: 0x17834a });
+      [[0.052, 0.016], [0.016, 0.052]].forEach(([wd, ht]) => {
+        const bar = this._box(wd, ht, 0.004, this._M(0xffffff));
+        bar.position.set(0, 0.056, 0.067); g.add(bar);
+      });
+      return g;
+    };
+    W.GoBag._make.firstAid = true;
+  }
+  if (W.HazardHunt && W.HazardHunt._prop && !W.HazardHunt._prop.firstAid) {
+    const prop = W.HazardHunt._prop;
+    W.HazardHunt._prop = function (kind) {
+      const g = prop.apply(this, arguments);
+      if (kind !== 'firstaid' || !g) return g;
+      // the red cross becomes white, in the middle of the green box's front
+      g.traverse((o) => { if (o.isMesh && o.material.color.getHex() === 0xd23b3b) o.position.y = 0.33; });
+      recolor(g, { 0xf0f0f0: 0x1e9c5a, 0xd23b3b: 0xffffff });
+      return g;
+    };
+    W.HazardHunt._prop.firstAid = true;
+  }
   // The extinguisher mist never showed: its particles start parked at y = -100,
   // so three.js measures the spray's bounds there once and culls it every frame
   // after. Always draw it.

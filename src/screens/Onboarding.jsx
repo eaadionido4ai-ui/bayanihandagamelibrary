@@ -1,6 +1,8 @@
 import { sx, pr } from '../ui/sx.js';
 import { Mascot, Logo, Dots } from '../ui/art.jsx';
 import { AV, MAX_PLAYERS, av } from '../data.js';
+import { ageOn, complete, daysIn, draftCheck, profileOf, validDate } from '../profiles.js';
+import { CONTACT_EMAIL } from './GrownUps.jsx';
 
 const BG = 'radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef)';
 const CTA = 'width:100%;background:#d9650a;color:#fff;font:800 21px \'Baloo 2\',sans-serif;padding:14px 24px 11px;border-radius:999px;box-shadow:0 6px 0 #a34a05';
@@ -93,12 +95,54 @@ export function Welcome({ c }) {
   );
 }
 
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const FIELD = 'width:100%;border:3px solid #d5e3ea;border-radius:16px;padding:12px 14px;font-size:17px;font-weight:800;color:#16303f;background:#fff;outline:none';
+const SUB = "font:800 19px/1 'Baloo 2',sans-serif";
+const ROLE = (on) => 'flex:1 1 0;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 8px;border-radius:16px;font-weight:900;font-size:15px;background:#fff;'
+  + (on ? 'border:3px solid #128253;color:#0c5c3a;box-shadow:0 3px 0 #b9e3cd' : 'border:3px solid #eadfc4;color:#4f6572');
+const clean = (v, n) => v.replace(/[<>]/g, '').slice(0, n);
+const listOf = (a) => (a.length > 1 ? a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1] : a[0] || '');
+
+// What the age means for this player (AGE in data.js).
+function ageNote(age) {
+  if (age == null) return '';
+  if (age < 6) return 'Age ' + age + '. Every game will ask for a grown-up to play along.';
+  if (age < 10) return 'Age ' + age + '. Games for ages 6 to 10 fit. Difficult levels, for ages 10 to 15, ask for a grown-up.';
+  return 'Age ' + age + '. Every game and level fits.';
+}
+
+// A new player, or a change to one: the avatar and nickname, the birthday, and the grown-up part (who sets the
+// player up, their school if they are a teacher, and their privacy consent). Everything stays on this device
+// (src/profiles.js). A new player needs it all; an older player may be saved with the grown-up part left for later.
 export function AddPlayer({ c }) {
   const { s, patch, players } = c;
   const d = s.draft, da = av(d.av), dn = d.nick.trim();
   const editing = !!d.id;
-  const back = () => c.go(players.length ? 'players' : 'welcome', { ws: 2 });
+  const set = (k, v) => patch((p) => ({ draft: { ...p.draft, [k]: v } }));
+  // a day past the end of the new month (say, 31 in June) moves back to its last day
+  const setDate = (k, v) => patch((p) => {
+    const n = { ...p.draft, [k]: v }, max = daysIn(n.by, n.bm);
+    if (n.bd && +n.bd > max) n.bd = String(max);
+    return { draft: n };
+  });
+  const back = () => c.go(d.back === 'home' ? 'home' : players.length ? 'players' : 'welcome', { ws: 2 });
+  const chk = draftCheck(d);
+  const skip = editing && !d.had && chk.empty;
+  const ready = !!dn && (chk.ok || skip);
+  const age = validDate(chk.born) ? ageOn(chk.born) : null;
+  const year = new Date().getFullYear();
+  const years = Array.from({ length: 16 }, (_, i) => String(year - 3 - i));
+  const days = Array.from({ length: daysIn(d.by, d.bm) }, (_, i) => String(i + 1));
+  const teacher = d.role === 'teacher';
+  const pf = editing ? profileOf(d.id) : null;
   const cta = editing ? 'Save' : "Let's play";
+  const sel = (label, value, k, opts, names) => (
+    <select value={value} onChange={(e) => setDate(k, e.target.value)} aria-label={label} className="fo"
+      style={{ ...sx(FIELD + ';padding:12px 8px;min-width:0'), color: value ? '#16303f' : '#8fa3b0' }}>
+      <option value="">{label}</option>
+      {opts.map((o, i) => <option key={o} value={o}>{names ? names[i] : o}</option>)}
+    </select>
+  );
   return (
     <div data-screen-label="Add player" className="scroll" style={{ ...sx('position:absolute;inset:0'), background: BG, padding: c.pad }}>
       <div style={sx('max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px')}>
@@ -110,28 +154,61 @@ export function AddPlayer({ c }) {
           <span style={{ ...sx('width:112px;height:112px;border-radius:50%;font-size:62px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -5px 0 rgba(0,0,0,.1),0 6px 0 rgba(20,48,66,.1)'), background: da.bg }}>{da.e}</span>
           <span style={{ ...sx("font:800 23px/1.1 'Baloo 2',sans-serif;min-height:26px"), color: dn ? '#16303f' : '#8fa3b0' }}>{dn || 'Your nickname'}</span>
         </div>
-        <div style={sx("font:800 19px/1 'Baloo 2',sans-serif")}>Choose your avatar</div>
+        <div style={sx(SUB)}>Choose your avatar</div>
         <div style={sx('display:grid;grid-template-columns:repeat(4,1fr);gap:12px;justify-items:center')}>
           {AV.map((a) => (
-            <button key={a.id} onClick={() => patch({ draft: { ...d, av: a.id } })} aria-label={a.id} aria-pressed={a.id === d.av}
+            <button key={a.id} onClick={() => set('av', a.id)} aria-label={a.id} aria-pressed={a.id === d.av}
               style={{ ...sx('position:relative;width:70px;height:70px;border-radius:50%;font-size:36px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.08)'), background: a.bg, border: '4px solid ' + (a.id === d.av ? '#f2760c' : 'transparent') }}>
               {a.e}
               {a.id === d.av && <span style={sx('position:absolute;right:-6px;bottom:-4px;width:26px;height:26px;border-radius:50%;background:#d9650a;color:#fff;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border:3px solid #fff')}>✓</span>}
             </button>
           ))}
         </div>
-        <div style={sx("font:800 19px/1 'Baloo 2',sans-serif;margin-top:6px")}>Your nickname</div>
+        <div style={sx(SUB + ';margin-top:6px')}>Your nickname</div>
         <div style={sx('position:relative')}>
-          <input value={d.nick} onChange={(e) => { const v = e.target.value.replace(/[<>]/g, '').slice(0, 14); patch((p) => ({ draft: { ...p.draft, nick: v } })); }}
-            onKeyDown={(e) => { if (e.key === 'Enter') c.savePlayer(); }}
+          <input value={d.nick} onChange={(e) => set('nick', clean(e.target.value, 14))}
             maxLength={14} placeholder="Your nickname" autoComplete="off" aria-label="Your nickname" className="fo"
             style={sx('width:100%;border:3px solid #d5e3ea;border-radius:18px;padding:15px 64px 15px 16px;font-size:19px;font-weight:800;color:#16303f;background:#fff;outline:none')} />
           <span style={sx('position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:800;color:#4f6572')}>{d.nick.length}/14</span>
         </div>
-        <p style={sx(NOTE)}>🔒 We only save a nickname and a picture, right here on this device. No full names, no birthdays, nothing is uploaded.</p>
+
+        <div style={sx(SUB + ';margin-top:6px')}>Your birthday</div>
+        <div style={sx('display:grid;grid-template-columns:1.6fr 1fr 1.2fr;gap:8px')}>
+          {sel('Month', d.bm, 'bm', MONTHS.map((m, i) => String(i + 1)), MONTHS)}
+          {sel('Day', d.bd, 'bd', days)}
+          {sel('Year', d.by, 'by', years)}
+        </div>
+        {age != null && <p aria-live="polite" style={sx('margin:-4px 0 0;font-weight:800;font-size:14px;color:#2f5d77;line-height:1.4')}>🎂 {ageNote(age)}</p>}
+
+        <div data-grownup="" style={sx('background:#fff5df;border:2px solid #ffe2a8;border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px;margin-top:6px')}>
+          <div>
+            <div style={sx("font:800 20px/1.1 'Baloo 2',sans-serif;padding-top:2px")}>👪 For the grown-up</div>
+            <div style={sx('font-weight:700;font-size:14px;color:#5c4000;margin-top:4px;line-height:1.4')}>{skip ? 'Fill this in now, or leave it for later.' : 'Please fill this in with the child.'}</div>
+          </div>
+          <div style={sx('font-weight:900;font-size:15px')}>Who is setting up this player?</div>
+          <div role="group" aria-label="Who is setting up this player?" style={sx('display:flex;gap:8px')}>
+            <button onClick={() => set('role', 'parent')} aria-pressed={!teacher} style={sx(ROLE(!teacher))}>👪 Parent or guardian</button>
+            <button onClick={() => set('role', 'teacher')} aria-pressed={teacher} style={sx(ROLE(teacher))}>🍎 Teacher</button>
+          </div>
+          <input value={d.gname} onChange={(e) => set('gname', clean(e.target.value, 60))} maxLength={60} autoComplete="off" className="fo"
+            placeholder={teacher ? 'Your name (the teacher)' : 'Your name (the parent or guardian)'} aria-label={teacher ? 'Name of the teacher' : 'Name of the parent or guardian'} style={sx(FIELD)} />
+          {teacher && <input value={d.school} onChange={(e) => set('school', clean(e.target.value, 80))} maxLength={80} autoComplete="off" className="fo"
+            placeholder="Your school" aria-label="School" style={sx(FIELD)} />}
+          <p style={sx('margin:0;font-weight:700;font-size:13.5px;color:#5c4000;line-height:1.5')}>
+            <b style={sx('font-weight:900')}>🔒 Privacy notice.</b> BAYANIHanda keeps this player's nickname, picture and date of birth, and your name{teacher ? ' and school' : ''}, on this device only. Nothing is sent over the internet or shared with anyone, including UPRI. The date of birth shows which games fit the child's age and when to ask for a grown-up. You can see or change these details anytime in Edit players, and removing the player deletes them. Questions? Email {CONTACT_EMAIL}.
+          </p>
+          <button role="checkbox" aria-checked={!!d.consent} onClick={() => set('consent', !d.consent)}
+            style={sx('display:flex;gap:12px;align-items:flex-start;text-align:left;background:#fff;border-radius:16px;padding:12px;border:2px solid ' + (d.consent ? '#128253' : '#eadfc4'))}>
+            <span style={sx('flex:none;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#fff;' + (d.consent ? 'background:#128253' : 'border:3px solid #c9b98f;box-sizing:border-box'))}>{d.consent ? '✓' : ''}</span>
+            <span style={sx('font-weight:800;font-size:14px;color:#25404e;line-height:1.45')}>I am this child's parent or guardian, or a teacher with the parent's or guardian's permission. I agree to keep these details on this device for these purposes, under the Data Privacy Act of 2012 (RA 10173).</span>
+          </button>
+          {pf && pf.consent && d.consent && <div style={sx('font-size:12.5px;font-weight:800;color:#5c4000')}>Agreed on {new Date(pf.consent.on + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</div>}
+        </div>
+
         <div style={sx('display:flex;flex-direction:column;gap:12px;margin-top:6px')}>
-          {dn ? <button onClick={c.savePlayer} {...pr(CTA, CTA_ON)}>{cta}</button>
+          {ready ? <button onClick={c.savePlayer} {...pr(CTA, CTA_ON)}>{cta}</button>
             : <div style={sx("width:100%;text-align:center;background:#c9d6dd;color:#4f6572;font:800 21px 'Baloo 2',sans-serif;padding:14px 24px 11px;border-radius:999px;box-shadow:0 6px 0 #b3c3cc")}>{cta}</div>}
+          {!ready && <p data-missing="" style={sx('margin:-2px 0 0;text-align:center;font-weight:800;font-size:13.5px;color:#4f6572')}>Still needed: {listOf(chk.missing)}.</p>}
           {editing && <button onClick={() => patch({ sheet: 'remove', sd: players.find((x) => x.id === d.id) })} style={sx('width:100%;background:#fff;color:#c62f22;font-weight:900;font-size:16px;padding:13px 20px;border-radius:999px;border:2px solid #f3c9c4;box-shadow:0 4px 0 #f3c9c4')}>Remove this player</button>}
         </div>
       </div>
@@ -163,6 +240,7 @@ export function Players({ c }) {
                   <span style={{ ...sx('width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:46px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.1)'), background: a.bg }}>{a.e}</span>
                   <span style={sx("font:800 19px/1.1 'Baloo 2',sans-serif;padding-top:3px")}>{p.nick}</span>
                   <span style={sx('font-size:13px;font-weight:800;color:#4f6572')}>{n} badge{n === 1 ? '' : 's'}</span>
+                  {!complete(profileOf(p.id)) && <span style={sx('font-size:11px;font-weight:900;letter-spacing:.4px;background:#fff5df;color:#7a5400;border-radius:999px;padding:2px 8px')}>👪 ADD DETAILS</span>}
                 </button>
                 {active && <span style={sx('position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:#d9650a;color:#fff;font-size:11px;font-weight:900;letter-spacing:.6px;padding:3px 10px;border-radius:999px')}>PLAYING</span>}
                 {editing && (
@@ -182,7 +260,7 @@ export function Players({ c }) {
             </button>
           )}
         </div>
-        <p style={sx(NOTE)}>{editing ? 'Tap a player to rename, change the avatar, or remove them.' : 'You can have up to ' + MAX_PLAYERS + ' players on this device for now.'}</p>
+        <p style={sx(NOTE)}>{editing ? 'Tap a player to change their nickname, avatar, birthday or grown-up, or to remove them.' : 'You can have up to ' + MAX_PLAYERS + ' players on this device for now.'}</p>
       </div>
     </div>
   );

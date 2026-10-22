@@ -5,7 +5,7 @@ import { Toggle } from './screens/Settings.jsx';
 import { TRIVIA, VALIDATION, CREDITS_LIBRARY, creditsOf, game, howTo, isStory } from './data.js';
 import { HvName } from './screens/Stories.jsx';
 import { renderIdPng, idFileName, savePng, sharePng } from './idcard.js';
-import { GateSheet } from './screens/GrownUps.jsx';
+import { GateSheet, SuperviseSheet, FinishSheet } from './screens/GrownUps.jsx';
 import { TourTab, TourWelcome, askLine } from './screens/Tour.jsx';
 
 const BACKDROP = 'position:absolute;inset:0;background:rgba(14,34,51,.5);animation:bh-fade .2s both';
@@ -194,6 +194,8 @@ export function Sheet({ c }) {
   } else if (s.sheet === 'tour') body = <TourWelcome c={c} />;
   else if (s.sheet === 'share') body = <ShareSheet c={c} />;
   else if (s.sheet === 'gate') body = <GateSheet key={sd.a + 'x' + sd.b} c={c} />;
+  else if (s.sheet === 'supervise') body = <SuperviseSheet key={sd.a + 'x' + sd.b} c={c} />;
+  else if (s.sheet === 'finish') body = <FinishSheet c={c} />;
   else if (s.sheet === 'photo') body = <PhotoSheet c={c} />;
   else if (s.sheet === 'remove') {
     body = (

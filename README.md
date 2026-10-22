@@ -78,8 +78,10 @@ run `npm run extract-engine`. The bridge relies on the engine's element ids, on
 `window.BYANI.App`, and on the game objects it exposes (`FireGame`, `GoBag`, …).
 
 Players and badges use the web app's own storage keys (`bayanihanda_players_v1`,
-`bayanihanda_badges_v1::<player>`), so progress carries over. Champion ID names and
-photos stay in memory only, as the app's privacy note promises.
+`bayanihanda_badges_v1::<player>`), so progress carries over. The details a grown-up adds
+when making a player (the birthday, the grown-up and their consent) are kept beside them in
+`bayanihanda_profiles_v1` (`src/profiles.js`; see "Players, ages and grown-ups" below).
+Champion ID names and photos stay in memory only, as the app's privacy note promises.
 
 ### Fix to the original engine
 
@@ -89,6 +91,43 @@ lends it Hazard Hunt's identical helper at startup (`applyEngineFixes` in
 `src/engine/bridge.js`), so `public/engine/games.js` stays an exact copy. Since October
 2026 the library shows Quake in Order in its place (below); the drill's code stays in
 the engine.
+
+The same function redraws the two 3D first aid kits (October 2026). The web app drew the
+kits in Go Bag Packing 3D and Hazard Hunt with a red cross, an emblem the Philippines
+protects for the Red Cross (RA 10530, which also covers look-alikes). The bridge wraps
+`GoBag._make` and `HazardHunt._prop` so both kits come out as the first aid sign instead,
+a white cross on green (ISO 7010 E003), as in the order games.
+
+## Players, ages and grown-ups
+
+Since October 2026 a player has a birthday and a grown-up, and the games carry age labels
+(EA's call).
+
+- **The new player page** asks for the avatar and nickname, the birthday (month, day and
+  year), and a part for the grown-up: who is setting up the player (a parent or guardian,
+  or a teacher), their name, the school for a teacher, a short privacy notice and a consent
+  box (the Data Privacy Act of 2012, RA 10173). "Let's play" turns on once everything is
+  filled in, and the page lists what is still missing. The next new player starts with the
+  same grown-up, so a teacher can set up a class quickly; the consent box is ticked for
+  each child.
+- **On this device only.** The details live in `bayanihanda_profiles_v1`
+  (`src/profiles.js`) and are never sent anywhere. Edit players shows and changes them
+  (with the day the consent was given), and removing a player deletes them.
+- **Players made before this** are asked once, when picked, to have a grown-up fill in the
+  details ("Fill it in now" or "Later"). Until then they carry "Add details" on the players
+  screen, can still be renamed without the grown-up part, and only the levels for ages 10
+  to 15 ask for a grown-up.
+- **Age labels** (`AGE`, `ageOf` and `agesOf` in `src/data.js`): every game and story is for
+  ages 6 to 10 (yellow), and the Difficult level of the games with Easy and Difficult (Fire
+  Extinguisher 3D, Quake in Order, Heart in Order and Press On, `levelAges` on each) is for
+  ages 10 to 15 (pink). The labels show on the game cards, the game intros and each level,
+  the story intros and the story shelf. A label carries 👪 when the player is younger than
+  it (`src/ui/age.jsx`).
+- **A grown-up plays along.** When a player is younger than a level's label (under 10 on
+  Difficult, under 6 on anything), Start shows "Play with a grown-up": a grown-up answers
+  a times-table question to start, or a Difficult level can be played at Easy instead. A
+  passed check holds for that player until the app is closed (`grownUpOk` in
+  `src/Shell.jsx`, `SuperviseSheet` in `src/screens/GrownUps.jsx`).
 
 ## For grown-ups
 
@@ -357,6 +396,10 @@ works, collected through teachers with parents' consent:
   before they replace the samples.
 - **Handaventures and the games are subject for code and content validation,** as their
   info tags say.
+- **The privacy notice and consent wording** need a review by UP's data protection office
+  before the library is used with classes.
+- **Play time limits** (rest reminders and a daily limit by age) are planned, using the
+  players' birthdays.
 - **Not yet tested on a phone.** Everything was checked in Chromium at phone (412×915)
   and tablet (1280×800) sizes, with software WebGL.
 

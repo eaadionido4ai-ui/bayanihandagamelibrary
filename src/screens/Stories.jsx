@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { sx, pr } from '../ui/sx.js';
 import { Mascot } from '../ui/art.jsx';
 import { SLIDE, useReel, Reel, ReelDots } from '../ui/reel.jsx';
-import { HV, HV_PEEKS, HV_PILLAR, JOURNEY, STORIES, game } from '../data.js';
+import { AGE, HV, HV_PEEKS, HV_PILLAR, JOURNEY, STORIES, game, needsGrownUp } from '../data.js';
+import { AgeChip } from '../ui/age.jsx';
 import { foundIn, loadStories } from '../stories.js';
 
 // Handaventures, the story series (design option B, the storybook shelf). It has a place of its own, like
@@ -232,6 +233,7 @@ export function StoryShelf({ c }) {
             <span style={sx(TAG)}>📖 Story series · Before, during, after</span>
             <h1 style={sx("margin:10px 0 0;font:800 34px/1 'Baloo 2',sans-serif;padding-top:4px")}><HvName /></h1>
             <p style={sx('margin:4px 0 0;font-size:15px;font-weight:800')}>{HV.tagline} {HV.short}</p>
+            <div style={sx('display:flex;margin-top:10px')}><AgeChip band={AGE.young} grownUp={needsGrownUp(c.age, AGE.young)} big /></div>
           </div>
           <div style={sx('display:flex;flex-direction:column;gap:6px')}>
             <span style={sx('display:block;height:12px;background:rgba(255,255,255,.25);border-radius:999px;overflow:hidden')}>
@@ -313,10 +315,16 @@ export function StoryIntro({ c }) {
               <span style={sx(TAG)}>📖 Handaventures · {st.hazard}</span>
               <h1 style={sx("margin:8px 0 0;font:800 28px/1.05 'Baloo 2',sans-serif")}>{st.name}</h1>
               <p style={sx('margin:6px 0 0;font-size:15px;font-weight:700;line-height:1.45;text-wrap:pretty')}>{st.desc}</p>
+              <div style={sx('display:flex;margin-top:10px')}><AgeChip band={AGE.young} grownUp={needsGrownUp(c.age, AGE.young)} big /></div>
             </div>
           </div>
 
           {st.note && <p style={sx('margin:0;background:#fff1e3;border:2px solid #ffd9ad;border-radius:18px;padding:12px 14px;font-size:14.5px;font-weight:800;line-height:1.45;color:#7a3b00')}>👪 {st.note}</p>}
+          {needsGrownUp(c.age, AGE.young) && (
+            <p data-grownup-note="" style={sx('margin:0;background:#fff5df;border:2px solid #ffe2a8;border-radius:18px;padding:12px 14px;font-size:14.5px;font-weight:800;line-height:1.45;color:#5c4000')}>
+              👪 {c.supervised ? 'A grown-up is playing along.' : 'This story is for ' + AGE.young.label.toLowerCase() + '. When you tap Start, Bayani will ask a grown-up to play along.'}
+            </p>
+          )}
 
           <div style={sx(H2)}>Before, during and after</div>
           <Journey st={st} wide={!!c.tablet} />
