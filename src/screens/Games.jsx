@@ -1,6 +1,7 @@
 import { sx, pr } from '../ui/sx.js';
 import { Mascot } from '../ui/art.jsx';
-import { P, PO, G, LIVE, STORIES, howTo, pillarOf, isStory } from '../data.js';
+import { P, PO, G, LIVE, STORIES, howTo, pillarOf, isStory, ageOf, agesOf, needsGrownUp } from '../data.js';
+import { AgeChip } from '../ui/age.jsx';
 import { MuseumTile } from './Tanghalan.jsx';
 import { StoryShelfCard, HvPillarCard } from './Stories.jsx';
 
@@ -69,6 +70,7 @@ export function Games({ c }) {
                         <span style={sx('font-size:13.5px;font-weight:700;color:#4f6572;line-height:1.35')}>{g.short}</span>
                         <span style={sx('display:flex;gap:6px;flex-wrap:wrap;margin-top:3px')}>
                           <span style={sx('font-size:11px;font-weight:900;letter-spacing:.5px;background:#e6f3f9;color:#1f5675;border-radius:999px;padding:3px 8px')}>3D · PLAY NOW</span>
+                          {agesOf(g).map((b) => <AgeChip key={b.id} band={b} grownUp={needsGrownUp(c.age, b)} />)}
                           {mine[g.id] && <span style={sx('font-size:11px;font-weight:900;letter-spacing:.5px;background:#e5f6ee;color:#0c5c3a;border-radius:999px;padding:3px 8px')}>✓ BADGE EARNED</span>}
                         </span>
                       </span>
@@ -104,6 +106,8 @@ export function Intro({ c }) {
   const { s, patch, mine } = c;
   const g = G.find((x) => x.id === s.gameId) || LIVE[0], gp = pillarOf(g);
   const how = howTo(g, s.mode);
+  const band = ageOf(g, s.mode), withGrownUp = needsGrownUp(c.age, band);
+  const picked = g.modes && g.levelAges ? 'The ' + g.modes[s.mode][1] + ' level' : g.name;
   return (
     <div data-screen-label="Game intro" style={{ ...sx('position:absolute;inset:0;display:flex;flex-direction:column'), background: BG }}>
       <div className="scroll" style={{ ...sx('flex:1;min-height:0'), padding: c.pad }}>
@@ -120,6 +124,7 @@ export function Intro({ c }) {
               <span style={sx('display:inline-block;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;background:rgba(0,0,0,.24);border-radius:999px;padding:4px 10px;white-space:nowrap')}>{gp.icon} {gp.name}</span>
               <div style={sx("font:800 28px/1.05 'Baloo 2',sans-serif;margin-top:8px")}>{g.name}</div>
               <p style={sx('margin:6px 0 0;font-size:15px;font-weight:700;line-height:1.45;text-wrap:pretty')}>{g.desc}</p>
+              <div style={sx('display:flex;gap:6px;flex-wrap:wrap;margin-top:10px')}>{agesOf(g).map((b) => <AgeChip key={b.id} band={b} grownUp={needsGrownUp(c.age, b)} big />)}</div>
             </div>
           </div>
           <div style={sx('display:flex;align-items:flex-end;gap:10px')}>
@@ -141,12 +146,18 @@ export function Intro({ c }) {
                     <span style={sx('flex:1;min-width:0')}>
                       <span style={sx("display:block;font:800 16.5px/1.15 'Baloo 2',sans-serif;padding-top:2px")}>{m[1]}</span>
                       <span style={sx('display:block;font-size:13px;font-weight:700;color:#4f6572;line-height:1.35;margin-top:2px')}>{m[2]}</span>
+                      {g.levelAges && <span style={sx('display:flex;margin-top:6px')}><AgeChip band={ageOf(g, i)} grownUp={needsGrownUp(c.age, ageOf(g, i))} /></span>}
                     </span>
                     {i === s.mode && <span style={{ ...sx('width:28px;height:28px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;flex:none'), background: gp.text }}>✓</span>}
                   </button>
                 ))}
               </div>
             </>
+          )}
+          {withGrownUp && (
+            <p data-grownup-note="" style={sx('margin:0;background:#fff5df;border:2px solid #ffe2a8;border-radius:18px;padding:12px 14px;font-size:14.5px;font-weight:800;line-height:1.45;color:#5c4000')}>
+              👪 {c.supervised ? 'A grown-up is playing along.' : picked + ' is for ' + band.label.toLowerCase() + '. When you tap Start, Bayani will ask a grown-up to play along.'}
+            </p>
           )}
           <div style={sx("font:800 21px/1 'Baloo 2',sans-serif;margin-top:4px")}>{g.stepsTitle || 'How to play'}</div>
           <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px')}>

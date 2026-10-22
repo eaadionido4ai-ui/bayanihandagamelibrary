@@ -171,7 +171,7 @@ export const G = [
     remind: 'Keep your family go bag near the door, and check it with a grown-up every few months.',
   },
   {
-    id: 'fire', p: 'resp', name: 'Fire Extinguisher 3D', icon: '🧯', short: 'Pull, Aim, Squeeze, Sweep. Put out the fire the PASS way.',
+    id: 'fire', p: 'resp', name: 'Fire Extinguisher 3D', icon: '🧯', short: 'Pull, Aim, Squeeze, Sweep. Put out the fire the PASS way.', levelAges: ['young', 'older'],
     desc: 'Pull, Aim, Squeeze, Sweep. Put out the fire the PASS way.',
     badge: ['Fire Out', '🧯'], modesLabel: 'Choose your challenge',
     modes: [['🙂', 'Easy', 'Take your time, and you will never run out of spray.'], ['⏱️', 'Difficult', 'Watch your extinguisher and beat the clock.']],
@@ -187,7 +187,7 @@ export const G = [
   // is safe, with the player's own order, earns the badge at either level.
   // Quake in Order takes the place of the paused Duck, Cover, and Hold drill, whose code stays in the engine.
   {
-    id: 'quake', p: 'resp', name: 'Quake in Order', icon: '🏗️', frame: 'games/quake-in-order.html', frameModes: ['easy', 'hard'],
+    id: 'quake', p: 'resp', name: 'Quake in Order', icon: '🏗️', frame: 'games/quake-in-order.html', frameModes: ['easy', 'hard'], levelAges: ['young', 'older'],
     short: 'Put the earthquake steps in order, then watch your class act them out in 3D.',
     desc: 'The ground shakes during math class. Put the steps of Duck, Cover, and Hold in order, then watch what happens. Whoever sits nearest the door opens it first.',
     badge: ['Quake Ready', '🏗️'], modesLabel: 'Pick a level',
@@ -208,7 +208,7 @@ export const G = [
   // Heart in Order and Press On bring back the paused CPR and bleeding games. Both happen in a first aid class, on a
   // practice manikin and a practice arm, so no one is hurt and no blood is shown.
   {
-    id: 'cpr', p: 'resp', name: 'Heart in Order', icon: '💓', frame: 'games/heart-in-order.html', frameModes: ['easy', 'hard'],
+    id: 'cpr', p: 'resp', name: 'Heart in Order', icon: '💓', frame: 'games/heart-in-order.html', frameModes: ['easy', 'hard'], levelAges: ['young', 'older'],
     short: 'Put the CPR steps in order, then watch them done on Manny, the class practice manikin.',
     desc: 'It is first aid class, and Manny, the practice manikin, is on the mat. Put the steps of hands-only CPR in order, then watch what happens.',
     badge: ['CPR Hero', '❤️'], modesLabel: 'Pick a level',
@@ -222,7 +222,7 @@ export const G = [
     remind: 'In real life, call 911 and get a grown-up. Learn CPR from a trained teacher, on a practice manikin like Manny.',
   },
   {
-    id: 'bleed', p: 'resp', name: 'Press On', icon: '🩹', frame: 'games/press-on.html', frameModes: ['easy', 'hard'],
+    id: 'bleed', p: 'resp', name: 'Press On', icon: '🩹', frame: 'games/press-on.html', frameModes: ['easy', 'hard'], levelAges: ['young', 'older'],
     short: 'Put the steps for stopping bad bleeding in order, then watch them done on a practice arm.',
     desc: 'It is first aid class, and a practice arm with a pretend cut is on the mat. Put the steps for stopping bad bleeding in order, then watch what happens.',
     badge: ['Bleeding Stopper', '🩹'], modesLabel: 'Pick a level',
@@ -287,6 +287,19 @@ export const G = [
 ];
 
 export const LIVE = G.filter((g) => !g.soon);
+
+// Age labels (EA, October 2026). Every game and story is for ages 6 to 10; the Difficult level of the games
+// that have Easy and Difficult (levelAges on the game, one band per level, in the order of its modes) is for
+// ages 10 to 15. A player younger than a level's band plays it with a grown-up: the library asks for one
+// before it starts (the grown-up check in Overlays.jsx). Until a player's date of birth is known, only the
+// 10 to 15 levels ask. The age comes from the player's details (src/profiles.js).
+export const AGE = {
+  young: { id: 'young', min: 6, max: 10, label: 'Ages 6 to 10', bg: '#ffeca8', fg: '#6b4a00' },
+  older: { id: 'older', min: 10, max: 15, label: 'Ages 10 to 15', bg: '#ffe0ee', fg: '#a3195b' },
+};
+export const ageOf = (g, mode) => AGE[(g && g.levelAges && g.levelAges[mode || 0]) || 'young'];
+export const agesOf = (g) => (g && g.levelAges ? g.levelAges.filter((k, i, a) => a.indexOf(k) === i).map((k) => AGE[k]) : [AGE.young]);
+export const needsGrownUp = (age, band) => (age == null ? band.id === 'older' : age < band.min);
 
 // Champion ID badge order, as on the web app's scorecard.
 export const BADGES = ['hazard', 'gobag', 'fire', 'nobody', 'bleed', 'cpr', 'quake', 'path', 'cares', 'cleanup', 'sapa', 'hv-kulog', 'hv-agos', 'hv-shake', 'hv-smoke', 'hv-lockdown'];

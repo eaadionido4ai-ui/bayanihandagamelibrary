@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { sx, pr } from '../ui/sx.js';
-import { P, PO, G, LIVE, av } from '../data.js';
+import { AGE, P, PO, G, LIVE, av, ageOf, game, needsGrownUp } from '../data.js';
 
 const BG = 'radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef)';
 const LABEL = 'font-size:12px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#4f6572;margin:6px 4px 0';
@@ -30,7 +30,7 @@ export function Mockup({ c, label, children }) {
 }
 
 function Lessons() {
-  const lessons = { mit: '40 min each', prep: '40 min', resp: '30–45 min', rec: '45 min' };
+  const lessons = { mit: '40 min each', prep: '40 min', resp: '30 to 45 min', rec: '45 min' };
   return (
     <>
       <div style={sx('display:flex;background:#fff;border-radius:999px;padding:4px;gap:4px')}>
@@ -131,7 +131,7 @@ const WAYS = [
   ['🌏', 'Translate', 'Filipino and regional languages'],
 ];
 
-const CONTACT_EMAIL = 'eadionido@up.edu.ph';
+export const CONTACT_EMAIL = 'eadionido@up.edu.ph';
 const CONTACT_LINK = 'mailto:' + CONTACT_EMAIL + '?subject=' + encodeURIComponent('BAYANIHanda: I would like to help');
 
 export function BuildWithUs({ c }) {
@@ -157,15 +157,13 @@ export function BuildWithUs({ c }) {
   );
 }
 
-// "Grown-ups only" check before the teacher and contributor screens.
-export function GateSheet({ c }) {
-  const { s, patch } = c;
-  const q = s.sd || { a: 7, b: 6, to: 'teacher' };
+// The grown-ups question: a times table only a grown-up (or an older child) answers quickly.
+function Keypad({ c, q, onPass }) {
   const [val, setVal] = useState('');
   const press = (k) => {
     if (k === '⌫') return setVal(val.slice(0, -1));
     if (k === '✓') {
-      if (+val === q.a * q.b) c.go(q.to);
+      if (+val === q.a * q.b) onPass();
       else { setVal(''); c.snackShow('Not quite. Ask a grown-up to help.'); }
       return;
     }
@@ -173,8 +171,6 @@ export function GateSheet({ c }) {
   };
   return (
     <>
-      <div style={sx("font:800 23px/1.1 'Baloo 2',sans-serif")}>Grown-ups only 🔒</div>
-      <div style={sx('font-weight:700;font-size:14.5px;color:#3d5563;line-height:1.4')}>Answer to continue. This keeps young players in the games.</div>
       <div style={sx("text-align:center;font:800 34px 'Baloo 2',sans-serif;background:#eef6fa;border-radius:16px;padding:12px 0 6px")} aria-live="polite">
         {q.a} × {q.b} = <span style={{ color: val ? '#d9650a' : '#b9ccd8' }}>{val || '?'}</span>
       </div>
@@ -184,7 +180,57 @@ export function GateSheet({ c }) {
             style={{ ...sx("height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font:800 22px 'Baloo 2',sans-serif;padding-top:3px"), background: k === '✓' ? '#128253' : '#eef3f6', color: k === '✓' ? '#fff' : '#16303f' }}>{k}</button>
         ))}
       </div>
+    </>
+  );
+}
+
+// "Grown-ups only" check before the teacher and contributor screens.
+export function GateSheet({ c }) {
+  const { s, patch } = c;
+  const q = s.sd || { a: 7, b: 6, to: 'teacher' };
+  return (
+    <>
+      <div style={sx("font:800 23px/1.1 'Baloo 2',sans-serif")}>Grown-ups only 🔒</div>
+      <div style={sx('font-weight:700;font-size:14.5px;color:#3d5563;line-height:1.4')}>Answer to continue. This keeps young players in the games.</div>
+      <Keypad c={c} q={q} onPass={() => c.go(q.to)} />
       <button onClick={() => patch({ sheet: null })} style={sx('padding:6px;font-weight:900;font-size:15px;color:#4f6572')}>Cancel</button>
+    </>
+  );
+}
+
+// Before a level or story above the player's age (AGE in data.js): a grown-up plays along, and answers the
+// grown-ups question to start. A Difficult level offers its Easy level instead when that fits the player's age.
+export function SuperviseSheet({ c }) {
+  const { s, patch, nick } = c;
+  const sd = s.sd || {};
+  const g = game(sd.id), band = AGE[sd.band] || AGE.older;
+  const level = sd.kind === 'game' && g.levelAges && g.modes ? g.modes[sd.mode][1] : null;
+  const what = level ? 'The ' + level + ' level of ' + g.name : g.name;
+  const who = c.age == null ? 'We do not know ' + nick + '\'s age yet' : nick + ' is ' + c.age;
+  const easy = level && sd.mode !== 0 && !needsGrownUp(c.age, ageOf(g, 0));
+  return (
+    <>
+      <div style={sx("font:800 23px/1.1 'Baloo 2',sans-serif")}>Play with a grown-up 👪</div>
+      <p style={sx('margin:0;font-weight:700;font-size:15px;color:#25404e;line-height:1.45')}>{what} is for {band.label.toLowerCase()}. {who}, so a grown-up should play along.</p>
+      <div style={sx('font-size:12.5px;font-weight:900;letter-spacing:1px;color:#7a5400;text-transform:uppercase')}>Grown-up: answer to start</div>
+      <Keypad c={c} q={sd} onPass={c.grownUpHere} />
+      {easy && <button onClick={c.easyInstead} style={sx('background:#fff;border:2px solid #d5e3ea;box-shadow:0 4px 0 #d5e3ea;border-radius:999px;padding:12px;font-weight:900;font-size:15px')}>Play {g.modes[0][1]} instead ({AGE.young.label.toLowerCase()})</button>}
+      <button onClick={() => patch({ sheet: null })} style={sx('padding:6px;font-weight:900;font-size:15px;color:#4f6572')}>Not now</button>
+    </>
+  );
+}
+
+// A player made before birthdays were asked: once, when the player is picked, a grown-up is asked to fill in
+// the birthday and their own details. "Later" is fine; until then, the 10 to 15 levels ask for a grown-up.
+export function FinishSheet({ c }) {
+  const { patch, me, nick } = c;
+  return (
+    <>
+      <div style={sx("font:800 23px/1.1 'Baloo 2',sans-serif")}>A grown-up's help, please 👪</div>
+      <p style={sx('margin:0;font-weight:700;font-size:15px;color:#25404e;line-height:1.45')}>{nick}'s player card needs two more things: {nick}'s birthday, and the parent, guardian or teacher who looks after {nick}'s play. Bayani uses the birthday to suggest games that fit {nick}'s age.</p>
+      <p style={sx('margin:0;font-weight:700;font-size:13.5px;color:#4f6572;line-height:1.45')}>Until then, the levels for ages 10 to 15 ask for a grown-up.</p>
+      <button onClick={() => me && c.editPlayer(me, 'home')} style={sx('background:#128253;color:#fff;font-weight:900;font-size:16px;padding:13px;border-radius:999px;box-shadow:0 4px 0 #0b5e3b')}>👪 Fill it in now</button>
+      <button onClick={() => patch({ sheet: null })} style={sx('padding:6px;font-weight:900;font-size:15px;color:#4f6572')}>Later</button>
     </>
   );
 }
