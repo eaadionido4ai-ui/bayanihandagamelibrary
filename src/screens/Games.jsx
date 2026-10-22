@@ -1,7 +1,7 @@
 import { sx, pr } from '../ui/sx.js';
 import { Mascot } from '../ui/art.jsx';
 import { P, PO, G, LIVE, STORIES, howTo, pillarOf, isStory, ageOf, agesOf, needsGrownUp } from '../data.js';
-import { AgeChip } from '../ui/age.jsx';
+import { AgeChip, TestChip } from '../ui/age.jsx';
 import { MuseumTile } from './Tanghalan.jsx';
 import { StoryShelfCard, HvPillarCard } from './Stories.jsx';
 
@@ -12,12 +12,13 @@ export function Games({ c }) {
   const chips = [{ id: 'all', icon: '✨', label: 'All', bg: '#16303f' }].concat(PO.map((pid) => ({ id: pid, icon: P[pid].icon, label: P[pid].name, bg: P[pid].text })));
   const banner = P[s.filter];
   const groups = s.filter === 'all' ? PO : [s.filter];
+  const playable = G.filter((x) => !x.soon); // test games included: they can be played, they just do not count for badges yet
   return (
     <div data-screen-label="Games" className="scroll" style={{ ...sx('position:absolute;inset:0'), background: BG, padding: c.pad }}>
       <div style={sx('max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:14px')}>
         <div>
           <div style={sx("font:800 31px/1.05 'Baloo 2',sans-serif;padding-top:4px")}>Games</div>
-          <div style={sx('font-size:14.5px;font-weight:700;color:#4f6572;margin-top:2px')}>{LIVE.length - STORIES.length} games and {STORIES.length} stories to play, {G.length - LIVE.length} coming soon</div>
+          <div style={sx('font-size:14.5px;font-weight:700;color:#4f6572;margin-top:2px')}>{playable.length - STORIES.length} games and {STORIES.length} stories to play, {G.length - playable.length} coming soon</div>
         </div>
         <div className="hscroll" style={sx('display:flex;gap:8px;padding:2px 0 6px')}>
           {chips.map((ch) => (
@@ -29,7 +30,7 @@ export function Games({ c }) {
           ))}
         </div>
         {banner && (() => {
-          const live = G.filter((x) => x.p === banner.id && !x.soon);
+          const live = G.filter((x) => x.p === banner.id && !x.soon && !x.test);
           return (
             <div style={{ ...sx('border-radius:24px;color:#fff;padding:16px 18px;display:flex;gap:14px;align-items:center;box-shadow:0 5px 0 rgba(0,0,0,.12)'), background: banner.banner }}>
               <span style={sx('width:62px;height:62px;border-radius:20px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:33px;flex:none')}>{banner.icon}</span>
@@ -69,7 +70,7 @@ export function Games({ c }) {
                         <span style={sx("font:800 18.5px/1.1 'Baloo 2',sans-serif;padding:3px 30px 0 0")}>{g.name}</span>
                         <span style={sx('font-size:13.5px;font-weight:700;color:#4f6572;line-height:1.35')}>{g.short}</span>
                         <span style={sx('display:flex;gap:6px;flex-wrap:wrap;margin-top:3px')}>
-                          <span style={sx('font-size:11px;font-weight:900;letter-spacing:.5px;background:#e6f3f9;color:#1f5675;border-radius:999px;padding:3px 8px')}>3D · PLAY NOW</span>
+                          {g.test ? <TestChip /> : <span style={sx('font-size:11px;font-weight:900;letter-spacing:.5px;background:#e6f3f9;color:#1f5675;border-radius:999px;padding:3px 8px')}>3D · PLAY NOW</span>}
                           {agesOf(g).map((b) => <AgeChip key={b.id} band={b} grownUp={needsGrownUp(c.age, b)} />)}
                           {mine[g.id] && <span style={sx('font-size:11px;font-weight:900;letter-spacing:.5px;background:#e5f6ee;color:#0c5c3a;border-radius:999px;padding:3px 8px')}>✓ BADGE EARNED</span>}
                         </span>
@@ -124,7 +125,7 @@ export function Intro({ c }) {
               <span style={sx('display:inline-block;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;background:rgba(0,0,0,.24);border-radius:999px;padding:4px 10px;white-space:nowrap')}>{gp.icon} {gp.name}</span>
               <div style={sx("font:800 28px/1.05 'Baloo 2',sans-serif;margin-top:8px")}>{g.name}</div>
               <p style={sx('margin:6px 0 0;font-size:15px;font-weight:700;line-height:1.45;text-wrap:pretty')}>{g.desc}</p>
-              <div style={sx('display:flex;gap:6px;flex-wrap:wrap;margin-top:10px')}>{agesOf(g).map((b) => <AgeChip key={b.id} band={b} grownUp={needsGrownUp(c.age, b)} big />)}</div>
+              <div style={sx('display:flex;gap:6px;flex-wrap:wrap;margin-top:10px')}>{g.test && <TestChip big />}{agesOf(g).map((b) => <AgeChip key={b.id} band={b} grownUp={needsGrownUp(c.age, b)} big />)}</div>
             </div>
           </div>
           <div style={sx('display:flex;align-items:flex-end;gap:10px')}>

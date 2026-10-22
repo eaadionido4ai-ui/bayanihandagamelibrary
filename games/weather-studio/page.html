@@ -1,0 +1,1797 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BAYANIHanda Weather Studio</title>
+<meta name="description" content="A sample BAYANIHanda game: forecast a typhoon on air and learn to read a flood hazard map.">
+<!-- Weather Studio, a test game of the BAYANIHanda library. scripts/build-games.mjs copies this page into
+     public/games/weather-studio.html with the fonts filled in below (and, with --standalone, into
+     games/standalone/Weather-Studio.html with the fonts inside). -->
+<!--@FONTS-->
+<style>
+/* page basics */
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+[hidden]{display:none!important}
+:root{
+  /* Layout: one phone-width column. A TV studio frame tops each step, chunky buttons sit below,
+     and Bayani's speech bubble carries every hint. One dark studio look on purpose. */
+  --navy:#13283a;--navy-0:rgba(19,40,58,0);--panel:#1d3b52;--panel-hi:#29506e;--frame:#0b1b28;--shadow:rgba(0,0,0,.35);--scrim:rgba(5,14,22,.72);
+  --sun:#ffd24d;--sun-edge:#b38a00;--sun-ink:#2e2200;
+  --sea:#4fb3e8;--sea-edge:#2a7aa8;--sea-ink:#0b2a3d;
+  --land:#8fd47e;--land-edge:#4f9a42;--land-ink:#123d1c;
+  --go:#1aa46a;--go-deep:#0f7a4b;--go-edge:#0c6a43;--go-soft:#e5f6ee;--go-ink:#0c5c3a;
+  --cta:#d9650a;--cta-edge:#a34a05;
+  --ink:#ffffff;--muted:#cfe0ea;--dim:#8fb2c6;
+  --paper:#ffffff;--paper-2:#eef3f6;--paper-ink:#13283a;--paper-dim:#4f6577;--paper-line:#cfdae2;
+  --nope:#ff9f43;--nope-soft:#fff1e3;--nope-edge:#b3651e;--nope-ink:#9a4200;
+  --rec:#c62f22;--rec-edge:#7e1d15;--warn:#ff9c94;
+  --low:#ffe14a;--med:#ff9a3c;--high:#e8453b;--high-chip:#cc3529;--low-ink:#4a3a00;--med-ink:#4a2300;
+  --rain-y:#ffe066;--rain-y-edge:#b39a2e;--rain-o:#ff9f43;--rain-o-edge:#b3651e;--rain-r:#cc3529;--rain-r-edge:#8e2219;
+  --young-bg:#ffeca8;--young-fg:#6b4a00;--older-bg:#ffe0ee;--older-fg:#a3195b;
+  --desk:#1f6f8b;
+  --map-land:#f3f4ea;--map-hill:#e4ebd6;--map-contour:#b5c49a;--map-road:#ffffff;--map-road-edge:#c2cab6;--map-river:#3c9fd8;--map-sea:#a9d9f1;--map-ink:#13283a;--map-house:#a3b0bb;
+  --display:'Baloo 2','Arial Rounded MT Bold','Trebuchet MS',system-ui,sans-serif;
+  --body:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;background:var(--navy);color:var(--ink)}
+body{font-family:var(--body);font-size:15px;line-height:1.4;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+body.locked{overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+a{color:var(--sun);font-weight:900}
+:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+.app{max-width:520px;min-height:100%;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 0;display:flex;flex-direction:column;gap:12px}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* header */
+.top{display:flex;align-items:center;gap:10px}
+.ibtn{width:44px;height:44px;flex:none;border-radius:14px;border:0;background:var(--paper);color:var(--paper-ink);display:grid;place-items:center;padding:0;box-shadow:0 4px 0 var(--shadow)}
+.ibtn.dark{background:var(--panel);color:var(--ink);box-shadow:0 4px 0 var(--frame)}
+.ibtn:active,.rbtn:active,.pbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--frame)}
+.h1{flex:1;min-width:0;margin:0;font-family:var(--display);font-weight:800;font-size:22px;line-height:1.05;text-wrap:balance}
+.h2{margin:0;font-family:var(--display);font-weight:800;font-size:19px;line-height:1.1;text-wrap:balance}
+.age{flex:none;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;border-radius:999px;padding:5px 9px;white-space:nowrap}
+.age.young{background:var(--young-bg);color:var(--young-fg)}
+.age.older{background:var(--older-bg);color:var(--older-fg)}
+.brand{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:var(--panel);border-radius:999px;padding:9px 14px}
+.brand i{width:10px;height:10px;border-radius:50%;background:var(--sun);flex:none}
+.brand b{font-family:var(--display);font-weight:800;font-size:17px;letter-spacing:.4px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand b span{color:var(--sun)}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.steps li{display:flex;flex-direction:column;gap:4px;font-size:10.5px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;color:var(--dim)}
+.steps i{display:block;height:6px;border-radius:6px;background:var(--panel)}
+.steps .done{color:var(--muted)}.steps .done i{background:var(--go)}
+.steps .now{color:var(--sun)}.steps .now i{background:var(--sun)}
+
+/* studio */
+.studio{position:relative;width:100%;aspect-ratio:342/236;border-radius:22px;overflow:hidden;border:6px solid var(--frame);background:var(--sea);box-shadow:0 6px 0 var(--shadow);flex:none}
+.studio.short{aspect-ratio:342/200}
+.studio svg.bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.sig{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:7px;background:var(--sun);color:var(--paper-ink);border-radius:12px;padding:4px 10px 4px 4px;box-shadow:0 3px 0 var(--shadow);font-size:12px;font-weight:900;line-height:1.05}
+.sig b{width:28px;height:28px;border-radius:9px;background:var(--paper-ink);color:var(--sun);display:grid;place-items:center;font-family:var(--display);font-size:19px;font-weight:800;line-height:1;padding-top:2px}
+.clock{position:absolute;right:10px;top:10px;display:flex;align-items:center;gap:6px;background:var(--frame);color:var(--ink);border-radius:999px;padding:5px 10px;font-size:11px;font-weight:900;letter-spacing:.6px;text-transform:uppercase}
+.clock.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--rec)}
+.anchor{position:absolute;left:37%;bottom:20%;width:24%;animation:bob 3.2s ease-in-out infinite}
+.anchor svg{display:block;width:100%;height:auto}
+.talking .mouth{animation:talk .26s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+.desk{position:absolute;left:27%;width:44%;bottom:13%;height:10%;background:var(--desk);border-top:4px solid var(--sun);border-radius:6px 6px 0 0}
+.lower{position:absolute;left:0;right:0;bottom:0;min-height:13%;background:var(--go-deep);display:flex;align-items:center;gap:8px;padding:4px 12px;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.3px}
+.lower span{font-weight:700;color:var(--go-soft);text-transform:none;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.micstage{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;background:var(--navy);border-radius:18px;padding:10px 14px;box-shadow:0 4px 0 var(--shadow)}
+.micdot{width:46px;height:46px;border-radius:50%;background:var(--sun);color:var(--paper-ink);display:grid;place-items:center}
+.bars{display:flex;align-items:center;gap:4px;height:40px}
+.bars span{width:5px;height:22%;border-radius:3px;background:var(--sun)}
+.live .bars span{animation:bar .8s ease-in-out infinite alternate}
+.live .bars span:nth-child(2n){animation-duration:.62s}.live .bars span:nth-child(3n){animation-duration:.95s}
+.metered .bars span{animation:none!important;transition:height .08s linear}
+@keyframes bar{from{height:18%}to{height:96%}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3%)}}
+@keyframes talk{from{transform:scaleY(.3)}to{transform:scaleY(1.2)}}
+
+.cc{background:var(--frame);border-radius:16px;padding:12px 14px;min-height:62px;font-size:17px;font-weight:800;line-height:1.35;display:flex;align-items:center;gap:10px}
+.cc small{flex:none;align-self:flex-start;font-size:10px;font-weight:900;letter-spacing:.8px;color:var(--frame);background:var(--muted);border-radius:6px;padding:2px 5px}
+.ctrls{display:flex;align-items:center;justify-content:center;gap:14px}
+.rbtn{width:50px;height:50px;border-radius:16px;border:0;background:var(--panel);color:var(--ink);display:grid;place-items:center;padding:0;box-shadow:0 4px 0 var(--frame);font-weight:900;font-size:14px}
+.rbtn.on{background:var(--go-deep);box-shadow:0 4px 0 var(--go-edge)}
+.pbtn{width:64px;height:64px;border-radius:50%;border:0;background:var(--sun);color:var(--paper-ink);display:grid;place-items:center;padding:0;box-shadow:0 5px 0 var(--sun-edge)}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.fact{border-radius:18px;padding:10px;display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:900;line-height:1.25}
+.fact.sea{background:var(--sea);color:var(--sea-ink);box-shadow:0 4px 0 var(--sea-edge)}
+.fact.sun{background:var(--sun);color:var(--sun-ink);box-shadow:0 4px 0 var(--sun-edge)}
+.fact.land{background:var(--land);color:var(--land-ink);box-shadow:0 4px 0 var(--land-edge)}
+
+/* dock and buttons */
+.dock{position:sticky;bottom:0;z-index:5;margin-top:auto;padding-block:14px calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,var(--navy-0),var(--navy) 38%)}
+.dock:empty{padding:0}
+.cta{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:60px;border-radius:999px;border:0;background:var(--cta);color:var(--ink);font-family:var(--display);font-weight:800;font-size:21px;line-height:1.1;box-shadow:0 6px 0 var(--cta-edge);padding:8px 20px;text-align:center}
+.cta:active{transform:translateY(4px);box-shadow:0 2px 0 var(--cta-edge)}
+.cta.ghost{background:var(--panel);box-shadow:0 5px 0 var(--frame)}
+.cta.go{background:var(--go-deep);box-shadow:0 5px 0 var(--go-edge)}
+.cta.small{min-height:52px;font-size:18px}
+.row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.linkbtn{background:transparent;border:0;color:var(--muted);font-weight:900;font-size:14px;min-height:44px;padding:0 6px;display:inline-flex;align-items:center;gap:6px;text-decoration:underline;text-underline-offset:3px}
+.linkbtn.warn{color:var(--warn)}
+
+/* Bayani says */
+.say{display:flex;gap:8px;align-items:flex-end}
+.say-face{width:52px;flex:none}
+.say-face svg{display:block;width:100%;height:auto}
+.say-text{flex:1;min-width:0;margin:0;background:var(--paper);color:var(--paper-ink);border-radius:18px 18px 18px 4px;padding:10px 13px;font-size:14.5px;font-weight:800;line-height:1.42;border:3px solid var(--paper)}
+.say-text b{font-weight:900}
+.say.good .say-text{border-color:var(--go)}.say.good .say-text b{color:var(--go-ink)}
+.say.nope .say-text{border-color:var(--nope)}.say.nope .say-text b{color:var(--nope-ink)}
+.say-hear{width:42px;height:42px;flex:none;align-self:center;border-radius:12px;border:0;background:var(--panel);color:var(--ink);display:grid;place-items:center;padding:0;box-shadow:0 3px 0 var(--frame)}
+
+/* title */
+.title-h{margin:0;font-family:var(--display);font-weight:800;font-size:30px;line-height:1.02;text-wrap:balance}
+.lede{margin:0;color:var(--muted);font-size:15.5px;font-weight:700;line-height:1.45}
+.field{display:flex;flex-direction:column;gap:6px;font-weight:900;font-size:14px}
+.field input{height:52px;width:100%;border-radius:14px;border:3px solid var(--panel-hi);background:var(--paper);color:var(--paper-ink);font-family:var(--body);font-weight:800;font-size:18px;padding:0 14px}
+.field small{font-weight:700;color:var(--dim);font-size:12.5px}
+.levels{display:grid;gap:10px}
+.level{position:relative;border-radius:20px;border:3px solid var(--panel);background:var(--panel);padding:12px 14px 12px 46px;text-align:left;display:flex;flex-direction:column;gap:6px;box-shadow:0 4px 0 var(--frame)}
+.level::before{content:"";position:absolute;left:14px;top:15px;width:20px;height:20px;border-radius:50%;border:3px solid var(--dim)}
+.level.on{border-color:var(--sun);background:var(--panel-hi)}
+.level.on::before{border-color:var(--sun);background:radial-gradient(circle,var(--sun) 45%,transparent 50%)}
+.lv-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lv-top b{font-family:var(--display);font-size:20px;font-weight:800;line-height:1}
+.lv-txt{font-size:14px;font-weight:700;color:var(--muted);line-height:1.4}
+.lv-note{font-size:12.5px;font-weight:800;color:var(--sun)}
+.how{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.how li{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;font-weight:900;text-align:center;color:var(--muted)}
+.how span{width:44px;height:44px;border-radius:50%;background:var(--panel);color:var(--sun);display:grid;place-items:center}
+.aboutrow{display:flex;justify-content:center}
+
+/* build */
+.news{background:var(--sun);color:var(--sun-ink);border-radius:18px;padding:10px 14px;box-shadow:0 4px 0 var(--sun-edge)}
+.eyebrow{font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase}
+.news p{margin:3px 0 0;font-size:14.5px;font-weight:800;line-height:1.42}
+.wall{position:relative;width:100%;aspect-ratio:342/176;border-radius:20px;overflow:hidden;border:6px solid var(--frame);background:var(--sea);flex:none}
+.wall svg.bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.slot-q{font-family:var(--display);font-weight:800;font-size:20px;fill:#ffffff}
+.rainchip{position:absolute;left:10px;bottom:10px;border-radius:10px;padding:5px 10px;font-size:12px;font-weight:900;box-shadow:0 3px 0 var(--shadow);background:var(--rain-o);color:var(--med-ink)}
+.parts{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.parts .h2{flex:1;min-width:0}
+.pdots{display:flex;gap:5px;flex:none}
+.pdots i{width:12px;height:12px;border-radius:50%;background:var(--panel)}
+.pdots i.on{background:var(--sun)}.pdots i.done{background:var(--go)}
+.tray{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.stk{display:flex;flex-direction:column;align-items:center;gap:5px;background:transparent;border:0;padding:0 0 2px;font-size:11px;font-weight:900;color:var(--ink);text-align:center;line-height:1.1}
+.stk-dot{width:50px;height:50px;border-radius:50%;display:grid;place-items:center}
+.stk.placed{color:var(--sun)}
+.stk.placed .stk-dot{opacity:.55}
+.stk.tried .stk-dot{opacity:.38}
+.stk.tried{color:var(--dim);text-decoration:line-through}
+.count{font-size:13.5px;font-weight:800;color:var(--muted);text-align:center}
+.sigs{display:grid;gap:8px}
+.sigs.n3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.sigs.n5{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.sigbtn{min-height:70px;border-radius:18px;border:0;background:var(--panel);color:var(--ink);padding:6px 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;box-shadow:0 4px 0 var(--frame)}
+.sigbtn b{font-family:var(--display);font-weight:800;font-size:26px;line-height:1}
+.sigbtn span{font-size:11px;font-weight:800;color:var(--muted);line-height:1.15;text-align:center}
+.sigbtn.right{background:var(--sun);color:var(--paper-ink);box-shadow:0 0 0 3px var(--paper),0 4px 0 var(--sun-edge)}
+.sigbtn.right span{color:var(--paper-ink)}
+.sigbtn.wrong{opacity:.42}.sigbtn.wrong b{text-decoration:line-through}
+.guide-btn{align-self:center}
+.guide{width:100%;border-collapse:collapse;background:var(--paper);color:var(--paper-ink);border-radius:14px;overflow:hidden;font-size:12.5px}
+.guide th,.guide td{padding:7px 8px;text-align:left;border-bottom:1px solid var(--paper-line);font-variant-numeric:tabular-nums}
+.guide th{font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--paper-dim);background:var(--paper-2)}
+.guide td:first-child{font-family:var(--display);font-weight:800;font-size:16px;width:34px;text-align:center}
+.tablewrap{overflow-x:auto;border-radius:14px}
+.rains{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rainbtn{min-height:64px;border-radius:16px;border:0;padding:6px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:900;font-size:15px;line-height:1.15;text-align:center}
+.rainbtn span{font-size:11.5px;font-weight:800}
+.rainbtn.y{background:var(--rain-y);color:var(--sun-ink);box-shadow:0 4px 0 var(--rain-y-edge)}
+.rainbtn.o{background:var(--rain-o);color:var(--med-ink);box-shadow:0 4px 0 var(--rain-o-edge)}
+.rainbtn.r{background:var(--rain-r);color:var(--ink);box-shadow:0 4px 0 var(--rain-r-edge)}
+.rainbtn.right{outline:3px solid var(--paper);outline-offset:2px}
+.rainbtn.wrong{opacity:.4}
+
+/* flood map */
+.mapbox{position:relative;border-radius:18px;overflow:hidden;border:5px solid var(--paper);background:var(--map-land);box-shadow:0 5px 0 var(--frame);flex:none}
+.fmap{display:block;width:100%;height:auto}
+.maptitle{position:absolute;left:8px;top:8px;background:var(--paper);color:var(--paper-ink);border-radius:8px;padding:3px 8px;font-size:10.5px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;box-shadow:0 2px 0 var(--map-road-edge);pointer-events:none}
+.m-land{fill:var(--map-land)}
+.m-hill{fill:var(--map-hill);stroke:var(--map-contour);stroke-width:1.5}
+.m-cont{fill:none;stroke:var(--map-contour);stroke-width:1.5}
+.z-low{fill:var(--low)}.z-med{fill:var(--med)}.z-high{fill:var(--high)}
+.m-river{fill:none;stroke:var(--map-river);stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.m-sea{fill:var(--map-sea)}
+.m-wave{fill:none;stroke:var(--paper);stroke-width:2;stroke-linecap:round;opacity:.8}
+.m-road-e{fill:none;stroke:var(--map-road-edge);stroke-width:7.5;stroke-linecap:round;stroke-linejoin:round}
+.m-road{fill:none;stroke:var(--map-road);stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round}
+.m-house{fill:var(--map-house)}
+.m-lab{font-family:var(--body);font-weight:900;font-size:10px;letter-spacing:1px;fill:var(--paper-dim)}
+.m-rivlab{fill:var(--map-river);font-size:10.5px;letter-spacing:.4px;paint-order:stroke;stroke:var(--paper);stroke-width:3px}
+.m-north circle{fill:var(--paper);stroke:var(--map-ink);stroke-width:1.5}
+.m-north path{fill:var(--map-ink)}
+.m-north text{font-family:var(--body);font-weight:900;font-size:8px;fill:var(--map-ink)}
+.pin{cursor:pointer;outline:none}
+.pin .hit{fill:transparent;pointer-events:all}
+.pin .dot{fill:var(--paper);stroke:var(--map-ink);stroke-width:2}
+.pin .lbl{font-family:var(--body);font-weight:900;font-size:11.5px;fill:var(--map-ink);paint-order:stroke;stroke:var(--paper);stroke-width:3.4px;stroke-linejoin:round}
+.pin .ring{fill:none;stroke:var(--navy);stroke-width:3.5;transform-box:fill-box;transform-origin:center;animation:pulse 1.25s ease-out infinite}
+.pin.sel .dot{stroke:var(--navy);stroke-width:3.5}
+.pin.ok .dot{stroke:var(--go);stroke-width:4}
+.pin.no .dot{stroke:var(--nope);stroke-width:4}
+.pin:focus-visible .dot{stroke:var(--cta);stroke-width:4.5}
+.pin .evac rect{fill:var(--go-deep)}
+.pin .evac text{font-family:var(--body);font-weight:900;font-size:9px;letter-spacing:.5px;fill:var(--paper)}
+.route{cursor:pointer}
+.route .case{fill:none;stroke:var(--paper);stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
+.route .line{fill:none;stroke:var(--map-ink);stroke-width:4.5;stroke-dasharray:9 7;stroke-linecap:round;stroke-linejoin:round}
+.route.sel .line{stroke:var(--nope-ink);stroke-width:5.5}
+.route.best .line{stroke:var(--go-deep);stroke-width:6;stroke-dasharray:none}
+.route.faded{opacity:.3}
+.rtag{cursor:pointer;outline:none}
+.rtag circle{fill:var(--map-ink);stroke:var(--paper);stroke-width:2.5}
+.rtag text{font-family:var(--display);font-weight:800;font-size:13px;fill:var(--paper)}
+.rtag:focus-visible circle{stroke:var(--cta);stroke-width:4}
+.best .rtag circle,.rtag.best circle{fill:var(--go-deep)}
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;background:var(--paper);color:var(--paper-ink);border-radius:14px;padding:8px 12px;font-size:12.5px;font-weight:900}
+.legend .lg-t{width:100%;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--paper-dim)}
+.legend .sw{display:inline-flex;align-items:center;gap:6px}
+.legend .sw i{width:20px;height:14px;border-radius:4px;display:inline-block;border:1.5px solid var(--paper-line)}
+.sw .lo{background:var(--low)}.sw .me{background:var(--med)}.sw .hi{background:var(--high)}.sw .no{background:var(--map-land)}
+.mapnote{margin:-4px 0 0;font-size:12.5px;font-weight:700;color:var(--dim);line-height:1.4}
+.pininfo{display:flex;align-items:center;gap:10px;background:var(--paper);color:var(--paper-ink);border-radius:16px;padding:9px 12px;border:3px solid var(--sun)}
+.pininfo .pi-ic{width:36px;height:36px;flex:none;border-radius:50%;background:var(--paper-2);display:grid;place-items:center;color:var(--paper-ink)}
+.pininfo .pi-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.pininfo b{font-size:15px;font-weight:900;line-height:1.15}
+.pininfo small{font-size:12.5px;font-weight:700;color:var(--paper-dim)}
+.zchip{align-self:flex-start;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:900;margin-top:2px}
+.zchip.high{background:var(--high-chip);color:var(--ink)}.zchip.med{background:var(--med);color:var(--med-ink)}.zchip.low{background:var(--low);color:var(--low-ink)}.zchip.none{background:var(--paper-2);color:var(--paper-ink);border:1.5px solid var(--paper-line)}
+.choices{display:grid;gap:10px}
+.choice{min-height:56px;width:100%;border-radius:18px;border:3px solid transparent;background:var(--panel);color:var(--ink);padding:10px 14px;text-align:left;font-weight:900;font-size:15px;line-height:1.3;box-shadow:0 4px 0 var(--frame);display:flex;align-items:center;gap:10px}
+.choice .mark{margin-left:auto;flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center}
+.choice.right{background:var(--paper);color:var(--paper-ink);border-color:var(--go);box-shadow:0 4px 0 var(--go-edge)}
+.choice.right .mark{background:var(--go);color:var(--ink)}
+.choice.wrong{background:var(--nope-soft);color:var(--paper-ink);border-color:var(--nope);box-shadow:0 4px 0 var(--nope-edge)}
+.choice.wrong .mark{background:var(--nope);color:var(--ink)}
+.lgq{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.lgq button{min-height:58px;border-radius:16px;border:0;font-weight:900;font-size:16px}
+.lgq .hi{background:var(--high-chip);color:var(--ink);box-shadow:0 4px 0 var(--rain-r-edge)}
+.lgq .me{background:var(--med);color:var(--med-ink);box-shadow:0 4px 0 var(--nope-edge)}
+.lgq .lo{background:var(--low);color:var(--low-ink);box-shadow:0 4px 0 var(--rain-y-edge)}
+.lgq .wrong{opacity:.4;text-decoration:line-through}
+.lgq .right{outline:3px solid var(--paper);outline-offset:2px}
+.sorts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.sorts button{min-height:58px;border-radius:16px;border:0;font-weight:900;font-size:14px;line-height:1.1;padding:4px}
+.sorts .hi{background:var(--high-chip);color:var(--ink);box-shadow:0 4px 0 var(--rain-r-edge)}
+.sorts .me{background:var(--med);color:var(--med-ink);box-shadow:0 4px 0 var(--nope-edge)}
+.sorts .lo{background:var(--low);color:var(--low-ink);box-shadow:0 4px 0 var(--rain-y-edge)}
+.sorts .no{background:var(--paper);color:var(--paper-ink);box-shadow:0 4px 0 var(--paper-line)}
+.sorts .wrong{opacity:.4;text-decoration:line-through}
+.routes{display:grid;gap:8px}
+.routes button{min-height:56px;border-radius:16px;border:3px solid transparent;background:var(--panel);color:var(--ink);font-weight:900;font-size:15px;display:flex;align-items:center;gap:10px;padding:8px 12px;text-align:left;box-shadow:0 4px 0 var(--frame)}
+.routes button i{font-style:normal;width:30px;height:30px;flex:none;border-radius:50%;background:var(--paper);color:var(--paper-ink);display:grid;place-items:center;font-family:var(--display);font-size:17px;font-weight:800}
+.routes button small{display:block;font-size:12px;font-weight:700;color:var(--muted)}
+.routes .wrong{border-color:var(--nope);background:var(--nope-soft);color:var(--paper-ink);box-shadow:0 4px 0 var(--nope-edge)}
+.routes .wrong small{color:var(--paper-dim)}
+.routes .right{border-color:var(--go);background:var(--paper);color:var(--paper-ink);box-shadow:0 4px 0 var(--go-edge)}
+.routes .right small{color:var(--paper-dim)}
+.donecard{background:var(--paper);color:var(--paper-ink);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 5px 0 var(--go-edge);border:3px solid var(--go)}
+.dc-top{display:flex;align-items:center;gap:12px}
+.dc-top .medal{width:52px;height:52px;flex:none;border-radius:50%;background:var(--go-deep);color:var(--ink);display:grid;place-items:center;border:3px solid var(--go-soft)}
+.donecard .eyebrow{color:var(--go-ink)}
+.donecard ul{margin:0;padding-left:20px;display:grid;gap:4px;font-weight:800;font-size:14.5px;line-height:1.4}
+.donecard p{margin:0;font-size:14px;font-weight:700;line-height:1.45}
+.donecard a{color:var(--cta-edge)}
+.donecard .small{font-size:12.5px;color:var(--paper-dim)}
+.side{display:block;width:100%;height:auto;border-radius:12px;border:2px solid var(--paper-line)}
+.cap{font-size:12.5px!important;color:var(--paper-dim)}
+
+/* advise */
+.chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:10px;padding:4px 10px;font-size:13px;font-weight:900;line-height:1.2}
+.pill.sigp{background:var(--sun);color:var(--paper-ink);padding:3px 10px 3px 3px}
+.pill.sigp b{width:24px;height:24px;border-radius:7px;background:var(--paper-ink);color:var(--sun);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:16px}
+.pill.orange{background:var(--rain-o);color:var(--med-ink)}
+.pill.mapp{background:var(--paper);color:var(--paper-ink)}
+.pill.mapp i{width:12px;height:12px;border-radius:3px;background:var(--high)}
+.pickrow{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:15px;font-weight:800;color:var(--muted)}
+.gdots{display:flex;gap:5px}
+.gdots i{width:13px;height:13px;border-radius:50%;background:var(--panel)}
+.gdots i.on{background:var(--go)}
+.tips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tip{position:relative;min-height:106px;border-radius:18px;border:3px solid transparent;background:var(--panel);color:var(--ink);padding:10px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:8px;text-align:left;box-shadow:0 4px 0 var(--frame)}
+.tip .ti{width:36px;height:36px;border-radius:50%;background:var(--navy);color:var(--sea);display:grid;place-items:center}
+.tip b{font-size:14px;font-weight:900;line-height:1.24}
+.tip.right{background:var(--paper);color:var(--paper-ink);border-color:var(--go);box-shadow:0 4px 0 var(--go-edge)}
+.tip.right .ti{background:var(--go-soft);color:var(--go-ink)}
+.tip.wrong{background:var(--nope-soft);color:var(--paper-ink);border-color:var(--nope);box-shadow:0 4px 0 var(--nope-edge)}
+.tip.wrong .ti{background:var(--paper);color:var(--nope-ink)}
+.tip .flag{position:absolute;right:-6px;top:-8px;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:900;border:3px solid var(--navy)}
+.tip.right .flag{background:var(--go-deep);color:var(--ink);width:30px;height:30px;padding:0;display:grid;place-items:center}
+.tip.wrong .flag{background:var(--nope-ink);color:var(--ink)}
+
+/* present */
+.onair{flex:none;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:900;color:var(--ink);background:var(--rec);border-radius:999px;padding:6px 11px;box-shadow:0 3px 0 var(--rec-edge);font-variant-numeric:tabular-nums}
+.onair::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--paper)}
+.onair.prac{background:var(--panel-hi);box-shadow:0 3px 0 var(--frame)}
+.cue{background:var(--frame);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.cue .eyebrow{color:var(--dim)}
+.cue p{margin:0;font-size:15px;font-weight:800;line-height:1.38;color:var(--ink)}
+.cue p.past{color:var(--dim)}
+.cue p.now{font-family:var(--display);font-size:21px;line-height:1.2;color:var(--sun)}
+.nextline{align-self:stretch;min-height:50px;border-radius:14px;border:0;background:var(--sun);color:var(--paper-ink);font-weight:900;font-size:16px;box-shadow:0 4px 0 var(--sun-edge);display:flex;align-items:center;justify-content:center;gap:6px}
+.recrow{display:flex;align-items:center;justify-content:center;gap:18px}
+.recrow .side-b{width:96px;display:flex;justify-content:center}
+.recbtn{width:84px;height:84px;flex:none;border-radius:50%;border:6px solid var(--paper);background:var(--rec);display:grid;place-items:center;box-shadow:0 6px 0 var(--frame);padding:0}
+.recbtn i{display:block;width:30px;height:30px;border-radius:50%;background:var(--paper)}
+.recbtn.stop i{width:26px;height:26px;border-radius:5px}
+.recbtn.done{background:var(--go-deep)}
+.recbtn:active{transform:translateY(3px);box-shadow:0 3px 0 var(--frame)}
+.tlabel{font-size:13px;font-weight:900;color:var(--muted);font-variant-numeric:tabular-nums;text-align:center}
+.smallbtn{min-height:48px;border-radius:16px;border:0;background:var(--panel);color:var(--ink);font-weight:900;font-size:14px;padding:0 14px;box-shadow:0 4px 0 var(--frame)}
+.privacy{margin:0;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:800;color:var(--muted);text-align:center}
+.nomic{background:var(--panel);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.nomic p{margin:0;font-size:14px;font-weight:700;line-height:1.45;color:var(--muted)}
+.nomic b{color:var(--ink)}
+
+/* wrap */
+.wbar{display:flex;align-items:center;gap:10px}
+.wbar div{flex:1;height:8px;border-radius:8px;background:var(--panel);overflow:hidden}
+.wbar div i{display:block;height:100%;width:0;background:var(--sun);border-radius:8px}
+.wbar span{font-size:12px;font-weight:900;color:var(--muted);font-variant-numeric:tabular-nums}
+.badges{display:grid;gap:10px}
+.badge{position:relative;background:var(--sun);color:var(--sun-ink);border-radius:22px;padding:14px 16px;display:flex;gap:14px;align-items:center;box-shadow:0 5px 0 var(--sun-edge);overflow:hidden}
+.badge.map{background:var(--land);color:var(--land-ink);box-shadow:0 5px 0 var(--land-edge)}
+.badge .medal{width:58px;height:58px;flex:none;border-radius:50%;background:var(--paper-ink);color:var(--sun);display:grid;place-items:center;border:4px solid var(--paper)}
+.badge.map .medal{color:var(--land)}
+.badge b{display:block;font-family:var(--display);font-weight:800;font-size:21px;line-height:1.05}
+.badge p{margin:2px 0 0;font-size:13px;font-weight:800;line-height:1.35}
+.note{display:flex;gap:10px;align-items:center;background:var(--panel);border-radius:18px;padding:12px 14px;font-size:14px;font-weight:800;line-height:1.4;color:var(--muted)}
+.note span.ni{width:36px;height:36px;flex:none;border-radius:50%;background:var(--navy);color:var(--land);display:grid;place-items:center}
+.wrapbtns{display:flex;flex-direction:column;gap:10px;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+.keptmsg{margin:0;font-size:13px;font-weight:800;color:var(--muted);display:flex;align-items:center;gap:6px;justify-content:center;text-align:center}
+
+/* sheets */
+.scrim{position:fixed;inset:0;z-index:30;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:520px;max-height:92%;overflow:auto;background:var(--paper);color:var(--paper-ink);border-radius:24px 24px 0 0;padding-block:18px calc(18px + env(safe-area-inset-bottom,0px));padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+.sh-h{margin:0;font-family:var(--display);font-weight:800;font-size:24px;line-height:1.1}
+.sh-h3{margin:6px 0 0;font-size:13px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:var(--paper-dim)}
+.sh-p{margin:0;font-size:14.5px;font-weight:700;line-height:1.5}
+.sh-list{margin:0;padding-left:20px;display:grid;gap:5px;font-size:14px;font-weight:700;line-height:1.45}
+.sh-list a{color:var(--cta-edge)}
+.sel{user-select:all;-webkit-user-select:all;font-weight:900}
+.sh-btn{min-height:52px;border-radius:999px;border:0;background:var(--cta);color:var(--ink);font-family:var(--display);font-weight:800;font-size:18px;box-shadow:0 5px 0 var(--cta-edge)}
+.sh-btn.ghost{background:var(--paper-2);color:var(--paper-ink);box-shadow:0 4px 0 var(--paper-line)}
+.gate{display:flex;flex-direction:column;gap:8px;background:var(--paper-2);border-radius:18px;padding:12px}
+.kq{font-size:13px;font-weight:900;color:var(--paper-dim);text-align:center}
+.kq.big{font-family:var(--display);font-size:28px;font-weight:800;color:var(--paper-ink)}
+.kdisp{height:52px;border-radius:14px;background:var(--navy);color:var(--sun);display:grid;place-items:center;font-family:var(--display);font-size:28px;font-weight:800;letter-spacing:3px;font-variant-numeric:tabular-nums}
+.kbad{margin:0;text-align:center;font-weight:900;color:var(--nope-ink);font-size:14px}
+.keys{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.key{height:54px;border-radius:14px;border:0;background:var(--paper);color:var(--paper-ink);font-family:var(--display);font-size:24px;font-weight:800;box-shadow:0 3px 0 var(--paper-line)}
+.key.ok{background:var(--go-deep);color:var(--ink);box-shadow:0 3px 0 var(--go-edge)}
+
+/* one-shot effects */
+.shake{animation:shake .42s ease-in-out}
+.pin.shake .pin-in{animation:shake .42s ease-in-out}
+.pop{transform-box:fill-box;transform-origin:center;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes pulse{from{transform:scale(.85);opacity:1}to{transform:scale(1.7);opacity:0}}
+
+@media (max-width:380px){
+  .tray{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:12px}
+  .sigs.n5 .sigbtn span{font-size:10px}
+  .how li{font-size:10px}
+}
+@media (min-width:560px){.levels{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="app" id="app"></main>
+<div id="sheet"></div>
+<audio id="playback" preload="auto"></audio>
+<input type="file" id="clip" accept="audio/*" hidden>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ===== Helpers ===== */
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var calm = function () { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+  var rnd = function (a, b) { return a + Math.floor(Math.random() * (b - a + 1)); };
+  var ico = function (body, size, sw) { return '<svg width="' + (size || 22) + '" height="' + (size || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 2.2) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + body + '</svg>'; };
+  var solid = function (body, size) { return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' + body + '</svg>'; };
+  var mmss = function (s) { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+
+  /* ===== Inside the BAYANIHanda library (?embed=1, in a frame) =====
+     The library opens the game at the level picked on its intro (&level=easy|hard), with its sound and voice
+     settings (&sound=0|1, &voice=0|1) and the player's nickname (&name=). It has already asked for a grown-up
+     when the player is younger than the level's age label. The game tells the library when the player leaves
+     (postMessage, source 'bayani-game', type 'exit') and keeps nothing on the device. */
+  var params = (function () { try { return new URLSearchParams(window.location.search); } catch (e) { return { get: function () { return null; } }; } })();
+  var EMBED = params.get('embed') === '1' && window.parent !== window;
+  function post(msg) {
+    if (!EMBED) return;
+    try { window.parent.postMessage(Object.assign({ source: 'bayani-game', game: 'weather' }, msg), '*'); } catch (e) { /* not in a frame */ }
+  }
+
+  var P = {
+    back: '<path d="M15 5l-7 7 7 7"/>',
+    next: '<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    cloud: '<path d="M7 18h10a4 4 0 0 0 0-8 5 5 0 0 0-9.6-1.4A3.5 3.5 0 0 0 7 18z"/>',
+    rain: '<path d="M7 14h10a3.5 3.5 0 0 0 0-7 4.5 4.5 0 0 0-8.6-1.2A3 3 0 0 0 7 14z"/><path d="M9 17l-1 3M13 17l-1 3M17 17l-1 3"/>',
+    heavy: '<path d="M7 12h10a3.5 3.5 0 0 0 0-7 4.5 4.5 0 0 0-8.6-1.2A3 3 0 0 0 7 12z"/><path d="M7 15l-1 3M10.5 15l-1 3M14 15l-1 3M17.5 15l-1 3M9 19l-.7 2M13 19l-.7 2"/>',
+    storm: '<circle cx="12" cy="12" r="3"/><path d="M12 9c0-3 2-5 6-5-2 1-3 3-3 5"/><path d="M12 15c0 3-2 5-6 5 2-1 3-3 3-5"/>',
+    wind: '<path d="M3 9h11a3 3 0 1 0-3-3"/><path d="M3 13h15a3 3 0 1 1-3 3"/><path d="M3 17h7"/>',
+    house: '<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/>',
+    radio: '<rect x="3" y="7" width="16" height="10" rx="2"/><path d="M21 10v4"/><path d="M12 9l-2 3h3l-2 3"/>',
+    uphill: '<path d="M3 20h18"/><path d="M4 20l6-9 4 4 5-8"/><path d="M15 7h4v4"/>',
+    road: '<path d="M8 3L6 21"/><path d="M16 3l2 18"/><path d="M12 5v2M12 11v2M12 17v2"/>',
+    kite: '<path d="M12 2l6 7-6 8-6-8z"/><path d="M12 17c-2 1.5 2 2.5 0 5"/>',
+    waves: '<path d="M2 10c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2"/><path d="M2 16c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    check: '<path d="M5 12l5 5 9-10"/>',
+    x: '<path d="M6 6l12 12M18 6L6 18"/>',
+    replay: '<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/>',
+    mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/>',
+    lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    trash: '<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5v.5"/>',
+    speaker: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6a8 8 0 0 1 0 12"/>',
+    mute: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/>',
+    map: '<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>',
+    medal: '<circle cx="12" cy="9" r="6"/><path d="M9 14.5L7.5 22l4.5-2.5 4.5 2.5-1.5-7.5"/>',
+    tv: '<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/>',
+    clip: '<path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 20h16"/>',
+    market: '<path d="M4 10h16l-1.6-5H5.6z"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/>',
+    court: '<rect x="3" y="6" width="18" height="12" rx="1.5"/><path d="M12 6v12"/><circle cx="12" cy="12" r="2.6"/>',
+    hall: '<path d="M6 21V4"/><path d="M6 5h11l-2 3.5 2 3.5H6"/>',
+    school: '<path d="M3 21h18"/><path d="M5 21V11l7-4 7 4v10"/><path d="M10 21v-5h4v5"/><path d="M12 7V3h3"/>',
+    health: '<rect x="4" y="4" width="16" height="16" rx="4" fill="#1e9c5a" stroke="none"/><path d="M12 8v8M8 12h8" stroke="#ffffff" stroke-width="3"/>'
+  };
+  var BACK = ico(P.back, 20, 2.6);
+  var NEXT = ico(P.next, 22, 2.8);
+  var PLAY = solid('<path d="M8 5v14l11-7z"/>', 26);
+  var PAUSE = solid('<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>', 24);
+
+  function mascot(o) {
+    o = o || {};
+    var arm = o.point
+      ? '<rect x="49" y="22" width="7" height="20" rx="3.5" fill="#e8ab70" transform="rotate(-55 51 40)"/>'
+      : '<rect x="47" y="39" width="7" height="18" rx="3.5" fill="#e8ab70"/>';
+    var mouth = o.smile
+      ? '<path d="M31 30 q5 4 10 0" stroke="#2a2320" stroke-width="1.8" fill="none" stroke-linecap="round"/>'
+      : '<ellipse class="mouth" cx="36" cy="31" rx="3.5" ry="2.5" fill="#2a2320"/>';
+    return '<svg viewBox="0 0 72 80" aria-hidden="true">' +
+      '<path d="M24 36 L48 36 L52 70 L20 70 Z" fill="#f2760c" opacity="0.92"/>' +
+      '<rect x="24" y="37" width="24" height="26" rx="8" fill="#1f6f8b"/>' +
+      '<polygon points="36,41 38.2,46 43.6,46.4 39.4,49.9 40.8,55.2 36,52.2 31.2,55.2 32.6,49.9 28.4,46.4 33.8,46" fill="#ffd24d"/>' +
+      '<rect x="18" y="39" width="7" height="18" rx="3.5" fill="#e8ab70"/>' + arm +
+      '<rect x="28" y="61" width="7" height="14" rx="3" fill="#35506b"/><rect x="37" y="61" width="7" height="14" rx="3" fill="#35506b"/>' +
+      '<circle cx="36" cy="24" r="13" fill="#e8ab70"/>' +
+      '<path d="M23 23 a13 13 0 0 1 26 0 v-3 a13 13 0 0 0 -26 0 Z" fill="#3a2a22"/>' +
+      '<path d="M21 18 a15 10 0 0 1 30 0 Z" fill="#ffc53d"/>' +
+      '<rect x="19" y="16" width="34" height="4.5" rx="2.25" fill="#eaa100"/>' +
+      '<circle cx="31" cy="25" r="1.9" fill="#2a2320"/><circle cx="41" cy="25" r="1.9" fill="#2a2320"/>' + mouth +
+      '</svg>';
+  }
+
+  /* ===== Preset story: one forecast, one flood map ===== */
+  var WATCH_LINES = [
+    "Magandang gabi! I'm Bayani, with the weather for Barangay Handa.",
+    'Bagyong Kulog is out in the sea, 300 kilometers away, and it is moving toward us.',
+    'PAGASA raised Signal No. 1 for our town. Strong winds may come within 36 hours.',
+    'Rain starts tonight and gets heavier tomorrow. Low places near the river could flood.',
+    'Tonight, charge the radio and pack the go bag.',
+    'Tomorrow morning, you will be the weather reporter. Ingat, everyone!'
+  ];
+  var NEWS = {
+    easy: 'Bagyong Kulog is now 200 km away and coming closer. PAGASA says very strong winds may come within 24 hours. Heavy rain has been falling since early morning, and PAGASA tells families to be prepared.',
+    hard: 'Bagyong Kulog is now 200 km east of Barangay Handa. PAGASA expects gale-force winds of 62 to 88 km/h within 24 hours. Our rain gauge measured 20 mm of rain in the last hour, and the rain will continue.'
+  };
+  var STICKERS = [
+    { id: 'sun', label: 'Sun', ok: false, say: { lead: 'Not today.', text: 'The news talks about rain and wind, not sunshine.' } },
+    { id: 'cloud', label: 'Cloud', ok: false, say: { lead: 'Close.', text: 'There are clouds, but the news says something stronger. Look for heavy rain.' } },
+    { id: 'rain', label: 'Light rain', ok: false, say: { lead: 'Almost.', text: 'That is light rain. The news says heavy rain.' } },
+    { id: 'heavy', label: 'Heavy rain', ok: true, say: { lead: 'Yes!', text: 'Heavy rain goes over the town.' } },
+    { id: 'storm', label: 'Storm', ok: true, say: { lead: 'Yes!', text: 'Bagyong Kulog goes out in the sea, coming closer.' } },
+    { id: 'wind', label: 'Wind', ok: true, say: { lead: 'Yes!', text: 'Strong winds will reach the coast.' } }
+  ];
+  var STK = {
+    sun: { bg: '#ffd24d', fg: '#6b4a00', edge: '#b38a00' },
+    cloud: { bg: '#ffffff', fg: '#13283a', edge: '#9bb3c2' },
+    rain: { bg: '#cfe9f7', fg: '#13283a', edge: '#6e9db8' },
+    heavy: { bg: '#2f8fcf', fg: '#ffffff', edge: '#1d5f8c' },
+    storm: { bg: '#5b3fa8', fg: '#ffffff', edge: '#3a2870' },
+    wind: { bg: '#34c3b4', fg: '#0b2a3d', edge: '#1d8a7f' }
+  };
+  var SLOTS = { heavy: [92, 64, 27], wind: [206, 96, 24], storm: [288, 64, 30] };
+  var SIGNALS = [
+    { n: 1, easy: 'Strong winds', wind: '39 to 61 km/h', lead: '36 h', name: 'Strong winds' },
+    { n: 2, easy: 'Very strong winds', wind: '62 to 88 km/h', lead: '24 h', name: 'Gale-force winds' },
+    { n: 3, easy: 'Even stronger winds', wind: '89 to 117 km/h', lead: '18 h', name: 'Storm-force winds' },
+    { n: 4, wind: '118 to 184 km/h', lead: '12 h', name: 'Typhoon-force winds' },
+    { n: 5, wind: '185 km/h or more', lead: '12 h', name: 'Typhoon-force winds' }
+  ];
+  var SIG_SAY = {
+    easy: {
+      1: { lead: 'Close!', text: 'Signal No. 1 is for strong winds. The news says very strong winds, so the signal went up.' },
+      2: { lead: 'Yes!', text: 'Signal No. 2 means very strong winds may come within 24 hours.' },
+      3: { lead: 'One step too high.', text: 'Signal No. 3 is for even stronger winds.' }
+    },
+    hard: {
+      1: { lead: 'Too low.', text: 'Signal No. 1 is for 39 to 61 km/h within 36 hours. These winds are stronger.' },
+      2: { lead: 'Correct!', text: 'Gale-force winds of 62 to 88 km/h within 24 hours means Signal No. 2.' },
+      3: { lead: 'Too high.', text: 'Signal No. 3 is for 89 to 117 km/h within 18 hours.' },
+      4: { lead: 'Too high.', text: 'Signal No. 4 is for 118 to 184 km/h within 12 hours.' },
+      5: { lead: 'Too high.', text: 'Signal No. 5 is for 185 km/h or more. That is the strongest signal.' }
+    }
+  };
+  var RAIN = [
+    { id: 'yellow', cls: 'y', label: 'Yellow', easy: 'Be alert', hard: '7.5 to 15 mm in 1 hour' },
+    { id: 'orange', cls: 'o', label: 'Orange', easy: 'Be prepared', hard: '15 to 30 mm in 1 hour' },
+    { id: 'red', cls: 'r', label: 'Red', easy: 'Take action', hard: 'Over 30 mm in 1 hour' }
+  ];
+  var RAIN_SAY = {
+    easy: {
+      yellow: { lead: 'Not quite.', text: 'Yellow means be alert. The news says be prepared. Which color is that?' },
+      orange: { lead: 'Yes!', text: 'Orange means be prepared. Heavy rain can make the river rise.' },
+      red: { lead: 'Not quite.', text: 'Red means take action now. The news says be prepared. Which color is that?' }
+    },
+    hard: {
+      yellow: { lead: 'Too low.', text: 'Yellow is for 7.5 to 15 mm in one hour. The gauge measured 20 mm, which is more.' },
+      orange: { lead: 'Correct!', text: '20 mm in one hour is between 15 and 30 mm. That is an orange warning: be prepared.' },
+      red: { lead: 'Too high.', text: 'Red is for more than 30 mm in one hour. 20 mm is not that much yet.' }
+    }
+  };
+
+  var PLACES = {
+    homes: { x: 254, y: 168, name: 'Riverside homes', short: 'Homes', the: 'The riverside homes are', note: 'Purok 1, right beside the river', want: 'high', lx: 20, ly: 27, icon: 'house' },
+    market: { x: 290, y: 152, name: 'Market', short: 'Market', the: 'The market is', note: 'Where the river meets the sea', want: 'high', lx: -2, ly: -18, icon: 'market' },
+    court: { x: 216, y: 164, name: 'Covered court', short: 'Court', the: 'The covered court is', note: 'On Center Street', want: 'med', lx: -6, ly: 27, icon: 'court' },
+    health: { x: 148, y: 138, name: 'Health center', short: 'Health\ncenter', the: 'The health center is', note: 'Between the river and the hill', want: 'low', lx: 0, ly: 27, icon: 'health' },
+    hall: { x: 172, y: 72, name: 'Barangay hall', short: 'Barangay hall', the: 'The barangay hall is', note: 'North of the river', want: 'low', lx: 0, ly: -18, icon: 'hall' },
+    school: { x: 62, y: 172, name: 'Handa Elementary School', short: 'School', the: 'The school is', note: 'Up on the hill', want: 'none', lx: 0, ly: 27, icon: 'school' }
+  };
+  var ROUTES = {
+    A: { name: 'River Road', hint: 'Shortcut along the river', pts: [[254, 168], [232, 152], [202, 132], [168, 116], [134, 115], [106, 112], [86, 124], [72, 148], [62, 172]], tag: [151, 115],
+      say: { lead: 'Not this one.', text: 'River Road runs right beside the river, through red and orange areas. That is where floods could be the most dangerous.' } },
+    B: { name: 'Center Street', hint: 'The shortest road', pts: [[254, 168], [234, 176], [206, 160], [176, 146], [142, 148], [112, 150], [86, 160], [62, 172]], tag: [190, 153],
+      say: { lead: 'Close, but no.', text: 'Center Street is the shortest, but it goes through orange and yellow areas. Look for the road that gets out of the colors fastest.' } },
+    C: { name: 'Burol Road', hint: 'The longest road (burol means hill)', pts: [[254, 168], [258, 208], [230, 232], [184, 242], [134, 236], [98, 212], [74, 190], [62, 172]], tag: [184, 242],
+      say: { lead: 'Yes!', text: 'Burol Road is the longest, but it leaves the colored areas fast and climbs to high ground. The shortest way is not always the safest.' } }
+  };
+  var SORT = ['market', 'court', 'hall', 'school'];
+  var SORT_OK = {
+    market: 'The market is in the red area, where the river meets the sea. High hazard.',
+    court: 'The covered court is in the orange area. Medium hazard.',
+    hall: 'The barangay hall is in the yellow area. Low hazard.',
+    school: 'The school is on high ground with no color. That makes it a good evacuation center.'
+  };
+  var ZWORD = { high: 'red', med: 'orange', low: 'yellow', none: 'no color' };
+  var ZLABEL = {
+    easy: { high: 'High flood danger', med: 'Medium flood danger', low: 'Low flood danger', none: 'No flood expected here' },
+    hard: { high: 'High flood hazard', med: 'Medium flood hazard', low: 'Low flood hazard', none: 'No flood expected here' }
+  };
+  var Q = {
+    legend: [
+      { id: 'red', cls: 'hi', text: 'Red', ok: true, say: { lead: 'Yes!', text: 'Red means high danger. Orange means medium, and yellow means low.' } },
+      { id: 'orange', cls: 'me', text: 'Orange', ok: false, say: { lead: 'Not quite.', text: 'Orange means medium danger. Which color is for high?' } },
+      { id: 'yellow', cls: 'lo', text: 'Yellow', ok: false, say: { lead: 'Not quite.', text: 'Yellow means low danger. Which color is for high?' } }
+    ],
+    first: [
+      { id: 'red', text: 'Families in the red area by the river', ok: true, say: { lead: 'Right!', text: 'Red is the highest danger, so those families get ready first.' } },
+      { id: 'yellow', text: 'Families in the yellow area', ok: false, say: { lead: 'Not yet.', text: 'Yellow is low danger. Who lives in the red area?' } },
+      { id: 'hill', text: 'Families on the hill, where there is no color', ok: false, say: { lead: 'Not yet.', text: 'The map does not expect a flood on the hill. Who lives in the red area?' } }
+    ],
+    rain100: [
+      { id: 'long', text: 'Rain that falls nonstop for 100 years', ok: false, say: { lead: 'Ha! No.', text: 'It is about how strong the rain is, not how long it lasts.' } },
+      { id: 'chance', text: 'A very heavy rain with a 1 in 100 chance of happening in any year', ok: true, say: { lead: 'Right!', text: 'Every year has the same small chance, so it can even happen two years in a row.' } },
+      { id: 'once', text: 'A rain that comes exactly once every 100 years', ok: false, say: { lead: 'Not quite.', text: 'It can happen two years in a row. The 1 in 100 is the chance in any one year.' } }
+    ],
+    why: [
+      { id: 'low', text: 'The land there is low and close to the river, so water reaches it first', ok: true, say: { lead: 'Right!', text: 'Water flows down to the lowest places first. High ground stays drier.' } },
+      { id: 'people', text: 'Many people live there', ok: false, say: { lead: 'Not that.', text: 'The colors show where water could go, not how many people live there.' } },
+      { id: 'yearly', text: 'It floods there every single year', ok: false, say: { lead: 'Not always.', text: 'The map shows what could happen in a very heavy rain, the 100-year rain.' } }
+    ]
+  };
+  var TIPS = {
+    loose: { ok: true, icon: 'house', text: 'Bring loose things inside', line: 'Bring loose things inside before the wind gets strong.', say: { lead: 'Yes!', text: 'Strong wind can blow loose things around and hurt people.' } },
+    radio: { ok: true, icon: 'radio', text: 'Charge the radio and pack the go bag', line: 'Charge your radio and pack your go bag.', say: { lead: 'Yes!', text: 'A charged radio keeps you updated, and a packed go bag is ready if you need to leave.' } },
+    river: { ok: true, icon: 'uphill', text: { easy: 'Families by the river: get ready to go to the school on the hill', hard: 'Families in red and orange areas: get ready to go to the school' },
+      line: { easy: 'Families by the river, get ready to go to the school on the hill when the barangay calls.', hard: 'Families in the red and orange areas, get ready to go to the school on the hill when the barangay calls.' },
+      say: { lead: 'Yes!', text: 'That is what the flood map tells us.' } },
+    road: { ok: true, icon: 'road', text: 'Take Burol Road, not River Road', line: 'Take Burol Road to the school, not River Road.', say: { lead: 'Yes!', text: 'Burol Road leaves the colored areas fast.' } },
+    kite: { ok: false, icon: 'kite', text: 'Fly a kite while it is windy', say: { lead: 'Not a good idea!', text: 'Strong wind can pull a kite into power lines. Stay inside and help get the house ready.' } },
+    beach: { ok: false, icon: 'waves', text: 'Watch the big waves at the beach', say: { lead: 'Stay away!', text: 'Big waves and strong wind at the shore are dangerous during a storm.' } },
+    wait: { ok: false, icon: 'clock', text: 'Wait for strong wind before getting ready', say: { lead: 'Too late by then.', text: 'Get ready now, while it is still safe outside.' } },
+    look: { ok: false, icon: 'eye', text: 'Go and see how high the river is', say: { lead: 'Stay away!', text: 'River water can rise very fast. Listen to the radio for news instead.' } }
+  };
+  var TIP_ORDER = { easy: ['loose', 'kite', 'radio', 'beach', 'river', 'wait'], hard: ['loose', 'kite', 'radio', 'look', 'river', 'beach', 'road', 'wait'] };
+  var GATE = {
+    hard: { h: 'Play with a grown-up 👪', p: 'The Difficult level is for ages 10 to 15. A grown-up should play along with you.', ask: 'Grown-up: answer to start' },
+    rec: { h: 'A grown-up’s OK, please 👪', p: 'Bayani would like to record your voice for your forecast. The recording stays on this device. The game never sends it anywhere.', ask: 'Grown-up: answer to allow recording' },
+    clip: { h: 'A grown-up’s OK, please 👪', p: 'You can add a voice clip from this phone. It stays on this device. The game never sends it anywhere.', ask: 'Grown-up: answer to choose a clip' }
+  };
+  var STEP_NAMES = ['Watch', 'Build', 'Map', 'Advise', 'Present'];
+  var ORDER = ['title', 'watch', 'build', 'map', 'advise', 'present', 'wrap'];
+  var STEP_OF = { watch: 0, build: 1, map: 2, advise: 3, present: 4, wrap: 5 };
+
+  /* ===== Flood map geometry (the drawing and the answers come from the same numbers) ===== */
+  var GEO = (function () {
+    var RIVER = [[-12, 50], [28, 60], [60, 80], [96, 100], [130, 106], [166, 104], [198, 118], [228, 140], [258, 158], [290, 168], [326, 172]];
+    var pts = [];
+    for (var i = 0; i < RIVER.length - 1; i++) {
+      var p0 = RIVER[Math.max(0, i - 1)], p1 = RIVER[i], p2 = RIVER[i + 1], p3 = RIVER[Math.min(RIVER.length - 1, i + 2)];
+      var n = Math.max(2, Math.ceil(Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) / 4));
+      for (var k = 0; k < n; k++) {
+        var t = k / n, t2 = t * t, t3 = t2 * t;
+        var f = function (a, b, c, d) { return 0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3); };
+        pts.push([f(p0[0], p1[0], p2[0], p3[0]), f(p0[1], p1[1], p2[1], p3[1])]);
+      }
+    }
+    pts.push(RIVER[RIVER.length - 1]);
+    var L = [0];
+    for (var j = 1; j < pts.length; j++) L.push(L[j - 1] + Math.hypot(pts[j][0] - pts[j - 1][0], pts[j][1] - pts[j - 1][1]));
+    var T = L.map(function (l) { return l / L[L.length - 1]; });
+    var sm = function (a, b, x) { var u = Math.min(1, Math.max(0, (x - a) / (b - a))); return u * u * (3 - 2 * u); };
+    var W = {
+      high: function (t) { return 10 + 18 * sm(0.45, 1, t) + 2 * Math.sin(11 * t + 2); },
+      med: function (t) { return 24 + 20 * sm(0.45, 1, t) + 2 * Math.sin(9 * t); },
+      low: function (t) { return 44 + 26 * sm(0.45, 1, t) + 3 * Math.sin(7 * t + 1); }
+    };
+    var HILL = { cx: 40, cy: 232, rx: 122, ry: 86 };
+    function layer(lv) { return pts.map(function (p, i) { return '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="' + W[lv](T[i]).toFixed(1) + '"/>'; }).join(''); }
+    function inHill(x, y) { return Math.pow((x - HILL.cx) / HILL.rx, 2) + Math.pow((y - HILL.cy) / HILL.ry, 2) < 1; }
+    function zone(x, y) {
+      if (inHill(x, y)) return 'none';
+      var lv = ['high', 'med', 'low'];
+      for (var a = 0; a < lv.length; a++) {
+        for (var b = 0; b < pts.length; b++) {
+          if (Math.hypot(pts[b][0] - x, pts[b][1] - y) <= W[lv[a]](T[b])) return lv[a];
+        }
+      }
+      return 'none';
+    }
+    var river = 'M' + pts.map(function (p) { return p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join('L');
+    return { zone: zone, river: river, HILL: HILL, layers: { low: layer('low'), med: layer('med'), high: layer('high') } };
+  })();
+  Object.keys(PLACES).forEach(function (id) {
+    var p = PLACES[id], z = GEO.zone(p.x, p.y);
+    if (z !== p.want) console.warn('Map check: ' + id + ' sits in ' + z + ', expected ' + p.want);
+  });
+  var zoneOf = function (id) { return GEO.zone(PLACES[id].x, PLACES[id].y); };
+
+  /* ===== State ===== */
+  // sound: every sound; voice: Bayani reads hints aloud by himself (Play and Hear always speak while sound is on)
+  var S = { screen: 'title', level: 'easy', name: 'Mika', sound: true, voice: true, cc: true, sheet: null, okHard: false, okRec: false, once: {} };
+  function fresh() {
+    S.watch = { i: -1, playing: false, done: false };
+    S.build = { part: 0, placed: {}, tried: {}, signal: null, sigTried: {}, rain: null, rainTried: {}, guide: false, say: null };
+    S.map = { part: 0, info: null, seen: {}, tried: {}, sortIdx: 0, sortTried: {}, route: null, routeTried: {}, routeSel: null, evac: false, say: null };
+    S.advise = { picked: {}, wrong: {}, say: null };
+    S.present = { mode: 'idle', line: 0, times: [], t: 0, say: null, metered: false };
+    S.wrap = { playing: false, line: -1, kept: false, msg: '', say: null };
+    dropRec();
+  }
+  S.rec = null;
+  function dropRec() {
+    if (S.rec && S.rec.url) { try { URL.revokeObjectURL(S.rec.url); } catch (e) { /* ignore */ } }
+    S.rec = null;
+    var a = document.getElementById('playback');
+    if (a) { try { a.pause(); a.removeAttribute('src'); a.load(); } catch (e) { /* ignore */ } }
+  }
+
+  /* ===== Voice (Bayani) and sounds ===== */
+  var TTS = (function () {
+    var ok = typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance === 'function';
+    var voice = null, gen = 0, blocked = false;
+    function choose() {
+      if (!ok) return;
+      var vs = [];
+      try { vs = window.speechSynthesis.getVoices() || []; } catch (e) { vs = []; }
+      var en = vs.filter(function (v) { return /^en/i.test(v.lang); });
+      var local = en.filter(function (v) { return v.localService; });
+      voice = local.find(function (v) { return /PH/i.test(v.lang); }) || local[0] || null;
+      blocked = vs.length > 0 && !voice;
+    }
+    if (ok) { choose(); try { window.speechSynthesis.addEventListener('voiceschanged', choose); } catch (e) { window.speechSynthesis.onvoiceschanged = choose; } }
+    function spoken(t) {
+      return String(t).replace(/[\uD83C-\uDBFF][\uDC00-\uDFFF]/g, '')
+        .replace(/No\. (\d)/g, 'Number $1')
+        .replace(/km\/h/g, 'kilometers per hour')
+        .replace(/(\d) km\b/g, '$1 kilometers')
+        .replace(/(\d) mm\b/g, '$1 millimeters')
+        .replace(/(\d) h\b/g, '$1 hours');
+    }
+    function ms(t) { return Math.min(9500, 1200 + String(t).split(/\s+/).length * 340); }
+    function stop() { gen++; if (ok) { try { window.speechSynthesis.cancel(); } catch (e) { /* ignore */ } } }
+    // force: the player asked to hear it (Play, Hear), so it speaks even when the library's voice setting is off
+    function say(text, done, force) {
+      var my = ++gen, t0 = Date.now(), minMs = ms(text) * 0.6;
+      // Keep each caption up long enough to read, even when a phone has no voice and speech ends at once.
+      var finish = function () {
+        if (my !== gen || !done) return;
+        var left = minMs - (Date.now() - t0);
+        if (left > 0) setTimeout(function () { if (my === gen) done(); }, left); else done();
+      };
+      if (!ok || blocked || !S.sound || (!S.voice && !force)) { if (done) setTimeout(finish, ms(text)); return; }
+      var u = new window.SpeechSynthesisUtterance(spoken(text));
+      if (voice) { u.voice = voice; u.lang = voice.lang; } else { u.lang = 'en-US'; }
+      u.rate = 0.95; u.pitch = 1.08;
+      var fired = false;
+      var guard = setTimeout(function () { once(); }, ms(text) * 2 + 3000);
+      var once = function () { if (fired) return; fired = true; clearTimeout(guard); finish(); };
+      u.onend = once; u.onerror = once;
+      var go = function () { if (my !== gen) return; try { window.speechSynthesis.speak(u); } catch (e) { once(); } };
+      try {
+        if (window.speechSynthesis.speaking || window.speechSynthesis.pending) { window.speechSynthesis.cancel(); setTimeout(go, 90); } else { go(); }
+      } catch (e) { once(); }
+    }
+    return { say: say, stop: stop, ms: ms };
+  })();
+
+  var AC = null;
+  function sfx(kind) {
+    if (!S.sound) return;
+    try {
+      var C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return;
+      AC = AC || new C();
+      if (AC.state === 'suspended') AC.resume();
+      var seq = { good: [[660, 0], [880, 0.11]], bad: [[240, 0], [190, 0.12]], pop: [[520, 0], [780, 0.06]], win: [[523, 0], [659, 0.12], [784, 0.24], [1047, 0.36]] }[kind] || [];
+      var now = AC.currentTime;
+      seq.forEach(function (n) {
+        var o = AC.createOscillator(), g = AC.createGain();
+        o.type = 'triangle'; o.frequency.value = n[0];
+        g.gain.setValueAtTime(0.0001, now + n[1]);
+        g.gain.exponentialRampToValueAtTime(0.15, now + n[1] + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + n[1] + 0.24);
+        o.connect(g); g.connect(AC.destination);
+        o.start(now + n[1]); o.stop(now + n[1] + 0.26);
+      });
+    } catch (e) { /* sound is optional */ }
+  }
+  function say(scope, obj) {
+    S[scope].say = obj;
+    TTS.say((obj.lead ? obj.lead + ' ' : '') + obj.text);
+  }
+
+  /* ===== Pieces ===== */
+  function header(title, o) {
+    o = o || {};
+    var age = S.level === 'hard' ? '<span class="age older">Ages 10 to 15</span>' : '<span class="age young">Ages 6 to 10</span>';
+    return '<header class="top">' +
+      '<button class="ibtn" data-act="back" data-k="back" aria-label="Back">' + BACK + '</button>' +
+      '<h1 class="h1">' + esc(title) + '</h1>' + (o.extra || age) + soundBtn() +
+      '</header>' + steps();
+  }
+  function soundBtn() {
+    return '<button class="ibtn dark" data-act="sound" data-k="sound" aria-pressed="' + S.sound + '" aria-label="' + (S.sound ? 'Sound is on' : 'Sound is off') + '">' + ico(S.sound ? P.speaker : P.mute, 20) + '</button>';
+  }
+  function steps() {
+    var at = STEP_OF[S.screen];
+    return '<ol class="steps" aria-label="Game steps">' + STEP_NAMES.map(function (n, i) {
+      return '<li class="' + (i < at ? 'done' : i === at ? 'now' : '') + '"' + (i === at ? ' aria-current="step"' : '') + '><i></i>' + n + '</li>';
+    }).join('') + '</ol>';
+  }
+  function bubble(s) {
+    if (!s) return '';
+    return '<div class="say ' + (s.tone || 'info') + '" role="status" aria-live="polite">' +
+      '<div class="say-face">' + mascot({ smile: s.tone !== 'nope' }) + '</div>' +
+      '<p class="say-text">' + (s.lead ? '<b>' + esc(s.lead) + '</b> ' : '') + esc(s.text) + '</p>' +
+      '<button class="say-hear" data-act="hear" data-k="hear" aria-label="Hear Bayani again">' + ico(P.speaker, 18) + '</button></div>';
+  }
+  function pdots(n, at) {
+    var h = '';
+    for (var i = 0; i < n; i++) h += '<i class="' + (i < at ? 'done' : i === at ? 'on' : '') + '"></i>';
+    return '<span class="pdots" aria-label="Part ' + Math.min(at + 1, n) + ' of ' + n + '">' + h + '</span>';
+  }
+  function storm(x, y) {
+    var spin = calm() ? '' : '<animateTransform attributeName="transform" type="rotate" from="0" to="-360" dur="7s" repeatCount="indefinite"/>';
+    return '<g transform="translate(' + x + ' ' + y + ')"><circle r="40" fill="#ffffff" opacity="0.18"/>' +
+      '<g fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"><g>' + spin +
+      '<circle r="9"/><path d="M0 -9 C0 -24 11 -34 30 -34 C19 -28 14 -20 14 -10"/><path d="M0 9 C0 24 -11 34 -30 34 C-19 28 -14 20 -14 10"/></g></g></g>';
+  }
+  function seaWaves() {
+    return '<g fill="none" stroke="#ffffff" stroke-opacity=".45" stroke-width="2.5" stroke-linecap="round">' +
+      '<path d="M206 166 q8 -6 16 0 t16 0"/><path d="M262 198 q8 -6 16 0 t16 0"/><path d="M220 32 q8 -6 16 0 t16 0"/><path d="M300 140 q8 -6 16 0 t16 0"/></g>';
+  }
+  function studio(o) {
+    var sx = o.near ? 252 : 284, sy = o.near ? 84 : 70;
+    var svg = '<svg class="bg" viewBox="0 0 342 236" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' +
+      '<rect width="342" height="236" fill="#4fb3e8"/>' + seaWaves() +
+      '<path d="M0 0 H176 C158 44 194 76 170 116 C152 150 186 182 160 236 H0 Z" fill="#8fd47e" stroke="#2f7d4f" stroke-width="3"/>' +
+      '<path d="M16 36 C62 64 96 54 124 94 C142 120 156 124 168 118" fill="none" stroke="#2f8fcf" stroke-width="6" stroke-linecap="round"/>' +
+      '<g fill="#ffffff" stroke="#2f5d4a" stroke-width="1.5"><rect x="104" y="20" width="22" height="14"/><path d="M102 20 L115 11 L128 20 Z" fill="#f2760c"/>' +
+      '<rect x="132" y="66" width="16" height="12"/><path d="M130 66 L140 58 L150 66 Z" fill="#f2760c"/>' +
+      '<rect x="40" y="96" width="16" height="12"/><path d="M38 96 L48 88 L58 96 Z" fill="#f2760c"/></g>' +
+      storm(sx, sy) +
+      '<path d="M' + (sx - 34) + ' ' + (sy + 42) + ' C' + (sx - 52) + ' ' + (sy + 54) + ' 206 128 188 123" fill="none" stroke="#ffffff" stroke-width="4" stroke-dasharray="8 6" stroke-linecap="round"/>' +
+      '<path d="M184 122 L195 115 L194 129 Z" fill="#ffffff"/>' +
+      '</svg>';
+    var sig = o.signal ? '<div class="sig"><b>' + o.signal + '</b><span>SIGNAL<br>No. ' + o.signal + '</span></div>' : '';
+    var clock = o.clock ? '<div class="clock' + (o.live ? ' live' : '') + '">' + esc(o.clock) + '</div>' : '';
+    var who;
+    if (o.anchor === 'mic') {
+      who = '<div class="micstage' + (o.liveBars ? ' live' : '') + (o.metered ? ' metered' : '') + '"><span class="micdot">' + ico(P.mic, 28, 2.2) + '</span><span class="bars" aria-hidden="true">' +
+        '<span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></div>';
+    } else {
+      who = '<div class="anchor' + (o.talking ? ' talking' : '') + '">' + mascot({ point: true }) + '</div><div class="desk"></div>';
+    }
+    return '<div class="studio' + (o.short ? ' short' : '') + '" role="img" aria-label="' + esc(o.label || 'Weather studio') + '">' + svg + sig + clock + who +
+      '<div class="lower"><b>' + esc(o.who) + '</b><span>' + esc(o.role) + '</span></div></div>';
+  }
+
+  /* ===== Screens ===== */
+  var SCREENS = {};
+
+  SCREENS.title = function () {
+    var hard = S.level === 'hard';
+    return '<header class="top"><div class="brand"><i></i><b>BAYANI<span>Handa</span> Weather</b></div>' +
+      '<button class="ibtn dark" data-act="about" data-k="about" aria-label="About this game">' + ico(P.info, 20) + '</button>' + soundBtn() + '</header>' +
+      studio({ short: true, who: 'Bayani', role: 'Weather anchor', clock: 'Live', live: true, label: 'Bayani at the weather desk, pointing at a typhoon out in the sea' }) +
+      '<h1 class="title-h">Be the weather reporter!</h1>' +
+      '<p class="lede">Bagyong Kulog is coming to Barangay Handa. Watch Bayani’s forecast, read the flood map, then go on air with your own forecast.</p>' +
+      '<label class="field" for="nick">Your reporter name<input id="nick" maxlength="14" autocomplete="off" spellcheck="false" value="' + esc(S.name) + '"><small>Only used in this game. It is not saved.</small></label>' +
+      '<div class="levels" role="radiogroup" aria-label="Level">' +
+      '<button class="level' + (!hard ? ' on' : '') + '" role="radio" aria-checked="' + !hard + '" data-act="level" data-arg="easy" data-k="lv-easy">' +
+      '<span class="lv-top"><b>Easy</b><span class="age young">Ages 6 to 10</span></span>' +
+      '<span class="lv-txt">Pick the wind signal and rain warning, then find the safe place on the flood map.</span></button>' +
+      '<button class="level' + (hard ? ' on' : '') + '" role="radio" aria-checked="' + hard + '" data-act="level" data-arg="hard" data-k="lv-hard">' +
+      '<span class="lv-top"><b>Difficult</b><span class="age older">👪 Ages 10 to 15</span></span>' +
+      '<span class="lv-txt">Read wind speeds and rain amounts, sort places by flood hazard, and pick the safest road.</span>' +
+      (S.okHard ? '<span class="lv-note">A grown-up is playing along.</span>' : '<span class="lv-note">When you tap Start, Bayani will ask a grown-up to play along.</span>') + '</button></div>' +
+      '<ol class="how" aria-label="What you will do">' +
+      [['tv', 'Watch'], ['storm', 'Build'], ['map', 'Map'], ['check', 'Advise'], ['mic', 'Present']].map(function (s) {
+        return '<li><span>' + ico(P[s[0]], 22) + '</span>' + s[1] + '</li>';
+      }).join('') + '</ol>' +
+      '<div class="aboutrow"><button class="linkbtn" data-act="about" data-k="about2">' + ico(P.info, 18) + 'About this game and its sources</button></div>' +
+      '<div class="dock"><button class="cta" data-act="start" data-k="start">Start ' + NEXT + '</button></div>';
+  };
+
+  SCREENS.watch = function () {
+    var w = S.watch;
+    var line = w.i < 0 ? 'Tap play to hear Bayani’s forecast.' : WATCH_LINES[w.i];
+    return header('Bayani’s forecast') +
+      studio({ who: 'Bayani', role: 'Weather anchor', clock: 'Friday, 6 PM', signal: 1, talking: w.playing, label: 'Bayani at the weather desk. Signal No. 1 is up and a typhoon is out in the sea' }) +
+      '<div class="cc" id="cc" aria-live="polite"' + (S.cc ? '' : ' hidden') + '><small>CC</small><span id="cctext">' + esc(line) + '</span></div>' +
+      '<div class="ctrls">' +
+      '<button class="rbtn" data-act="wreplay" data-k="wreplay" aria-label="Play from the start">' + ico(P.replay, 22, 2.4) + '</button>' +
+      '<button class="pbtn" id="wplay" data-act="wplay" data-k="wplay" aria-label="' + (w.playing ? 'Pause' : 'Play') + '">' + (w.playing ? PAUSE : PLAY) + '</button>' +
+      '<button class="rbtn' + (S.cc ? ' on' : '') + '" data-act="cc" data-k="cc" aria-pressed="' + S.cc + '" aria-label="Captions">CC</button></div>' +
+      '<h2 class="h2">Bayani’s forecast</h2>' +
+      '<div class="facts">' +
+      '<div class="fact sea">' + ico(P.storm, 28) + '<span>Bagyong Kulog, 300 km away</span></div>' +
+      '<div class="fact sun">' + ico(P.wind, 28) + '<span>Signal No. 1: strong winds</span></div>' +
+      '<div class="fact land">' + ico(P.check, 28, 2.6) + '<span>Charge the radio, pack the go bag</span></div></div>' +
+      '<div class="aboutrow"><button class="linkbtn" data-act="about" data-k="about3">' + ico(P.info, 18) + 'About this game and its sources</button></div>' +
+      '<div class="dock"><button class="cta" data-act="go" data-arg="build" data-k="cta">Make your own forecast ' + NEXT + '</button></div>';
+  };
+
+  function wall() {
+    var b = S.build;
+    var slot = function (id) {
+      var c = SLOTS[id], cx = c[0], cy = c[1], r = c[2];
+      if (!b.placed[id]) return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="#ffffff" fill-opacity=".28" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="6 5"/><text class="slot-q" x="' + cx + '" y="' + (cy + 7) + '" text-anchor="middle">?</text>';
+      var col = { heavy: '#2f8fcf', wind: '#0f8a8a', storm: '#5b3fa8' }[id], s = r * 1.25;
+      return '<g class="' + (S.once.pop === id ? 'pop' : '') + '"><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="#ffffff" stroke="#13283a" stroke-width="3"/>' +
+        '<svg x="' + (cx - s / 2) + '" y="' + (cy - s / 2) + '" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="' + col + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' + P[id] + '</svg></g>';
+    };
+    return '<div class="wall" role="img" aria-label="Your weather wall: ' + Object.keys(b.placed).length + ' of 3 stickers placed">' +
+      '<svg class="bg" viewBox="0 0 342 176" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' +
+      '<rect width="342" height="176" fill="#4fb3e8"/>' + seaWaves() +
+      '<path d="M0 0 H176 C160 34 192 58 170 92 C152 120 186 142 166 176 H0 Z" fill="#8fd47e" stroke="#2f7d4f" stroke-width="3"/>' +
+      '<path d="M12 28 C58 52 92 44 120 74 C138 94 154 98 170 92" fill="none" stroke="#2f8fcf" stroke-width="6" stroke-linecap="round"/>' +
+      '<g fill="#ffffff" stroke="#2f5d4a" stroke-width="1.5"><rect x="66" y="118" width="16" height="12"/><path d="M64 118 L74 110 L84 118 Z" fill="#f2760c"/>' +
+      '<rect x="104" y="134" width="16" height="12"/><path d="M102 134 L112 126 L122 134 Z" fill="#f2760c"/></g>' +
+      slot('heavy') + slot('wind') + slot('storm') + '</svg>' +
+      (b.signal ? '<div class="sig"><b>2</b><span>SIGNAL<br>No. 2</span></div>' : '') +
+      (b.rain ? '<div class="rainchip">ORANGE RAIN WARNING</div>' : '') + '</div>';
+  }
+
+  SCREENS.build = function () {
+    var b = S.build, hard = S.level === 'hard', body = '';
+    var titles = ['Tap the 3 stickers that match the news', 'Which wind signal is up now?', 'Which rain warning fits?', 'Your forecast is ready!'];
+    if (b.part === 0) {
+      body = '<div class="tray" role="group" aria-label="Weather stickers">' + STICKERS.map(function (s) {
+        var placed = !!b.placed[s.id], tried = !!b.tried[s.id], st = STK[s.id];
+        return '<button class="stk' + (placed ? ' placed' : '') + (tried ? ' tried' : '') + '" data-act="sticker" data-arg="' + s.id + '" data-k="stk-' + s.id + '" aria-pressed="' + placed + '"' + (placed ? ' aria-disabled="true"' : '') + '>' +
+          '<span class="stk-dot" style="background:' + st.bg + ';color:' + st.fg + ';box-shadow:' + (placed ? '0 0 0 3px #ffd24d,' : '') + '0 4px 0 ' + st.edge + '">' + ico(P[s.id], 26) + '</span>' + esc(s.label) + '</button>';
+      }).join('') + '</div><div class="count">' + Object.keys(b.placed).length + ' of 3 stickers on the wall</div>';
+    } else if (b.part === 1) {
+      var list = hard ? SIGNALS : SIGNALS.slice(0, 3);
+      body = '<div class="sigs n' + list.length + '" role="group" aria-label="Wind signals">' + list.map(function (s) {
+        var cls = b.signal === s.n ? ' right' : b.sigTried[s.n] ? ' wrong' : '';
+        return '<button class="sigbtn' + cls + '" data-act="signal" data-arg="' + s.n + '" data-k="sig-' + s.n + '" aria-label="Signal number ' + s.n + (hard ? ', within ' + s.lead.replace(' h', ' hours') : ', ' + s.easy) + '"><b>' + s.n + '</b><span>' + esc(hard ? 'within ' + s.lead : s.easy) + '</span></button>';
+      }).join('') + '</div>';
+      if (hard) {
+        body += '<button class="linkbtn guide-btn" data-act="guide" data-k="guide" aria-expanded="' + b.guide + '">' + ico(P.info, 18) + (b.guide ? 'Hide the PAGASA signal guide' : 'Show the PAGASA signal guide') + '</button>';
+        if (b.guide) {
+          body += '<div class="tablewrap"><table class="guide"><thead><tr><th>No.</th><th>Winds</th><th>Speed</th><th>Within</th></tr></thead><tbody>' +
+            SIGNALS.map(function (s) { return '<tr><td>' + s.n + '</td><td>' + esc(s.name) + '</td><td>' + esc(s.wind) + '</td><td>' + esc(s.lead.replace(' h', ' hours')) + '</td></tr>'; }).join('') +
+            '</tbody></table></div>';
+        }
+      }
+    } else if (b.part === 2) {
+      body = '<div class="rains" role="group" aria-label="Rain warnings">' + RAIN.map(function (r) {
+        var cls = b.rain === r.id ? ' right' : b.rainTried[r.id] ? ' wrong' : '';
+        return '<button class="rainbtn ' + r.cls + cls + '" data-act="rain" data-arg="' + r.id + '" data-k="rain-' + r.id + '">' + r.label + '<span>' + esc(hard ? r.hard : r.easy) + '</span></button>';
+      }).join('') + '</div>';
+    }
+    return header('Build your forecast') +
+      '<div class="news"><div class="eyebrow">Your news · Saturday, 8 AM</div><p>' + esc(NEWS[S.level]) + '</p></div>' +
+      wall() +
+      '<div class="parts"><h2 class="h2">' + titles[b.part] + '</h2>' + pdots(3, b.part) + '</div>' +
+      bubble(b.say) + body +
+      '<div class="dock">' + (b.part >= 3 ? '<button class="cta" data-act="go" data-arg="map" data-k="cta">Next: the flood map ' + NEXT + '</button>' : '') + '</div>';
+  };
+
+  /* --- flood map --- */
+  function polyD(pts) { return 'M' + pts.map(function (p) { return p[0] + ' ' + p[1]; }).join('L'); }
+  var ROADS = [
+    [[302, -6], [300, 60], [302, 120], [304, 168], [300, 230], [298, 274]],
+    [[302, 130], [262, 112], [222, 94], [182, 86], [132, 74], [100, 64], [94, -6]],
+    [[254, 168], [278, 178], [302, 184]],
+    [[290, 152], [302, 150]]
+  ].concat(Object.keys(ROUTES).map(function (k) { return ROUTES[k].pts; }));
+  var HOUSES = [[236, 155], [262, 150], [232, 172], [272, 160], [276, 136], [306, 104], [240, 104], [256, 120], [206, 100], [150, 88], [122, 90], [186, 162], [118, 156], [196, 204], [32, 196], [100, 236], [128, 212], [218, 214], [274, 224], [44, 120], [70, 112]];
+  function mapTargets() {
+    var m = S.map, hard = S.level === 'hard';
+    if (!hard && m.part === 1) return ['homes', 'court', 'health'].filter(function (id) { return !m.seen[id]; });
+    if (!hard && m.part === 2) return ['court', 'school'];
+    if (hard && m.part === 1) return [SORT[m.sortIdx]];
+    return [];
+  }
+  function pinSvg(id, targets) {
+    var p = PLACES[id], m = S.map, hard = S.level === 'hard', cls = ['pin'];
+    var hint = targets.indexOf(id) >= 0;
+    if (m.info === id) cls.push('sel');
+    if ((!hard && m.seen[id] && m.part >= 1) || (hard && SORT.indexOf(id) >= 0 && SORT.indexOf(id) < m.sortIdx)) cls.push('ok');
+    if (m.tried.safe && m.tried.safe[id]) cls.push('no');
+    if (S.once.shake === 'pin-' + id) cls.push('shake');
+    var evac = id === 'school' && m.evac;
+    var s = 16;
+    return '<g class="' + cls.join(' ') + '" data-act="pin" data-arg="' + id + '" data-k="pin-' + id + '" role="button" tabindex="0" aria-label="' + esc(p.name) + '" transform="translate(' + p.x + ' ' + p.y + ')"><g class="pin-in">' +
+      '<circle class="hit" r="21"/>' + (hint ? '<circle class="ring" r="14"/>' : '') +
+      '<circle class="dot" r="12"/>' +
+      '<svg x="' + (-s / 2) + '" y="' + (-s / 2) + '" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="#13283a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' + P[p.icon] + '</svg>' +
+      '<text class="lbl" x="' + p.lx + '" y="' + p.ly + '" text-anchor="middle">' + p.short.split('\n').map(function (l, i) { return '<tspan x="' + p.lx + '" dy="' + (i ? 12 : 0) + '">' + esc(l) + '</tspan>'; }).join('') + '</text>' +
+      (evac ? '<g class="evac"><rect x="-40" y="-33" width="80" height="15" rx="7.5"/><text x="0" y="-22.5" text-anchor="middle">EVACUATION CENTER</text></g>' : '') +
+      '</g></g>';
+  }
+  function routesSvg() {
+    var m = S.map;
+    return Object.keys(ROUTES).map(function (k) {
+      var r = ROUTES[k], cls = ['route'];
+      if (m.route === 'C') cls.push(k === 'C' ? 'best' : 'faded');
+      else if (m.routeSel === k) cls.push('sel');
+      var d = polyD(r.pts);
+      return '<g class="' + cls.join(' ') + '" data-act="route" data-arg="' + k + '"><path class="case" d="' + d + '"/><path class="line" d="' + d + '"/></g>';
+    }).join('') + Object.keys(ROUTES).map(function (k) {
+      var r = ROUTES[k], best = m.route === 'C' && k === 'C';
+      if (m.route === 'C' && k !== 'C') return '';
+      return '<g class="rtag' + (best ? ' best' : '') + '" data-act="route" data-arg="' + k + '" data-k="rtag-' + k + '" role="button" tabindex="0" aria-label="Road ' + k + ', ' + esc(r.name) + '" transform="translate(' + r.tag[0] + ' ' + r.tag[1] + ')"><circle r="10.5"/><text y="4.5" text-anchor="middle">' + k + '</text></g>';
+    }).join('');
+  }
+  function floodMap() {
+    var m = S.map, hard = S.level === 'hard', targets = mapTargets(), H = GEO.HILL;
+    var roadsE = ROADS.map(function (r) { return '<path class="m-road-e" d="' + polyD(r) + '"/>'; }).join('');
+    var roads = ROADS.map(function (r) { return '<path class="m-road" d="' + polyD(r) + '"/>'; }).join('');
+    var houses = HOUSES.map(function (h) { return '<rect class="m-house" x="' + (h[0] - 4) + '" y="' + (h[1] - 3.5) + '" width="8" height="7" rx="1.5"/>'; }).join('');
+    var pinOrder = ['hall', 'market', 'health', 'court', 'homes', 'school'];
+    return '<svg class="fmap" viewBox="0 0 360 268" role="group" aria-label="Practice flood hazard map of Barangay Handa. A river runs from the west to the sea in the east. Red, orange and yellow areas follow the river. The hill in the southwest has no color.">' +
+      '<defs><mask id="lowland"><rect width="360" height="268" fill="#ffffff"/><ellipse cx="' + H.cx + '" cy="' + H.cy + '" rx="' + H.rx + '" ry="' + H.ry + '" fill="#000000"/></mask><path id="riv" d="' + GEO.river + '"/></defs>' +
+      '<rect class="m-land" width="360" height="268"/>' +
+      '<ellipse class="m-hill" cx="' + H.cx + '" cy="' + H.cy + '" rx="' + H.rx + '" ry="' + H.ry + '"/>' +
+      '<ellipse class="m-cont" cx="34" cy="246" rx="92" ry="62"/><ellipse class="m-cont" cx="28" cy="256" rx="62" ry="40"/><ellipse class="m-cont" cx="24" cy="264" rx="34" ry="20"/>' +
+      '<g mask="url(#lowland)" opacity=".88"><g class="z-low">' + GEO.layers.low + '</g><g class="z-med">' + GEO.layers.med + '</g><g class="z-high">' + GEO.layers.high + '</g></g>' +
+      '<path class="m-river" d="' + GEO.river + '"/>' +
+      '<path class="m-sea" d="M318 -6 C308 40 326 82 316 122 C308 152 330 190 320 228 C314 248 324 262 318 274 L366 274 L366 -6 Z"/>' +
+      '<path class="m-wave" d="M332 60 q5 -4 10 0 t10 0"/><path class="m-wave" d="M330 196 q5 -4 10 0 t10 0"/><path class="m-wave" d="M336 240 q5 -4 10 0 t10 0"/>' +
+      roadsE + roads + houses +
+      '<text class="m-lab m-rivlab" dy="-8"><textPath href="#riv" xlink:href="#riv" startOffset="13%">Handa River</textPath></text>' +
+      '<text class="m-lab" x="346" y="128" text-anchor="middle" transform="rotate(90 346 128)">SEA</text>' +
+      '<text class="m-lab" x="70" y="254" text-anchor="middle">HIGH GROUND</text>' +
+      (hard && m.part >= 2 ? routesSvg() : '') +
+      pinOrder.map(function (id) { return pinSvg(id, targets); }).join('') +
+      '<g class="m-north" transform="translate(338 22)"><circle r="13"/><path d="M0 -9 L5 3 L0 0 L-5 3 Z"/><text y="11" text-anchor="middle">N</text></g>' +
+      '</svg>';
+  }
+  function pinInfo() {
+    var m = S.map, id = m.info;
+    if (!id) return '';
+    var p = PLACES[id], hard = S.level === 'hard', z = zoneOf(id);
+    var reveal = !hard || m.part >= 2 || (hard && SORT.indexOf(id) >= 0 && SORT.indexOf(id) < m.sortIdx);
+    return '<div class="pininfo"><span class="pi-ic">' + ico(P[p.icon], 22) + '</span><span class="pi-tx"><b>' + esc(p.name) + '</b><small>' + esc(p.note) + '</small>' +
+      (reveal ? '<span class="zchip ' + z + '">' + (z === 'none' ? 'No color' : ZWORD[z].charAt(0).toUpperCase() + ZWORD[z].slice(1)) + ': ' + ZLABEL[S.level][z] + '</span>' : '<small>Read the color around it on the map.</small>') +
+      '</span></div>';
+  }
+  function legendBox() {
+    var hard = S.level === 'hard';
+    return '<div class="legend" aria-label="Map legend"><span class="lg-t">' + (hard ? 'Flood hazard (100-year rain)' : 'Flood danger') + '</span>' +
+      '<span class="sw"><i class="hi"></i>High</span><span class="sw"><i class="me"></i>Medium</span><span class="sw"><i class="lo"></i>Low</span><span class="sw"><i class="no"></i>No color</span></div>';
+  }
+  function qList(key) {
+    var tr = S.map.tried[key] || {};
+    return '<div class="choices">' + Q[key].map(function (o) {
+      var cls = tr[o.id] ? (o.ok ? ' right' : ' wrong') : '';
+      return '<button class="choice' + cls + '" data-act="q" data-arg="' + key + ':' + o.id + '" data-k="q-' + key + '-' + o.id + '">' + esc(o.text) +
+        (tr[o.id] ? '<span class="mark">' + ico(o.ok ? P.check : P.x, 16, 3) + '</span>' : '') + '</button>';
+    }).join('') + '</div>';
+  }
+  var SIDE = (function () {
+    // Side view of the same town: hill on the left, river channel on the right, flood water at one level.
+    var g = function (x) { return 30 + 58 / (1 + Math.exp(-(x - 110) / 22)) + 14 * Math.exp(-Math.pow((x - 255) / 14, 2)); };
+    var pts = [];
+    for (var x = 0; x <= 300; x += 5) pts.push([x, g(x)]);
+    var line = function (list) { return list.map(function (p) { return p[0] + ' ' + p[1].toFixed(1); }).join(' L'); };
+    var level = 72, wet = pts.filter(function (p) { return p[1] > level; });
+    var water = 'M' + (wet[0][0] - 3) + ' ' + level + ' L300 ' + level + ' L' + line(wet.slice().reverse()) + ' Z';
+    return '<svg class="side" viewBox="0 0 300 112" role="img" aria-label="Side view: the hill is high on the left, the land by the river is low on the right, and flood water covers the low land first while the school on the hill stays dry">' +
+      '<rect width="300" height="112" fill="#eaf6fd"/>' +
+      '<path d="M0 112 L' + line(pts) + ' L300 112 Z" fill="#cfe3b2" stroke="#8fb072" stroke-width="2"/>' +
+      '<g fill="#ffffff" stroke="#13283a" stroke-width="1.6"><rect x="24" y="18" width="20" height="13"/><path d="M22 18 L34 10 L46 18 Z" fill="#ffd24d"/>' +
+      '<rect x="205" y="75" width="16" height="12"/><path d="M203 75 L213 66 L223 75 Z" fill="#f2760c"/></g>' +
+      '<path d="' + water + '" fill="#3c9fd8" fill-opacity=".62"/>' +
+      '<text x="8" y="48" text-anchor="start" font-family="Nunito, sans-serif" font-size="10" font-weight="900" fill="#13283a">SCHOOL ON THE HILL</text>' +
+      '<text x="296" y="20" text-anchor="end" font-family="Nunito, sans-serif" font-size="10" font-weight="900" fill="#13283a">LOW LAND BY THE RIVER</text>' +
+      '<text x="296" y="34" text-anchor="end" font-family="Nunito, sans-serif" font-size="10" font-weight="800" fill="#13283a">floods first</text>' +
+      '</svg>';
+  })();
+  function mapDone() {
+    var hard = S.level === 'hard';
+    var pts = hard
+      ? ['A 100-year rain has a 1 in 100 chance in any year.', 'Red is high hazard, orange is medium, yellow is low.', 'Pick the road that leaves the colored areas fastest.']
+      : ['Red is high, orange is medium, yellow is low.', 'Families by the river get ready first.', 'The school on the hill is the safe place.'];
+    return '<div class="donecard"><div class="dc-top"><span class="medal">' + ico(P.map, 26) + '</span><div><div class="eyebrow">Map reader</div><h2 class="h2">' +
+      (hard ? 'You can read a flood hazard map!' : 'You can read a flood map!') + '</h2></div></div>' +
+      SIDE + '<p class="cap">Water fills the low land first. High ground stays drier.</p>' +
+      '<ul>' + pts.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' +
+      '<p>With a grown-up, look up your own barangay on UP NOAH: <a href="https://noah.up.edu.ph/know-your-hazards" target="_blank" rel="noopener">noah.up.edu.ph</a></p>' +
+      '<p class="small">A map is a guide. Always follow your barangay and PAGASA.</p></div>';
+  }
+  function mapBody() {
+    var m = S.map, hard = S.level === 'hard';
+    if (!hard) {
+      if (m.part === 0) {
+        var tr = m.tried.legend || {};
+        return '<div class="lgq" role="group" aria-label="Pick a color">' + Q.legend.map(function (o) {
+          return '<button class="' + o.cls + (tr[o.id] ? (o.ok ? ' right' : ' wrong') : '') + '" data-act="q" data-arg="legend:' + o.id + '" data-k="q-legend-' + o.id + '">' + o.text + '</button>';
+        }).join('') + '</div>';
+      }
+      if (m.part === 1) {
+        var n = ['homes', 'court', 'health'].filter(function (id) { return m.seen[id]; }).length;
+        return '<div class="count">' + n + ' of 3 glowing places checked</div>' + (n === 3 ? qList('first') : '');
+      }
+      if (m.part === 2) return '<div class="count">Tap the covered court or the school on the map.</div>';
+      return mapDone();
+    }
+    if (m.part === 0) return qList('rain100');
+    if (m.part === 1) {
+      var id = SORT[m.sortIdx];
+      return '<div class="count">Place ' + (m.sortIdx + 1) + ' of 4: the ' + esc(PLACES[id].name.toLowerCase()) + '</div>' +
+        '<div class="sorts" role="group" aria-label="Flood hazard">' + [['high', 'hi', 'High'], ['med', 'me', 'Medium'], ['low', 'lo', 'Low'], ['none', 'no', 'No color']].map(function (z) {
+          return '<button class="' + z[1] + (m.sortTried[z[0]] ? ' wrong' : '') + '" data-act="sort" data-arg="' + z[0] + '" data-k="sort-' + z[0] + '">' + z[2] + '</button>';
+        }).join('') + '</div>';
+    }
+    if (m.part === 2) {
+      return '<div class="routes" role="group" aria-label="Roads to the school">' + Object.keys(ROUTES).map(function (k) {
+        var r = ROUTES[k], cls = m.route === k ? ' right' : m.routeTried[k] ? ' wrong' : '';
+        return '<button class="' + cls.trim() + '" data-act="route" data-arg="' + k + '" data-k="road-' + k + '"><i>' + k + '</i><span>' + esc(r.name) + '<small>' + esc(r.hint) + '</small></span></button>';
+      }).join('') + '</div>';
+    }
+    if (m.part === 3) return qList('why');
+    return mapDone();
+  }
+  SCREENS.map = function () {
+    var m = S.map, hard = S.level === 'hard', parts = hard ? 4 : 3;
+    var titles = hard
+      ? ['What is a 100-year rain?', 'Sort the places by hazard', 'Pick the safest road', 'Why is it red by the river?', 'Map reader!']
+      : ['Which color means high?', 'Check the glowing places', 'Find the safe place', 'Map reader!'];
+    return header('Read the flood map') +
+      '<div class="mapbox"><span class="maptitle">Flood hazard map · Brgy. Handa</span>' + floodMap() + '</div>' +
+      pinInfo() + legendBox() +
+      '<p class="mapnote">Practice map. Barangay Handa and its flood areas are made up. The colors follow UP NOAH flood hazard maps.</p>' +
+      '<div class="parts"><h2 class="h2">' + titles[Math.min(m.part, titles.length - 1)] + '</h2>' + pdots(parts, m.part) + '</div>' +
+      bubble(m.say) + mapBody() +
+      '<div class="dock">' + (m.part >= parts ? '<button class="cta" data-act="go" data-arg="advise" data-k="cta">Next: the advice ' + NEXT + '</button>' : '') + '</div>';
+  };
+
+  /* --- advise --- */
+  function needTips() { return S.level === 'hard' ? 4 : 3; }
+  function rightPicked() { return TIP_ORDER[S.level].filter(function (id) { return TIPS[id].ok && S.advise.picked[id]; }); }
+  SCREENS.advise = function () {
+    var a = S.advise, need = needTips(), got = rightPicked().length, dots = '';
+    for (var i = 0; i < need; i++) dots += '<i class="' + (i < got ? 'on' : '') + '"></i>';
+    return header('What should families do?') +
+      '<div class="chips"><span class="pill sigp"><b>2</b>Signal No. 2</span><span class="pill orange">Orange rain warning</span><span class="pill mapp"><i></i>Red by the river</span></div>' +
+      '<div class="pickrow"><span>Pick the ' + need + ' tips for your forecast</span><span class="gdots" role="img" aria-label="' + got + ' of ' + need + ' picked">' + dots + '</span></div>' +
+      bubble(a.say) +
+      '<div class="tips">' + TIP_ORDER[S.level].map(function (id) {
+        var t = TIPS[id], text = typeof t.text === 'string' ? t.text : t.text[S.level];
+        var cls = a.picked[id] ? ' right' : a.wrong[id] ? ' wrong' : '';
+        var flag = a.picked[id] ? '<span class="flag">' + ico(P.check, 14, 3.4) + '</span>' : a.wrong[id] ? '<span class="flag">NOT THIS</span>' : '';
+        return '<button class="tip' + cls + '" data-act="tip" data-arg="' + id + '" data-k="tip-' + id + '" aria-pressed="' + !!a.picked[id] + '"><span class="ti">' + ico(P[t.icon], 22) + '</span><b>' + esc(text) + '</b>' + flag + '</button>';
+      }).join('') + '</div>' +
+      '<div class="dock">' + (got >= need ? '<button class="cta" data-act="go" data-arg="present" data-k="cta">Make my cue card ' + NEXT + '</button>' : '') + '</div>';
+  };
+
+  /* --- present --- */
+  function cueLines() {
+    var hard = S.level === 'hard', n = S.name || 'Mika';
+    var L = ['Magandang umaga! I’m ' + n + ' with the weather for Barangay Handa.'];
+    if (hard) {
+      L.push('Bagyong Kulog is 200 kilometers east of us. Signal No. 2 is up, so gale-force winds may come within 24 hours.');
+      L.push('Our rain gauge measured 20 millimeters in one hour. That is an orange rain warning, so be prepared!');
+    } else {
+      L.push('Bagyong Kulog is coming closer. Signal No. 2 is up for our town.');
+      L.push('There is an orange rain warning, so be prepared!');
+    }
+    rightPicked().forEach(function (id) { var t = TIPS[id]; L.push(typeof t.line === 'string' ? t.line : t.line[S.level]); });
+    L.push('Stay safe, everyone! Ingat!');
+    return L;
+  }
+  function micAllowedHere() {
+    var md = navigator.mediaDevices;
+    if (!md || typeof md.getUserMedia !== 'function' || typeof window.MediaRecorder === 'undefined') return false;
+    var pol = document.permissionsPolicy || document.featurePolicy;
+    if (pol && typeof pol.allowsFeature === 'function') { try { if (!pol.allowsFeature('microphone')) return false; } catch (e) { /* ignore */ } }
+    return true;
+  }
+  SCREENS.present = function () {
+    var p = S.present, lines = cueLines(), live = p.mode === 'rec' || p.mode === 'practice';
+    var pill = p.mode === 'rec' ? '<span class="onair" id="tpill">REC ' + mmss(p.t) + '</span>' : p.mode === 'practice' ? '<span class="onair prac" id="tpill">PRACTICE ' + mmss(p.t) + '</span>' : '';
+    var cue = '<div class="cue" aria-live="polite"><div class="eyebrow">Cue card</div>' + lines.map(function (l, i) {
+      var cls = live ? (i < p.line ? 'past' : i === p.line ? 'now' : '') : (i === 0 ? 'now' : '');
+      return '<p class="' + cls + '">' + esc(l) + '</p>';
+    }).join('') + (live ? (p.line < lines.length - 1 ? '<button class="nextline" data-act="nextline" data-k="nextline">Next line ' + ico(P.next, 18, 2.8) + '</button>' : '') : '') + '</div>';
+    var controls;
+    if (p.mode === 'nomic') {
+      controls = '<div class="nomic"><p><b>Recording is not available on this screen.</b> You can still practice out loud, or add a voice clip from your phone’s recorder app.</p>' +
+        '<div class="row2"><button class="cta small ghost" data-act="practice" data-k="practice">Practice out loud</button><button class="cta small" data-act="clip" data-k="clipbtn">' + ico(P.clip, 20) + 'Add a clip</button></div></div>';
+    } else if (p.mode === 'rec') {
+      controls = '<div class="recrow"><span class="side-b"><button class="smallbtn" data-act="cancel" data-k="cancel">Start over</button></span>' +
+        '<button class="recbtn stop" data-act="stop" data-k="stop" aria-label="Stop recording"><i></i></button>' +
+        '<span class="side-b tlabel" id="tlabel">' + mmss(p.t) + ' of 1:00</span></div>';
+    } else if (p.mode === 'practice') {
+      controls = '<div class="recrow"><span class="side-b"><button class="smallbtn" data-act="cancel" data-k="cancel">Start over</button></span>' +
+        '<button class="recbtn done" data-act="finish" data-k="finish" aria-label="Done practicing">' + ico(P.check, 34, 3.4) + '</button>' +
+        '<span class="side-b tlabel" id="tlabel">' + mmss(p.t) + '</span></div>';
+    } else {
+      controls = '<div class="recrow"><span class="side-b"><button class="smallbtn" data-act="practice" data-k="practice">Practice</button></span>' +
+        '<button class="recbtn" data-act="rec" data-k="rec" aria-label="Record your forecast"><i></i></button>' +
+        '<span class="side-b tlabel">Up to 1:00</span></div>';
+    }
+    return '<header class="top"><button class="ibtn" data-act="back" data-k="back" aria-label="Back">' + BACK + '</button><h1 class="h1">You’re on air!</h1>' + pill + soundBtn() + '</header>' + steps() +
+      studio({ near: true, signal: 2, who: S.name, role: 'Weather for Barangay Handa', anchor: 'mic', liveBars: live, metered: p.metered, label: 'Your weather studio, ready for your voice' }) +
+      bubble(p.say) + cue + controls +
+      '<p class="privacy">' + ico(P.lock, 14) + (S.okRec ? 'A grown-up said OK. ' : 'Recording needs a grown-up’s OK. ') + 'Your voice stays on this device.</p>' +
+      '<div class="dock"></div>';
+  };
+
+  /* --- wrap --- */
+  SCREENS.wrap = function () {
+    var w = S.wrap, hasRec = !!(S.rec && S.rec.url), hard = S.level === 'hard', lines = cueLines();
+    var cap = w.line >= 0 ? lines[w.line] : (hasRec ? 'Tap play to hear your forecast.' : 'Tap play and Bayani will read your forecast back.');
+    var b1 = hard ? 'You matched 62 to 88 km/h to Signal No. 2, read 20 mm in an hour as an orange warning, and shared 4 good tips.' : 'You read Signal No. 2 and an orange rain warning, and shared 3 good tips.';
+    var b2 = hard ? 'You sorted places by flood hazard and picked the safest road to the evacuation center.' : 'You found the red areas and the safe place on the flood map.';
+    var btns;
+    if (hasRec) {
+      btns = '<div class="row2"><button class="cta small ghost" data-act="retry" data-k="retry">' + ico(P.replay, 18, 2.4) + 'Try again</button>' +
+        (w.kept ? '<button class="cta small go" data-k="kept" aria-disabled="true">' + ico(P.check, 18, 3) + 'Kept</button>' : '<button class="cta small" data-act="keep" data-k="keep">Keep it</button>') + '</div>' +
+        '<p class="keptmsg">' + ico(P.lock, 14) + (w.kept ? 'Kept on this device until you close the game.' : 'Your recording stays on this device.') + '</p>' +
+        '<div class="aboutrow"><button class="linkbtn warn" data-act="del" data-k="del">' + ico(P.trash, 16) + 'Delete my recording</button></div>';
+    } else {
+      btns = '<div class="row2"><button class="cta small ghost" data-act="retry" data-k="retry">' + ico(P.mic, 18) + 'Record it</button>' +
+        '<button class="cta small" data-act="restart" data-k="restart">Play again</button></div>' +
+        (w.msg ? '<p class="keptmsg">' + esc(w.msg) + '</p>' : '');
+    }
+    return header('That’s a wrap!') +
+      studio({ near: true, signal: 2, who: S.name, role: 'Weather for Barangay Handa', anchor: 'mic', liveBars: w.playing, label: 'Your forecast on the studio screen' }) +
+      '<div class="cc"><small>CC</small><span id="wtext">' + esc(cap) + '</span></div>' +
+      '<div class="ctrls"><button class="pbtn" id="wplaybtn" data-act="play" data-k="play" aria-label="' + (w.playing ? 'Pause' : (hasRec ? 'Play your recording' : 'Play Bayani reading your forecast')) + '">' + (w.playing ? PAUSE : PLAY) + '</button></div>' +
+      (hasRec ? '<div class="wbar"><div><i id="wfill"></i></div><span id="wtime">0:00</span></div>' : '') +
+      '<div class="badges"><div class="badge"><span class="medal">' + ico(P.medal, 30, 2) + '</span><div><span class="eyebrow">New badge</span><b>Weather Reporter</b><p>' + esc(b1) + '</p></div></div>' +
+      '<div class="badge map"><span class="medal">' + ico(P.map, 28, 2) + '</span><div><span class="eyebrow">New badge</span><b>Flood Map Reader</b><p>' + esc(b2) + '</p></div></div></div>' +
+      '<div class="note"><span class="ni">' + ico(P.house, 20) + '</span><span>' + (hasRec ? 'Play it for your family tonight, then check your go bag together.' : 'Read your forecast to your family tonight, then check your go bag together.') + '</span></div>' +
+      '<div class="note"><span class="ni">' + ico(P.map, 20) + '</span><span>With a grown-up, find your real barangay’s flood map on <a href="https://noah.up.edu.ph/know-your-hazards" target="_blank" rel="noopener">noah.up.edu.ph</a>.</span></div>' +
+      '<div class="wrapbtns">' + btns +
+      (EMBED ? '<button class="cta small ghost" data-act="leave" data-k="leave">Back to the library</button>' : '') +
+      '<div class="aboutrow"><button class="linkbtn" data-act="restart" data-k="restart2">Play again from the start</button></div></div>';
+  };
+
+  /* ===== Sheets ===== */
+  var SHEETS = {
+    gate: function () {
+      var g = S.sheet, c = GATE[g.reason];
+      var keys = '';
+      for (var d = 1; d <= 9; d++) keys += '<button class="key" data-act="key" data-arg="' + d + '" data-k="key-' + d + '">' + d + '</button>';
+      keys += '<button class="key" data-act="bksp" data-k="key-b" aria-label="Delete a number">⌫</button><button class="key" data-act="key" data-arg="0" data-k="key-0">0</button><button class="key ok" data-act="ok" data-k="key-ok">OK</button>';
+      return '<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="gh">' +
+        '<h2 id="gh" class="sh-h">' + esc(c.h) + '</h2><p class="sh-p">' + esc(c.p) + '</p>' +
+        '<div class="gate"><div class="kq">' + esc(c.ask) + '</div><div class="kq big">What is ' + g.a + ' × ' + g.b + '?</div>' +
+        '<div class="kdisp" aria-live="polite" aria-label="Answer">' + (g.entry ? esc(g.entry) : '&nbsp;') + '</div>' +
+        (g.wrong ? '<p class="kbad" role="alert">Not quite. Please ask a grown-up to help.</p>' : '') +
+        '<div class="keys">' + keys + '</div></div>' +
+        (g.reason === 'hard' ? '<button class="sh-btn" data-act="easy" data-k="g-easy">Play Easy instead (ages 6 to 10)</button>' : '') +
+        '<button class="sh-btn ghost" data-act="close" data-k="g-close">Not now</button></div></div>';
+    },
+    about: function () {
+      var src = [
+        ['PAGASA: the five tropical cyclone wind signals', 'https://pagasa.dost.gov.ph/press-release/108'],
+        ['The Varsitarian: how PAGASA’s rainfall warnings work', 'https://varsitarian.net/sci-tech/20250724/explainer-how-do-pagasas-rainfall-warnings-and-weather-advisories-work'],
+        ['GMA News: checking your area on UP NOAH’s hazard map', 'https://gmanetwork.com/news/scitech/weather/914572/up-noah-hazard-database-map-flood-landslides-storm-surges/story'],
+        ['PhilSTAR Life: how to use the UP NOAH map', 'https://philstarlife.com/news-and-views/617131-how-to-use-up-noah-map-shows-likely-affected-floods'],
+        ['USGS: what a 100-year flood means', 'https://www.usgs.gov/water-science-school/science/floods-and-recurrence-intervals'],
+        ['UP NOAH: Know your hazards', 'https://noah.up.edu.ph/know-your-hazards']
+      ];
+      return '<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ah">' +
+        '<h2 id="ah" class="sh-h">About this game</h2>' +
+        '<p class="sh-p">BAYANIHanda Weather Studio is a sample game for the BAYANIHanda library. Kids watch a forecast, build their own, read a flood hazard map, and share safety tips on air.</p>' +
+        '<h3 class="sh-h3">What is real</h3><ul class="sh-list"><li>The wind signals (Signal No. 1 to 5) and the yellow, orange and red rain warnings follow PAGASA.</li>' +
+        '<li>The flood map colors follow UP NOAH flood hazard maps: yellow for low, orange for medium and red for high. UP NOAH flood maps show what a 100-year rain could do.</li></ul>' +
+        '<h3 class="sh-h3">What is made up</h3><ul class="sh-list"><li>Bagyong Kulog, Barangay Handa, and every place and flood area on the map are made up for practice. To see a real barangay, open noah.up.edu.ph with a grown-up.</li></ul>' +
+        '<h3 class="sh-h3">Privacy</h3><ul class="sh-list"><li>The nickname and any recording stay on this device. The game never sends them anywhere, and a recording is gone when you delete it or close the game.</li></ul>' +
+        '<h3 class="sh-h3">Credits</h3><p class="sh-p">Subject for code and content validation. Conceptualized and developed with AI assistance by Edward Andrew A. Dionido, Science Research Specialist II, UPRI.</p>' +
+        '<p class="sh-p">Questions? <span class="sel">eadionido@up.edu.ph</span></p>' +
+        '<h3 class="sh-h3">Sources</h3><ul class="sh-list">' + src.map(function (s) { return '<li><a href="' + s[1] + '" target="_blank" rel="noopener">' + esc(s[0]) + '</a></li>'; }).join('') + '</ul>' +
+        '<button class="sh-btn" data-act="close" data-k="a-close">Close</button></div></div>';
+    }
+  };
+
+  /* ===== Render ===== */
+  var lastScreen = null, sheetReturn = null, gateThen = null;
+  function render() {
+    var app = $('#app'), same = lastScreen === S.screen, y = same ? window.scrollY : 0;
+    var ae = document.activeElement, fk = ae && ae.getAttribute ? ae.getAttribute('data-k') : null;
+    app.innerHTML = SCREENS[S.screen]();
+    $('#sheet').innerHTML = S.sheet ? SHEETS[S.sheet.kind]() : '';
+    document.body.classList.toggle('locked', !!S.sheet);
+    if (!same) { lastScreen = S.screen; window.scrollTo(0, 0); } else { window.scrollTo(0, y); }
+    var target = fk ? document.querySelector('[data-k="' + fk + '"]') : null;
+    if (S.sheet && (!target || !$('#sheet').contains(target))) target = $('#sheet .key') || $('#sheet .sh-btn');
+    if (target) { try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); } }
+    if (S.once.shake) { var el = document.querySelector('[data-k="' + S.once.shake + '"]'); if (el && el.tagName !== 'g') el.classList.add('shake'); }
+    S.once = {};
+  }
+  function openSheet(sheet) {
+    var ae = document.activeElement;
+    sheetReturn = ae && ae.getAttribute ? ae.getAttribute('data-k') : null;
+    S.sheet = sheet;
+    render();
+  }
+  function closeSheet() {
+    S.sheet = null; gateThen = null;
+    render();
+    if (sheetReturn) { var el = document.querySelector('[data-k="' + sheetReturn + '"]'); if (el) { try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } } }
+  }
+  function openGate(reason, then) {
+    gateThen = then;
+    openSheet({ kind: 'gate', reason: reason, a: rnd(3, 9), b: rnd(6, 9), entry: '', wrong: false });
+  }
+
+  /* ===== Navigation ===== */
+  function stopMedia() {
+    watchGen++; readGen++;
+    TTS.stop();
+    S.watch && (S.watch.playing = false);
+    if (S.wrap) S.wrap.playing = false;
+    var a = $('#playback'); if (a && !a.paused) { try { a.pause(); } catch (e) { /* ignore */ } }
+    if (REC.mr && REC.mr.state !== 'inactive') { REC.discard = true; stopRecording(); }
+    if (S.present && S.present.mode === 'practice') stopPractice();
+  }
+  function go(screen) {
+    stopMedia();
+    S.screen = screen;
+    enter(screen);
+    render();
+    // On its own, Bayani starts right away, inside the Start tap, so phones allow the voice. Inside the library the
+    // frame has had no tap yet, so the forecast waits for the Play button.
+    if (screen === 'watch' && !EMBED && !S.watch.playing && S.watch.i < 0) playForecast(0);
+  }
+  function enter(screen) {
+    var hard = S.level === 'hard';
+    if (screen === 'build' && !S.build.say) say('build', { text: hard ? 'Read your news. Then tap the 3 stickers that match it.' : 'Read your news. Then tap the 3 stickers that match it. Bayani will help!' });
+    if (screen === 'map' && !S.map.say) {
+      say('map', hard
+        ? { text: 'This flood hazard map uses UP NOAH colors: red is high hazard, orange is medium, and yellow is low. It shows floods from a 100-year rain. What is a 100-year rain?' }
+        : { text: 'Heavy rain can make the river overflow. This flood map shows which places could flood. Hazard means danger. Which color means the danger is HIGH?' });
+    }
+    if (screen === 'advise' && !S.advise.say) say('advise', { text: 'Which tips will you share on air? Pick the ' + needTips() + ' good ones.' });
+    if (screen === 'present') {
+      S.present.mode = 'idle'; S.present.line = 0; S.present.t = 0; S.present.times = [];
+      if (!S.present.say) say('present', { text: 'Here is your cue card. Tap Practice to try it, or the red button to record. Read one line at a time.' });
+    }
+    if (screen === 'wrap') { S.wrap.playing = false; S.wrap.line = -1; S.wrap.kept = false; S.wrap.msg = ''; }
+  }
+
+  /* ===== Watch: Bayani's forecast ===== */
+  var watchGen = 0;
+  function playForecast(from, force) {
+    var my = ++watchGen;
+    S.watch.playing = true;
+    var step = function (i) {
+      if (my !== watchGen) return;
+      if (i >= WATCH_LINES.length) { S.watch.playing = false; S.watch.done = true; updWatch(); return; }
+      S.watch.i = i; updWatch();
+      TTS.say(WATCH_LINES[i], function () { if (my === watchGen) setTimeout(function () { step(i + 1); }, 420); }, force);
+    };
+    step(from || 0);
+  }
+  function pauseForecast() { watchGen++; TTS.stop(); S.watch.playing = false; updWatch(); }
+  function updWatch() {
+    if (S.screen !== 'watch') return;
+    var t = $('#cctext'); if (t) t.textContent = S.watch.i < 0 ? 'Tap play to hear Bayani’s forecast.' : WATCH_LINES[S.watch.i];
+    var b = $('#wplay'); if (b) { b.innerHTML = S.watch.playing ? PAUSE : PLAY; b.setAttribute('aria-label', S.watch.playing ? 'Pause' : 'Play'); }
+    var an = $('.anchor'); if (an) an.classList.toggle('talking', S.watch.playing);
+  }
+
+  /* ===== Recording (kept in memory only) ===== */
+  var REC = { stream: null, mr: null, chunks: [], t0: 0, timer: null, raf: null, ctx: null, discard: false };
+  function cleanupStream() {
+    if (REC.timer) { clearInterval(REC.timer); REC.timer = null; }
+    if (REC.raf) { cancelAnimationFrame(REC.raf); REC.raf = null; }
+    if (REC.ctx) { try { REC.ctx.close(); } catch (e) { /* ignore */ } REC.ctx = null; }
+    if (REC.stream) { REC.stream.getTracks().forEach(function (t) { t.stop(); }); REC.stream = null; }
+    if (S.present) S.present.metered = false;
+  }
+  function noMic() {
+    S.present.mode = 'nomic';
+    say('present', { lead: 'No microphone here.', text: 'You can still practice out loud, or add a voice clip from your phone.' });
+    render();
+  }
+  function startRecording() {
+    var p = S.present;
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      if (S.screen !== 'present') { stream.getTracks().forEach(function (t) { t.stop(); }); return; }
+      var types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'], mime = '';
+      try { mime = types.find(function (t) { return window.MediaRecorder.isTypeSupported && window.MediaRecorder.isTypeSupported(t); }) || ''; } catch (e) { mime = ''; }
+      var mr;
+      try { mr = mime ? new window.MediaRecorder(stream, { mimeType: mime }) : new window.MediaRecorder(stream); }
+      catch (e) { stream.getTracks().forEach(function (t) { t.stop(); }); noMic(); return; }
+      REC.stream = stream; REC.mr = mr; REC.chunks = []; REC.discard = false;
+      mr.ondataavailable = function (ev) { if (ev.data && ev.data.size) REC.chunks.push(ev.data); };
+      mr.onstop = function () {
+        var dur = (performance.now() - REC.t0) / 1000;
+        var blob = new Blob(REC.chunks, { type: mr.mimeType || mime || 'audio/webm' });
+        var discard = REC.discard;
+        REC.mr = null; REC.discard = false;
+        cleanupStream();
+        if (discard || !blob.size) return;
+        dropRec();
+        S.rec = { url: URL.createObjectURL(blob), dur: dur, times: p.times.slice(), src: 'mic' };
+        go('wrap');
+      };
+      REC.t0 = performance.now();
+      p.mode = 'rec'; p.line = 0; p.t = 0; p.times = [0];
+      mr.start(250);
+      REC.timer = setInterval(tickRec, 200);
+      startMeter(stream);
+      say('present', { lead: 'You’re on air!', text: 'Read the yellow line, then tap Next line.' });
+      render();
+    }).catch(function () { noMic(); });
+  }
+  function tickRec() {
+    var p = S.present;
+    p.t = (performance.now() - REC.t0) / 1000;
+    var tl = $('#tlabel'); if (tl) tl.textContent = mmss(p.t) + (p.mode === 'rec' ? ' of 1:00' : '');
+    var tp = $('#tpill'); if (tp) tp.textContent = (p.mode === 'rec' ? 'REC ' : 'PRACTICE ') + mmss(p.t);
+    if (p.mode === 'rec' && p.t >= 60) stopRecording();
+  }
+  function stopRecording() {
+    if (REC.timer) { clearInterval(REC.timer); REC.timer = null; }
+    if (REC.mr && REC.mr.state !== 'inactive') { try { REC.mr.stop(); } catch (e) { cleanupStream(); } }
+  }
+  function startMeter(stream) {
+    try {
+      var C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return;
+      REC.ctx = new C();
+      var an = REC.ctx.createAnalyser(); an.fftSize = 256;
+      REC.ctx.createMediaStreamSource(stream).connect(an);
+      var buf = new Uint8Array(an.fftSize);
+      S.present.metered = true;
+      var loop = function () {
+        if (!REC.ctx) return;
+        an.getByteTimeDomainData(buf);
+        var sum = 0;
+        for (var i = 0; i < buf.length; i++) { var d = (buf[i] - 128) / 128; sum += d * d; }
+        var rms = Math.sqrt(sum / buf.length), now = Date.now();
+        var bars = document.querySelectorAll('.micstage .bars span');
+        for (var b = 0; b < bars.length; b++) bars[b].style.height = Math.min(100, 16 + rms * 520 * (0.65 + 0.35 * Math.sin(now / 110 + b * 1.4))) + '%';
+        REC.raf = requestAnimationFrame(loop);
+      };
+      loop();
+    } catch (e) { /* the bars are optional */ }
+  }
+  var pracT0 = 0;
+  function startPractice() {
+    var p = S.present;
+    p.mode = 'practice'; p.line = 0; p.t = 0; p.times = [0];
+    pracT0 = performance.now(); REC.t0 = pracT0;
+    if (REC.timer) clearInterval(REC.timer);
+    REC.timer = setInterval(tickRec, 200);
+    say('present', { lead: 'Practice time!', text: 'Read the yellow line out loud, then tap Next line.' });
+    render();
+  }
+  function stopPractice() { if (REC.timer) { clearInterval(REC.timer); REC.timer = null; } }
+
+  /* ===== Wrap: play it back ===== */
+  var readGen = 0;
+  function readBack() {
+    var my = ++readGen, lines = cueLines();
+    S.wrap.playing = true; updWrap();
+    var step = function (i) {
+      if (my !== readGen) return;
+      if (i >= lines.length) { S.wrap.playing = false; S.wrap.line = -1; updWrap(true); return; }
+      S.wrap.line = i; updWrap();
+      TTS.say(lines[i], function () { if (my === readGen) setTimeout(function () { step(i + 1); }, 380); }, true);
+    };
+    step(0);
+  }
+  function updWrap(full) {
+    if (S.screen !== 'wrap') return;
+    if (full) { render(); return; }
+    var lines = cueLines(), w = S.wrap, hasRec = !!(S.rec && S.rec.url);
+    var t = $('#wtext'); if (t) t.textContent = w.line >= 0 ? lines[w.line] : (hasRec ? 'Tap play to hear your forecast.' : 'Tap play and Bayani will read your forecast back.');
+    var b = $('#wplaybtn'); if (b) { b.innerHTML = w.playing ? PAUSE : PLAY; b.setAttribute('aria-label', w.playing ? 'Pause' : 'Play'); }
+    var st = $('.micstage'); if (st) st.classList.toggle('live', w.playing);
+  }
+  function lineAt(sec) {
+    var r = S.rec, lines = cueLines();
+    if (r.times && r.times.length > 1) {
+      var idx = 0;
+      for (var i = 0; i < r.times.length; i++) if (sec >= r.times[i]) idx = i;
+      return Math.min(idx, lines.length - 1);
+    }
+    var dur = r.dur || 0;
+    if (!dur || !isFinite(dur)) return -1;
+    return Math.min(lines.length - 1, Math.floor(sec / dur * lines.length));
+  }
+  function bindAudio() {
+    var a = $('#playback');
+    a.addEventListener('timeupdate', function () {
+      if (S.screen !== 'wrap' || !S.rec) return;
+      S.wrap.line = lineAt(a.currentTime);
+      var dur = S.rec.dur || a.duration;
+      var f = $('#wfill'); if (f && dur && isFinite(dur)) f.style.width = Math.min(100, a.currentTime / dur * 100) + '%';
+      var tm = $('#wtime'); if (tm) tm.textContent = mmss(a.currentTime);
+      updWrap();
+    });
+    a.addEventListener('loadedmetadata', function () { if (S.rec && !S.rec.dur && isFinite(a.duration)) S.rec.dur = a.duration; });
+    a.addEventListener('play', function () { S.wrap.playing = true; updWrap(); });
+    a.addEventListener('pause', function () { S.wrap.playing = false; updWrap(); });
+    a.addEventListener('ended', function () { S.wrap.playing = false; S.wrap.line = -1; updWrap(); });
+    $('#clip').addEventListener('change', function (e) {
+      var f = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (!f) return;
+      dropRec();
+      S.rec = { url: URL.createObjectURL(f), dur: 0, times: [], src: 'clip' };
+      go('wrap');
+    });
+  }
+
+  /* ===== Actions ===== */
+  function cleanName(v) {
+    v = String(v || '').replace(/[<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 14);
+    return v ? v.charAt(0).toUpperCase() + v.slice(1) : '';
+  }
+  function beginGame() { fresh(); go('watch'); }
+  var ACT = {
+    back: function () {
+      // Inside the library the game opens at Watch, so Back from there returns to the library's intro.
+      if (EMBED && S.screen === 'watch') { ACT.leave(); return; }
+      var i = ORDER.indexOf(S.screen);
+      if (i > 0) go(ORDER[i - 1]);
+    },
+    leave: function () { stopMedia(); dropRec(); post({ type: 'exit' }); },
+    sound: function () {
+      S.sound = !S.sound;
+      TTS.stop();
+      if (S.screen === 'watch' && S.watch.playing) playForecast(Math.max(0, S.watch.i), true);
+      if (S.screen === 'wrap' && S.wrap.playing && !(S.rec && S.rec.url)) { readGen++; S.wrap.playing = false; S.wrap.line = -1; }
+      render();
+    },
+    about: function () { openSheet({ kind: 'about' }); },
+    close: function () { closeSheet(); },
+    scrim: function () { closeSheet(); },
+    level: function (v) { S.level = v === 'hard' ? 'hard' : 'easy'; render(); },
+    start: function () {
+      var inp = $('#nick');
+      if (inp) S.name = cleanName(inp.value) || 'Mika';
+      if (S.level === 'hard' && !S.okHard) { openGate('hard', function () { S.okHard = true; beginGame(); }); return; }
+      beginGame();
+    },
+    go: function (v) { go(v); },
+    hear: function () {
+      if (S.screen === 'watch') { playForecast(Math.max(0, S.watch.i), true); return; }
+      var s = S[S.screen] && S[S.screen].say;
+      if (s) TTS.say((s.lead ? s.lead + ' ' : '') + s.text, null, true);
+    },
+    wplay: function () {
+      if (S.watch.playing) pauseForecast();
+      else playForecast(S.watch.done || S.watch.i < 0 ? 0 : S.watch.i, true);
+    },
+    wreplay: function () { S.watch.done = false; playForecast(0, true); },
+    cc: function () { S.cc = !S.cc; render(); },
+    sticker: function (id) {
+      var b = S.build;
+      if (b.part !== 0 || b.placed[id]) return;
+      var s = STICKERS.filter(function (x) { return x.id === id; })[0];
+      if (!s) return;
+      if (s.ok) {
+        b.placed[id] = true; S.once.pop = id; sfx('pop');
+        if (Object.keys(b.placed).length >= 3) {
+          b.part = 1;
+          say('build', S.level === 'hard'
+            ? { tone: 'good', lead: 'Your weather wall looks great!', text: 'Now pick the wind signal for gale-force winds of 62 to 88 km/h within 24 hours. The signal guide can help.' }
+            : { tone: 'good', lead: 'Your weather wall looks great!', text: 'Now, which wind signal is up? The news says very strong winds.' });
+        } else {
+          say('build', { tone: 'good', lead: s.say.lead, text: s.say.text + ' ' + (3 - Object.keys(b.placed).length) + ' more to go.' });
+        }
+      } else {
+        b.tried[id] = true; S.once.shake = 'stk-' + id; sfx('bad');
+        say('build', { tone: 'nope', lead: s.say.lead, text: s.say.text });
+      }
+      render();
+    },
+    signal: function (v) {
+      var b = S.build, n = +v, lv = S.level;
+      if (b.part !== 1) return;
+      var fb = SIG_SAY[lv][n];
+      if (!fb) return;
+      if (n === 2) { b.signal = 2; b.part = 2; sfx('good'); say('build', { tone: 'good', lead: fb.lead, text: fb.text + ' Next, pick the rain warning.' }); }
+      else { b.sigTried[n] = true; S.once.shake = 'sig-' + n; sfx('bad'); say('build', { tone: 'nope', lead: fb.lead, text: fb.text }); }
+      render();
+    },
+    guide: function () { S.build.guide = !S.build.guide; render(); },
+    rain: function (id) {
+      var b = S.build, fb = RAIN_SAY[S.level][id];
+      if (b.part !== 2 || !fb) return;
+      if (id === 'orange') { b.rain = 'orange'; b.part = 3; sfx('win'); say('build', { tone: 'good', lead: fb.lead, text: fb.text + ' Your forecast is ready. Next, the flood map!' }); }
+      else { b.rainTried[id] = true; S.once.shake = 'rain-' + id; sfx('bad'); say('build', { tone: 'nope', lead: fb.lead, text: fb.text }); }
+      render();
+    },
+    pin: function (id) {
+      var m = S.map, hard = S.level === 'hard', p = PLACES[id];
+      if (!p) return;
+      var z = zoneOf(id);
+      var where = z === 'none' ? p.the + ' on high ground with no color. The map does not expect a flood there.' : p.the + ' in the ' + ZWORD[z] + ' area. ' + ZLABEL[S.level][z] + '.';
+      m.info = id;
+      if (!hard && m.part === 1) {
+        var T3 = ['homes', 'court', 'health'];
+        if (T3.indexOf(id) >= 0 && !m.seen[id]) {
+          m.seen[id] = true; sfx('pop');
+          var n = T3.filter(function (k) { return m.seen[k]; }).length;
+          say('map', { tone: 'info', text: where + (n === 3 ? ' Now answer: which families should get ready to leave first?' : ' Tap another glowing place.') });
+        } else {
+          say('map', { tone: 'info', text: where });
+        }
+      } else if (!hard && m.part === 2) {
+        if (id === 'school') {
+          m.part = 3; m.evac = true; sfx('win');
+          say('map', { tone: 'good', lead: 'Yes!', text: 'The school is on high ground with no color. It is the safer place, so it becomes the evacuation center. You can read a flood map!' });
+        } else if (id === 'court') {
+          m.tried.safe = m.tried.safe || {}; m.tried.safe.court = true; S.once.shake = 'pin-court'; sfx('bad');
+          say('map', { tone: 'nope', lead: 'Not that one.', text: 'The covered court is in the orange area, so water could reach it. Look for a place with no color.' });
+        } else {
+          say('map', { tone: 'info', text: 'Pick one of the two glowing places: the covered court or the school.' });
+        }
+      } else if (hard && m.part <= 1) {
+        var cur = m.part === 1 ? SORT[m.sortIdx] : null;
+        if (SORT.indexOf(id) >= 0 && SORT.indexOf(id) < m.sortIdx) say('map', { tone: 'info', text: where });
+        else if (cur === id) say('map', { tone: 'info', text: 'Look closely at the color around the ' + p.name.toLowerCase() + '. Then pick its hazard below.' });
+        else say('map', { tone: 'info', text: 'That is the ' + p.name.toLowerCase() + '. ' + (cur ? 'Right now, look at the glowing place.' : 'Answer the question below first.') });
+      } else {
+        say('map', { tone: 'info', text: where });
+      }
+      render();
+    },
+    q: function (arg) {
+      var parts = String(arg).split(':'), key = parts[0], oid = parts[1], m = S.map, hard = S.level === 'hard';
+      var o = (Q[key] || []).filter(function (x) { return x.id === oid; })[0];
+      if (!o) return;
+      var expect = hard ? ['rain100', null, null, 'why'][m.part] : ['legend', 'first'][m.part];
+      if (key !== expect) return;
+      if (key === 'first' && ['homes', 'court', 'health'].some(function (k) { return !m.seen[k]; })) return;
+      m.tried[key] = m.tried[key] || {};
+      m.tried[key][oid] = true;
+      if (o.ok) {
+        var next = '';
+        if (key === 'legend') { m.part = 1; next = ' Now tap the 3 glowing places on the map to see their colors.'; }
+        if (key === 'first') { m.part = 2; next = ' Last one: the barangay can open the covered court or the school on the hill for families. Which is safer from floods? Tap it on the map.'; }
+        if (key === 'rain100') { m.part = 1; next = ' Now read the map. What is the flood hazard at the market?'; }
+        if (key === 'why') { m.part = 4; next = ' You can read a flood hazard map!'; }
+        sfx(m.part >= (hard ? 4 : 3) ? 'win' : 'good');
+        say('map', { tone: 'good', lead: o.say.lead, text: o.say.text + next });
+      } else {
+        S.once.shake = 'q-' + key + '-' + oid; sfx('bad');
+        say('map', { tone: 'nope', lead: o.say.lead, text: o.say.text });
+      }
+      render();
+    },
+    sort: function (z) {
+      var m = S.map;
+      if (S.level !== 'hard' || m.part !== 1) return;
+      var id = SORT[m.sortIdx], right = zoneOf(id);
+      m.info = id;
+      if (z === right) {
+        m.sortIdx++; m.sortTried = {}; sfx('good');
+        if (m.sortIdx >= SORT.length) {
+          m.part = 2;
+          say('map', { tone: 'good', lead: 'Right!', text: SORT_OK[id] + ' Now look at roads A, B and C. Families in the riverside homes need to get to the school on the hill. Which road is safest?' });
+        } else {
+          say('map', { tone: 'good', lead: 'Right!', text: SORT_OK[id] + ' Next: what is the flood hazard at the ' + PLACES[SORT[m.sortIdx]].name.toLowerCase() + '?' });
+        }
+      } else {
+        m.sortTried[z] = true; S.once.shake = 'sort-' + z; sfx('bad');
+        say('map', { tone: 'nope', lead: 'Look again.', text: 'Check the color around the ' + PLACES[id].name.toLowerCase() + ' on the map.' });
+      }
+      render();
+    },
+    route: function (k) {
+      var m = S.map, r = ROUTES[k];
+      if (S.level !== 'hard' || m.part !== 2 || !r) return;
+      if (k === 'C') { m.route = 'C'; m.routeSel = null; m.part = 3; sfx('good'); say('map', { tone: 'good', lead: r.say.lead, text: r.say.text + ' Last question: why is the land by the river red?' }); }
+      else { m.routeTried[k] = true; m.routeSel = k; S.once.shake = 'road-' + k; sfx('bad'); say('map', { tone: 'nope', lead: r.say.lead, text: r.say.text }); }
+      render();
+    },
+    tip: function (id) {
+      var a = S.advise, t = TIPS[id];
+      if (!t || a.picked[id] || a.wrong[id]) return;
+      if (TIP_ORDER[S.level].indexOf(id) < 0) return;
+      if (t.ok) {
+        a.picked[id] = true;
+        var got = rightPicked().length, need = needTips();
+        if (got >= need) { sfx('win'); say('advise', { tone: 'good', lead: 'Great tips!', text: 'Those will keep families safe. Now make your cue card.' }); }
+        else { sfx('good'); say('advise', { tone: 'good', lead: t.say.lead, text: t.say.text + ' ' + (need - got) + ' more to find.' }); }
+      } else {
+        a.wrong[id] = true; S.once.shake = 'tip-' + id; sfx('bad');
+        say('advise', { tone: 'nope', lead: t.say.lead, text: t.say.text });
+      }
+      render();
+    },
+    rec: function () {
+      if (S.present.mode === 'rec') return;
+      if (!micAllowedHere()) { noMic(); return; }
+      if (!S.okRec) { openGate('rec', function () { S.okRec = true; startRecording(); }); return; }
+      startRecording();
+    },
+    stop: function () { stopRecording(); },
+    cancel: function () {
+      var p = S.present;
+      if (p.mode === 'rec') { REC.discard = true; stopRecording(); }
+      if (p.mode === 'practice') stopPractice();
+      p.mode = 'idle'; p.line = 0; p.t = 0; p.times = [];
+      say('present', { text: 'No problem. Take a breath and start again when you are ready.' });
+      render();
+    },
+    nextline: function () {
+      var p = S.present, n = cueLines().length;
+      if (p.mode !== 'rec' && p.mode !== 'practice') return;
+      if (p.line < n - 1) { p.line++; p.times.push((performance.now() - REC.t0) / 1000); }
+      render();
+    },
+    practice: function () { startPractice(); },
+    finish: function () { stopPractice(); dropRec(); go('wrap'); },
+    clip: function () {
+      var pick = function () { var c = $('#clip'); if (c) c.click(); };
+      if (!S.okRec) { openGate('clip', function () { S.okRec = true; pick(); }); return; }
+      pick();
+    },
+    play: function () {
+      var w = S.wrap;
+      if (S.rec && S.rec.url) {
+        var a = $('#playback');
+        if (!a.paused) { a.pause(); return; }
+        if (a.getAttribute('src') !== S.rec.url) a.setAttribute('src', S.rec.url);
+        if (a.ended) a.currentTime = 0;
+        var pr = a.play();
+        if (pr && pr.catch) pr.catch(function () { say('wrap', { tone: 'nope', lead: 'Hmm.', text: 'This recording could not play here.' }); render(); });
+        return;
+      }
+      if (w.playing) { readGen++; TTS.stop(); w.playing = false; w.line = -1; updWrap(); return; }
+      readBack();
+    },
+    keep: function () { S.wrap.kept = true; sfx('good'); render(); },
+    del: function () { dropRec(); S.wrap.playing = false; S.wrap.line = -1; S.wrap.msg = 'Your recording is deleted.'; render(); },
+    retry: function () { dropRec(); go('present'); },
+    restart: function () { stopMedia(); fresh(); go(EMBED ? 'watch' : 'title'); },
+    key: function (d) { var g = S.sheet; if (!g || g.kind !== 'gate' || g.entry.length >= 3) return; g.entry += String(d); g.wrong = false; render(); },
+    bksp: function () { var g = S.sheet; if (!g || g.kind !== 'gate') return; g.entry = g.entry.slice(0, -1); render(); },
+    ok: function () {
+      var g = S.sheet;
+      if (!g || g.kind !== 'gate') return;
+      if (g.entry && Number(g.entry) === g.a * g.b) {
+        var fn = gateThen; gateThen = null; S.sheet = null; sfx('good'); render();
+        if (fn) fn();
+      } else {
+        g.wrong = true; g.entry = ''; g.a = rnd(3, 9); g.b = rnd(6, 9); sfx('bad'); render();
+      }
+    },
+    easy: function () { S.sheet = null; gateThen = null; S.level = 'easy'; beginGame(); }
+  };
+
+  /* ===== Events ===== */
+  function bind() {
+    document.addEventListener('click', function (e) {
+      var t = e.target.closest ? e.target.closest('[data-act]') : null;
+      if (!t || t.getAttribute('aria-disabled') === 'true' || t.disabled) return;
+      var act = t.getAttribute('data-act');
+      if (act === 'scrim' && e.target !== t) return;
+      if (t.tagName === 'A') return;
+      var fn = ACT[act];
+      if (fn) { e.preventDefault(); fn(t.getAttribute('data-arg')); }
+    });
+    document.addEventListener('keydown', function (e) {
+      var t = e.target;
+      if ((e.key === 'Enter' || e.key === ' ') && t && t.getAttribute && t.getAttribute('role') === 'button' && t.tagName !== 'BUTTON' && t.getAttribute('data-act')) {
+        e.preventDefault();
+        var fn = ACT[t.getAttribute('data-act')];
+        if (fn) fn(t.getAttribute('data-arg'));
+        return;
+      }
+      if (S.sheet && e.key === 'Escape') { closeSheet(); return; }
+      if (S.sheet && S.sheet.kind === 'gate') {
+        if (/^[0-9]$/.test(e.key)) { e.preventDefault(); ACT.key(e.key); }
+        else if (e.key === 'Backspace') { e.preventDefault(); ACT.bksp(); }
+        else if (e.key === 'Enter' && t && t.tagName !== 'BUTTON') { e.preventDefault(); ACT.ok(); }
+      }
+    });
+    document.addEventListener('input', function (e) { if (e.target && e.target.id === 'nick') S.name = e.target.value; });
+    // Leaving the page (or the library closing its frame) stops Bayani's voice and any recording.
+    window.addEventListener('pagehide', function () { stopMedia(); });
+    // For the tests (games/tests/weather-studio.test.cjs): the game's state, the map's zones and the actions.
+    window.__weather = { state: function () { return S; }, zone: zoneOf, embed: EMBED, act: ACT };
+    document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target && e.target.id === 'nick') { e.preventDefault(); ACT.start(); } });
+    bindAudio();
+  }
+
+  /* ===== Boot (keeps progress if the page is updated while open) ===== */
+  function snapshot() {
+    var screen = S.screen === 'present' || S.screen === 'wrap' ? 'advise' : S.screen;
+    return JSON.parse(JSON.stringify({ screen: screen, level: S.level, name: S.name, sound: S.sound, cc: S.cc, okHard: S.okHard, okRec: S.okRec, build: S.build, map: S.map, advise: S.advise }));
+  }
+  var booted = false;
+  function boot(data) {
+    if (booted) return;
+    booted = true;
+    fresh();
+    try {
+      if (data && data.screen && SCREENS[data.screen]) {
+        ['level', 'name', 'sound', 'cc', 'okHard', 'okRec'].forEach(function (k) { if (data[k] !== undefined) S[k] = data[k]; });
+        ['build', 'map', 'advise'].forEach(function (k) { if (data[k]) S[k] = Object.assign(S[k], data[k]); });
+        S.screen = data.screen === 'watch' ? 'watch' : data.screen;
+      }
+    } catch (e) { S.screen = 'title'; }
+    bind();
+    if (EMBED) {
+      S.level = params.get('level') === 'hard' ? 'hard' : 'easy';
+      S.sound = params.get('sound') !== '0';
+      S.voice = params.get('voice') !== '0';
+      S.name = cleanName(params.get('name') || '') || S.name;
+      S.okHard = true; // the library already asked for a grown-up when the player's age called for one
+      fresh();
+      go('watch');
+      return;
+    }
+    render();
+  }
+  var hot = window.claude && window.claude.hot;
+  try { if (hot && typeof hot.snapshot === 'function') hot.snapshot(snapshot); } catch (e) { /* ignore */ }
+  if (hot && typeof hot.ready === 'function') {
+    try { hot.ready(boot); } catch (e) { boot({}); }
+    setTimeout(function () { boot({}); }, 1500);
+  } else {
+    boot((hot && hot.data) || {});
+  }
+})();
+</script>
+</body>
+</html>

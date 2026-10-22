@@ -1,4 +1,5 @@
-// Runs the tests of every order game (after npm run test:games builds the pages).
+// Runs the tests of every game that plays in a frame: the order games and Weather Studio (after npm run test:games
+// builds the pages).
 const fs = require('fs');
 const path = require('path');
 
@@ -12,6 +13,6 @@ const path = require('path');
       pass += t.pass; fail += t.fail;
     } catch (e) { fail++; console.log('FAIL [' + f + ']: ' + (e && e.stack || e)); }
   }
-  console.log('Order games: ' + pass + ' passed, ' + fail + ' failed');
+  console.log('Games in a frame: ' + pass + ' passed, ' + fail + ' failed');
   process.exit(fail ? 1 : 0);
 })();

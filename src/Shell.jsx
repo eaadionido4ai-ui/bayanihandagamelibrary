@@ -46,9 +46,10 @@ function useMedia(query) {
 const countOf = (earned) => LIVE.filter((g) => earned[g.id]).length;
 
 // A new player's page starts with the grown-up from the player saved last (a teacher setting up a class).
+// cfor: whose consent the box was ticked as ('grownup' for a child, 'self' for a player 18 or older).
 function blankDraft() {
   const g = lastGrownUp() || {};
-  return { nick: '', av: 'turtle', id: null, by: '', bm: '', bd: '', role: g.role || 'parent', gname: g.name || '', school: g.school || '', consent: false, had: false, back: null };
+  return { nick: '', av: 'turtle', id: null, by: '', bm: '', bd: '', role: g.role || 'parent', gname: g.name || '', school: g.school || '', consent: false, cfor: null, had: false, back: null };
 }
 
 export default function Shell() {
@@ -98,8 +99,9 @@ export default function Shell() {
     else go('welcome', { ws: 0 });
   }
 
-  // players: a nickname and an avatar, and the details a grown-up adds (src/profiles.js): the birthday, the
-  // parent, guardian or teacher (and the teacher's school) and their privacy consent, all kept on this device.
+  // players: a nickname and an avatar, and the details added for them (src/profiles.js): the birthday, and for a
+  // child the parent, guardian or teacher (and the teacher's school) with their privacy consent, or for a player
+  // 18 or older their own consent; all kept on this device.
   const newPlayer = () => go('addPlayer', { draft: blankDraft() });
   // back: 'home' when a grown-up fills in an older player's details from Home
   function editPlayer(p, back) {
@@ -107,7 +109,8 @@ export default function Shell() {
     const [by, bm, bd] = (pf.born || '').split('-');
     go('addPlayer', { draft: {
       nick: p.nick, av: p.avatar, id: p.id, by: by || '', bm: bm ? String(+bm) : '', bd: bd ? String(+bd) : '',
-      role: g.role || 'parent', gname: g.name || '', school: g.school || '', consent: !!pf.consent, had: complete(pf), back: back || null,
+      role: g.role || 'parent', gname: g.name || '', school: g.school || '', consent: !!pf.consent,
+      cfor: pf.consent ? (pf.consent.by === 'self' ? 'self' : 'grownup') : null, had: complete(pf), back: back || null,
     } });
   }
   function savePlayer() {
@@ -115,10 +118,15 @@ export default function Shell() {
     // a new player needs everything; an older player may be saved with the grown-up part left for later
     if (!name || !(chk.ok || (d.id && !d.had && chk.empty))) return;
     const before = d.id ? profileOf(d.id) : null;
-    const details = chk.ok ? {
+    // the consent keeps the day it was first given, as long as it was given by the same kind of person
+    const kept = before && before.consent && (before.consent.by === 'self') === chk.adult ? before.consent : null;
+    const details = !chk.ok ? null : chk.adult ? {
+      // a player 18 or older: their own consent, and no grown-up's details kept
+      born: chk.born, grownUp: null, consent: kept || { on: today(), v: CONSENT_VERSION, by: 'self' },
+    } : {
       born: chk.born, grownUp: d.role === 'teacher' ? { role: 'teacher', name: chk.name, school: chk.school } : { role: 'parent', name: chk.name },
-      consent: before && before.consent ? before.consent : { on: today(), v: CONSENT_VERSION },
-    } : null;
+      consent: kept || { on: today(), v: CONSENT_VERSION, by: 'grownup' },
+    };
     if (d.id) {
       engine.updatePlayer(d.id, name, d.av);
       if (details) saveProfile(d.id, details);

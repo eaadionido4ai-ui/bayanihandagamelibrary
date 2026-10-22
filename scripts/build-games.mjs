@@ -1,5 +1,6 @@
 // Builds the games that open in a frame inside the library, from games/: the order games (Quake in Order and the two
-// first aid games). They share one engine:
+// first aid games), and Weather Studio, a test game that is a whole page of its own (games/weather-studio/page.html,
+// see PAGES below). The order games share one engine:
 //
 //   node scripts/build-games.mjs [--standalone]
 //
@@ -29,6 +30,12 @@ const out = join(root, 'public', 'games');
 const standaloneOut = join(root, 'games', 'standalone');
 const standalone = process.argv.includes('--standalone');
 const shared = join(root, 'games', 'shared');
+
+// Games that are whole pages of their own, not built from the order-game template: the build fills in their fonts
+// (<!--@FONTS-->) and copies them. Weather Studio (a test game) is one.
+const PAGES = [
+  { id: 'weather-studio', src: 'page.html', name: 'Weather-Studio.html' },
+];
 
 // parts: more shared code a game needs (the first aid games share their room)
 const GAMES = [
@@ -93,6 +100,16 @@ for (const g of GAMES) {
       '<!--@FONTS-->': fonts((pkg, w) => 'data:font/woff2;base64,' + b64(fontPath(pkg, w))),
       '<!--@THREE-->': '<script>\n' + inScript(three) + '\n</script>',
     }, 'games/shared/template.html'));
+    built.push('games/standalone/' + g.name);
+  }
+}
+for (const g of PAGES) {
+  const page = read(join(root, 'games', g.id, g.src));
+  if (page.split('<!--@FONTS-->').length !== 2) throw new Error('games/' + g.id + '/' + g.src + ' needs exactly one <!--@FONTS-->');
+  writeFileSync(join(out, g.id + '.html'), page.replace('<!--@FONTS-->', () => fonts((pkg, w) => 'fonts/' + fontFile(pkg, w))));
+  built.push('public/games/' + g.id + '.html');
+  if (standalone) {
+    writeFileSync(join(standaloneOut, g.name), page.replace('<!--@FONTS-->', () => fonts((pkg, w) => 'data:font/woff2;base64,' + b64(fontPath(pkg, w)))));
     built.push('games/standalone/' + g.name);
   }
 }
