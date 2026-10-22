@@ -127,11 +127,11 @@ export default function Shell() {
     go('intro', { gameId: id, mode: s.modes[id] || 0, from });
   }
   function startGame(id, mode) {
-    // A game that is a page of its own (Quake in Order) plays in a frame instead of the 3D engine.
+    // A game that is a page of its own (the order games) plays in a frame instead of the 3D engine.
     const g = game(id || s.gameId);
     if (g.frame) {
       try { window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
-      go('gameframe', { gameId: g.id });
+      go('gameframe', { gameId: g.id, mode: mode == null ? s.mode : mode });
       return;
     }
     if (!engine.ready) { snackShow('The 3D games could not start on this device.'); return; }
