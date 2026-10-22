@@ -108,7 +108,8 @@ sees what happens; every choice changes the ending, and each story has four endi
 Handaventures has a place of its own, like TANGHALAN: the four pillars on Home and Games
 hold only their standalone games, each one standing for its pillar, and the stories sit
 beside them (October 2026, after the judges asked for games that teach what to do before,
-during and after a hazard).
+during and after a hazard). Each pillar's list on Games then ends with a Handaventures card
+for the part of the stories that belongs to that pillar.
 
 | Story | Hazard | Hero badge |
 | --- | --- | --- |
@@ -124,6 +125,22 @@ during and after a hazard).
   height; on a phone held upright, Handaventures comes first and TANGHALAN below it. Tapping
   it opens the shelf with the five stories and the player's progress (endings found, hero
   badges), and Back returns to where it was opened.
+- **The card has a carousel,** like the museum card: scenes from the stories, a different
+  five each day, each marked Before, During or After with the story's name. It moves on by
+  itself every few seconds (not with reduced motion, and never while someone is using it),
+  and it can be swiped. Tapping a picture opens that story's intro, and Back returns to the
+  card. The pictures are in `public/stories/peek/`, taken from the stories themselves by
+  `design/handaventures/peeks.cjs` (see its README); their order is `HV_PEEKS` in
+  `src/data.js`. Lockdown at School stays out of the carousel, since it is a story to play
+  with a grown-up first.
+- **A card in each pillar.** After the games in each pillar on Games comes a Handaventures
+  card for the part of the stories that belongs to that pillar, with what each story
+  teaches there, hazard by hazard. Stop Hazards Early has the Before part where you spot
+  dangers (things that could fall, a warm cord with too many plugs, loose things the wind
+  could throw); Get Ready has the Before part where the family gets ready (the news, the go
+  bag, moving things up high); Act Fast has the During part of every story; Bounce Back has
+  the After part of every story. The card opens the shelf. Its lines are `HV_PILLAR` in
+  `src/data.js`, and the pillar counts on Home still count games only.
 - **Before, during and after.** Every story shows the stops it covers: chips on the shelf,
   and in its intro one line each for what happens before, during and after the hazard. A
   stop with no scene yet is dashed and says Coming soon (Lockdown at School has no before
@@ -144,8 +161,10 @@ How it is built:
 | The five stories (script, choices, endings, lessons) | `stories/story-*.js` |
 | Build: one page per story, offline fonts | `scripts/build-stories.mjs` writes `public/stories/*.html` and `public/stories/fonts/` |
 | Cover pictures and character faces | `public/stories/art/` |
-| Storybook card, shelf, intro, story frame | `src/screens/Stories.jsx` |
+| Pictures for the card's carousel | `public/stories/peek/`, made by `design/handaventures/peeks.cjs` |
+| Storybook card, the card in each pillar, shelf, intro, story frame | `src/screens/Stories.jsx` (the carousel itself is `src/ui/reel.jsx`, shared with TANGHALAN) |
 | Story list, badges, endings, tips, before, during and after | `STORIES`, `HV` and `JOURNEY` in `src/data.js` |
+| The part of the stories in each pillar, the carousel's pictures | `HV_PILLAR` and `HV_PEEKS` in `src/data.js` |
 | Progress and preferences | `src/stories.js` |
 | Tests | `stories/tests/` |
 
@@ -281,6 +300,7 @@ there is room.
   using it), and it can be swiped. Tapping a picture walks you straight into its room. The room
   pictures are in `public/tanghalan/peek/`, taken from the museum itself by
   `design/tanghalan/peeks.cjs`; the rooms it uses are `PEEK_ROOMS` in `src/museum/content.js`.
+  The carousel itself is `src/ui/reel.jsx`, which the Handaventures card uses too.
 
 - **One connected space.** Nine rooms in a 3 × 3 grid open into each other: the Lobby, the
   Bulwagan ng Bayanihan (featured hall), a room for each pillar, the Kuwentuhan Corner for

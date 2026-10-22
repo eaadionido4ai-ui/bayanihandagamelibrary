@@ -121,7 +121,8 @@ export default function Shell() {
   // games
   function openGame(id) {
     const g = game(id);
-    if (isStory(g)) { go('story', { storyId: id, storyFrom: s.screen === 'home' ? 'home' : 'hv' }); return; }
+    // A story opened from the Handaventures card on Home or Games goes back there; from anywhere else, to the shelf.
+    if (isStory(g)) { go('story', { storyId: id, storyFrom: s.screen === 'home' || s.screen === 'games' ? s.screen : 'hv' }); return; }
     if (g.soon) { snackShow('Coming soon! Bayani is still building this game.'); return; }
     const from = ['home', 'games', 'id', 'players', 'museum'].indexOf(s.screen) >= 0 ? s.screen : 'games';
     go('intro', { gameId: id, mode: s.modes[id] || 0, from });
@@ -290,7 +291,7 @@ export default function Shell() {
     openGame, startGame, gameEnded, askItem, openAsk, openStories, startStory, storyEnded,
     openTour, closeTour, tourDone, tourOffer: !!activeId && cardOffer(activeId),
     setBack: (fn) => { backHook.current = fn; },
-    tabOf: scr === 'museum' ? s.museumFrom : scr === 'hv' || (scr === 'story' && s.storyFrom === 'hv') ? s.hvFrom || 'games' : TAB_OF[scr],
+    tabOf: scr === 'museum' ? s.museumFrom : scr === 'hv' || (scr === 'story' && s.storyFrom === 'hv') ? s.hvFrom || 'games' : scr === 'story' && s.storyFrom === 'home' ? 'home' : TAB_OF[scr],
   };
 
   let body = null;

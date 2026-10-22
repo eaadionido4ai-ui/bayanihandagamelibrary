@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { sx, pr } from '../ui/sx.js';
 import { Mascot } from '../ui/art.jsx';
-import { HV, JOURNEY, STORIES, game } from '../data.js';
+import { SLIDE, useReel, Reel, ReelDots } from '../ui/reel.jsx';
+import { HV, HV_PEEKS, HV_PILLAR, JOURNEY, STORIES, game } from '../data.js';
 import { foundIn, loadStories } from '../stories.js';
 
 // Handaventures, the story series (design option B, the storybook shelf). It has a place of its own, like
 // TANGHALAN: the storybook card on Home (below the four pillars) and on Games (More to explore), the shelf of
 // five stories, a story's intro, and the frame the story plays in. Each story shows what it covers before,
-// during and after its hazard. The stories themselves are built from stories/.
+// during and after its hazard, and each pillar on Games has a card for the part of the stories that belongs
+// to it. The stories themselves are built from stories/.
 
 const BG = 'radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef)';
 const GREEN = 'linear-gradient(135deg,#1e9c66,#0c5c3a)';
@@ -16,7 +18,9 @@ const BACK = 'width:48px;height:48px;border-radius:16px;background:#fff;border:2
 const PILL = 'background:#fff;border:2px solid #d5e3ea;border-radius:999px;padding:7px 12px;font-weight:800;font-size:13px;color:#3d5563;white-space:nowrap';
 const TAG = 'display:inline-block;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;background:rgba(0,0,0,.24);border-radius:999px;padding:4px 10px;white-space:nowrap';
 const H2 = "font:800 21px/1 'Baloo 2',sans-serif;margin-top:4px";
-const FAN = [[0, 25, -8, 1], [15.7, 11.5, -3, 2], [31.4, 3.8, 1, 5], [47.2, 11.5, 5, 2], [62.3, 25, 9, 1]];
+const PEEK = 'stories/peek/';
+const SCHIP = 'position:absolute;left:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;font-weight:900;border-radius:999px;padding:4px 9px';
+const NUM = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
 
 export function HvName({ accent = '#ffd873' }) {
   return <><span style={{ color: accent }}>HANDA</span>ventures</>;
@@ -84,15 +88,40 @@ function Dots({ n, of }) {
   );
 }
 
+// Five story pictures for the day, from HV_PEEKS: any five in a row cover before, during and after.
+export function peeksOf(day) {
+  return Array.from({ length: 5 }, (_, i) => HV_PEEKS[(day * 5 + i) % HV_PEEKS.length]);
+}
+const stopName = (k) => JOURNEY.find(([key]) => key === k)[1];
+
+// One picture in the carousel: a scene from a story, with the stop it shows (before, during or after) and the
+// story's name. Tapping it opens that story's intro.
+function Peek({ id, stop, onPick }) {
+  const st = game(id), label = stopName(stop);
+  return (
+    <button onClick={() => onPick(st.id)} aria-label={st.name + ', ' + label.toLowerCase() + ' the ' + st.hazard.toLowerCase() + ': ' + st.journey[stop] + ' Open the story.'}
+      style={sx(SLIDE + ';background:#0c5c3a;box-shadow:0 6px 14px rgba(0,0,0,.3)')}>
+      <img src={PEEK + st.art + '-' + stop + '.webp'} alt="" draggable="false" style={sx('display:block;width:100%;height:100%;object-fit:cover')} />
+      <span style={{ ...sx(SCHIP + ';top:8px;letter-spacing:.5px;text-transform:uppercase;box-shadow:0 2px 0 rgba(0,0,0,.15)'), color: STOP[stop][0], background: STOP[stop][1] }}>{label}</span>
+      <span style={sx(SCHIP + ';bottom:8px;max-width:calc(100% - 16px);box-sizing:border-box;color:#fff;background:rgba(14,34,51,.82)')}>{st.icon} {st.name}</span>
+    </button>
+  );
+}
+
 // The storybook card that stands for all five stories, on Home (from="home") and on Games (from="games").
-// Where there is room (a tablet, or a phone turned sideways) it sits beside the TANGHALAN card and fills the
-// height of its cell, so the two cards line up; on a phone held upright they stack.
+// Like the TANGHALAN card, it has a carousel of pictures from the stories, a different five each day, and
+// each picture opens its story; the rest of the card opens the shelf. Where there is room (a tablet, or a
+// phone turned sideways) it sits beside the TANGHALAN card and fills the height of its cell, so the two cards
+// line up; on a phone held upright they stack.
 export function StoryShelfCard({ c, from }) {
   const p = progressOf(c.me ? c.me.id : null);
-  const card = pr('display:flex;flex-direction:column;justify-content:space-between;gap:12px;padding:18px;width:100%;height:100%;text-align:left;border-radius:26px;color:#fff;overflow:hidden;box-shadow:0 6px 0 rgba(0,0,0,.14);background:' + GREEN,
-    'transform:translateY(3px);box-shadow:0 3px 0 rgba(0,0,0,.14)');
+  const [peeks] = useState(() => peeksOf(Math.floor(Date.now() / 864e5)));
+  const r = useReel(peeks.length);
+  const open = () => c.openStories(from);
+  const go = pr('display:flex;align-items:center;gap:6px;background:#fff;color:#0c5c3a;font-weight:900;font-size:14px;padding:8px 14px;border-radius:999px;box-shadow:0 3px 0 rgba(0,0,0,.2);white-space:nowrap',
+    'transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.2)');
   const head = (
-    <span style={sx('display:block;padding-right:34px')}>
+    <span style={sx('display:block;padding:0 52px 0 18px')}>
       <span style={sx(TAG)}>{p.found ? '📖 Story series' : '✨ New · Story series'}</span>
       <span style={sx("display:block;font:800 30px/1 'Baloo 2',sans-serif;margin-top:10px;padding-top:4px")}><HvName /></span>
       <span style={sx('display:block;font-size:15px;font-weight:800;margin-top:4px')}>{HV.tagline}</span>
@@ -107,25 +136,72 @@ export function StoryShelfCard({ c, from }) {
       </span>
     </span>
   );
-  const fan = (
-    <span aria-hidden="true" style={sx('position:relative;display:block;width:100%;max-width:420px;align-self:center;aspect-ratio:318/104')}>
-      {STORIES.map((st, i) => (
-        <img key={st.id} src={ART + st.art + '.webp'} alt=""
-          style={{ ...sx('position:absolute;width:37.7%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;border:3px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.28);box-sizing:border-box'), left: FAN[i][0] + '%', top: FAN[i][1] + '%', transform: 'rotate(' + FAN[i][2] + 'deg)', zIndex: FAN[i][3] }} />
-      ))}
-    </span>
+  const pictures = (
+    <Reel r={r} label="Pictures from the Handaventures stories">
+      {peeks.map(([id, stop], i) => <Peek key={i} id={id} stop={stop} onPick={c.openGame} />)}
+    </Reel>
   );
   const foot = (
-    <span style={sx('display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap')}>
+    <span style={sx('display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:0 18px;margin-top:auto')}>
       <span style={sx('font-size:13px;font-weight:900')}>{STORIES.length} stories · {p.found} of {p.total} endings</span>
-      <span style={sx('display:flex;align-items:center;gap:6px;background:#fff;color:#0c5c3a;font-weight:900;font-size:14px;padding:8px 14px;border-radius:999px;box-shadow:0 3px 0 rgba(0,0,0,.2);white-space:nowrap')}>Open the stories ›</span>
+      <button onClick={open} className={go.className} style={go.style}>Open the stories ›</button>
     </span>
   );
   return (
     <div style={sx('position:relative;height:100%')}>
-      <button onClick={() => c.openStories(from)} className={card.className} style={card.style}>{head}{fan}{foot}</button>
+      <div data-hv-card="" onClick={(e) => { if (!e.target.closest('button')) open(); }}
+        style={sx('display:flex;flex-direction:column;gap:12px;padding:16px 0 14px;height:100%;box-sizing:border-box;cursor:pointer;border-radius:26px;color:#fff;overflow:hidden;box-shadow:0 6px 0 rgba(0,0,0,.14);background:' + GREEN)}>
+        {head}{pictures}<ReelDots r={r} />{foot}
+      </div>
       <button onClick={() => c.patch({ sheet: 'credit', sd: HV })} aria-label="Who made Handaventures"
         style={sx('position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.7);color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.18)')}>i</button>
+    </div>
+  );
+}
+
+// Handaventures in a pillar's list on Games, after its games: a card like a game's for the part of the stories
+// that belongs to the pillar (HV_PILLAR in data.js), with what each story teaches in that part, hazard by
+// hazard. It opens the shelf. It takes a whole row of the list, so a game card beside it never stretches to
+// its height; where the row is wide, the hazards sit side by side.
+export function HvPillarCard({ c, pid }) {
+  const hp = HV_PILLAR[pid];
+  if (!hp) return null;
+  const k = hp.stop, label = stopName(k), n = hp.parts.length;
+  const lead = 'In the ' + label + ' part of ' + (n === STORIES.length ? 'all ' : '') + (NUM[n] || n) + (n === 1 ? ' story, ' : ' stories, ') + hp.does + '.';
+  const card = pr('display:flex;flex-direction:column;gap:12px;text-align:left;width:100%;height:100%;background:#fff;border-radius:22px;padding:14px;box-shadow:0 5px 0 rgba(20,48,66,.1)',
+    'transform:translateY(3px);box-shadow:0 2px 0 rgba(20,48,66,.1)');
+  const chip = 'font-size:11px;font-weight:900;letter-spacing:.5px;border-radius:999px;padding:3px 8px';
+  return (
+    <div data-hv-pillar={pid} style={sx('position:relative;grid-column:1 / -1')}>
+      <button onClick={() => c.openStories('games')} className={card.className} style={card.style}>
+        <span style={sx('display:flex;gap:14px;align-items:center')}>
+          <span style={{ ...sx('width:66px;height:66px;border-radius:20px;flex:none;display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)'), background: GREEN }}>{HV.icon}</span>
+          <span style={sx('flex:1;min-width:0;display:flex;flex-direction:column;gap:4px')}>
+            <span style={sx("font:800 18.5px/1.1 'Baloo 2',sans-serif;padding:3px 30px 0 0")}><HvName accent="#128253" /></span>
+            <span style={sx('font-size:13.5px;font-weight:700;color:#4f6572;line-height:1.35')}>{lead}</span>
+            <span style={sx('display:flex;gap:6px;flex-wrap:wrap;margin-top:3px')}>
+              <span style={sx(chip + ';background:#e6f3f9;color:#1f5675')}>📖 STORIES</span>
+              <span style={{ ...sx(chip), color: STOP[k][0], background: STOP[k][1] }}>{label.toUpperCase()}</span>
+            </span>
+          </span>
+        </span>
+        <span style={{ ...sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:7px 18px;border-radius:16px;padding:10px 12px'), background: STOP[k][1] }}>
+          {hp.parts.map(([id, text]) => {
+            const st = game(id);
+            return (
+              <span key={id} style={sx('display:flex;gap:8px;align-items:flex-start;font-size:13px;font-weight:700;line-height:1.4;color:#25404e')}>
+                <span aria-hidden="true" style={sx('flex:none;width:20px;text-align:center')}>{st.icon}</span>
+                <span style={sx('min-width:0')}>
+                  <b style={{ fontWeight: 900, color: STOP[k][0] }}>{st.hazard}:</b> {text}
+                  {st.grownUp && <span style={sx('display:inline-block;margin-left:6px;font-size:10.5px;font-weight:900;letter-spacing:.3px;background:#fff;color:#a84d04;border-radius:999px;padding:1px 7px')}>👪 WITH A GROWN-UP</span>}
+                </span>
+              </span>
+            );
+          })}
+        </span>
+      </button>
+      <button onClick={() => c.patch({ sheet: 'credit', sd: HV })} aria-label="Who made Handaventures"
+        style={sx('position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:1.5px solid #d5e3ea;color:#4f6572;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;background:#fff')}>i</button>
     </div>
   );
 }

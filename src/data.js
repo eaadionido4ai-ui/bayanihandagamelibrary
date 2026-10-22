@@ -84,6 +84,59 @@ export const STORIES = [
 ];
 export const isStory = (g) => !!g && g.series === 'hv';
 
+// Handaventures in each pillar's list on Games: a card for the part of the stories that belongs to the pillar,
+// with what each story teaches there, hazard by hazard. stop: before, during or after (as in JOURNEY);
+// does: finishes "In the Before part of three stories, ..."; parts: [story id, what you do in that part].
+// The card opens the shelf. Spotting and removing dangers belongs to Stop Hazards Early, the news and the
+// go bag to Get Ready, the hazard itself to Act Fast, and the day after to Bounce Back.
+export const HV_PILLAR = {
+  mit: {
+    stop: 'before', does: 'you spot dangers early',
+    parts: [
+      ['hv-shake', 'Point out things in the classroom that could fall.'],
+      ['hv-smoke', 'Tell a grown-up when a cord with too many plugs feels warm.'],
+      ['hv-kulog', 'Bring loose things inside before the wind can throw them.'],
+    ],
+  },
+  prep: {
+    stop: 'before', does: 'you help your family get ready',
+    parts: [
+      ['hv-kulog', 'Listen to the news and pack the go bag while it is still calm.'],
+      ['hv-agos', 'Move important things up high and pack the go bag.'],
+    ],
+  },
+  resp: {
+    stop: 'during', does: 'you act fast to stay safe',
+    parts: [
+      ['hv-kulog', 'Stay inside, away from windows, through the strong winds.'],
+      ['hv-agos', 'Leave early and stay at the evacuation center.'],
+      ['hv-shake', 'Duck, cover and hold while the ground shakes.'],
+      ['hv-smoke', 'Get down low, get out and call for help.'],
+      ['hv-lockdown', 'Stay quiet and out of sight, and never open the door.'],
+    ],
+  },
+  rec: {
+    stop: 'after', does: 'you help your family bounce back',
+    parts: [
+      ['hv-kulog', 'Stay far away from a fallen wire and tell a grown-up.'],
+      ['hv-agos', 'Go home safely and get a floodwater scratch checked.'],
+      ['hv-shake', 'Stay in the open through an aftershock, then go home safely.'],
+      ['hv-smoke', 'Talk about how you feel the next morning.'],
+      ['hv-lockdown', 'Wait for your family, then talk about how you feel.'],
+    ],
+  },
+};
+
+// The pictures in the Handaventures card's carousel on Home and Games: one for each stop of four stories
+// (public/stories/peek/<art>-<stop>.webp, taken from the stories by design/handaventures/peeks.cjs), in an order
+// that takes turns between the stories and the stops. The card shows five a day, and any five in a row cover
+// before, during and after. Lockdown at School stays out: it is a story to play with a grown-up first.
+export const HV_PEEKS = [
+  ['hv-kulog', 'before'], ['hv-agos', 'during'], ['hv-shake', 'after'], ['hv-smoke', 'before'],
+  ['hv-kulog', 'during'], ['hv-agos', 'after'], ['hv-shake', 'before'], ['hv-smoke', 'during'],
+  ['hv-kulog', 'after'], ['hv-agos', 'before'], ['hv-shake', 'during'], ['hv-smoke', 'after'],
+];
+
 // modes: [icon, name, description]. steps: [number, title, text].
 // badgeStars: stars needed for the badge, as scored by the game itself.
 export const G = [
