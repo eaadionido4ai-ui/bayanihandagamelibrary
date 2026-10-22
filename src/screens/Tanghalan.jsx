@@ -6,6 +6,7 @@ import { ROOMS, DOORS, WORKS, KINDS, SAMPLE_NOTE, NAME_PARTS, PEEK_ROOMS, room, 
 import { createMuseum } from '../museum/runtime.js';
 import { loadProgress, saveProgress } from '../museum/store.js';
 import { readLines, stopReading } from '../museum/speech.js';
+import { SLIDE as REEL_SLIDE, useReel, Reel, ReelDots } from '../ui/reel.jsx';
 
 // TANGHALAN, the BAYANIHanda museum: a walkable 3D museum of learners' art and stories.
 // The 3D side is in src/museum; this is the screen around it: the controls, the sheets for
@@ -38,16 +39,14 @@ const seenIn = (prog, id) => WORKS.filter((w) => w.room === id && prog.seen[w.id
 // The museum card: a carousel of rooms in 3D and kids' drawings, a different few each day. Where there is room
 // (a tablet, or a phone turned sideways) it sits beside the Handaventures card, filling the height of its cell.
 // It moves on by itself (never with reduced motion, off screen, or while someone is using it),
-// swipes, and every picture walks you into its room.
+// swipes, and every picture walks you into its room. The carousel itself is src/ui/reel.jsx, shared with
+// the Handaventures card.
 const PEEK = 'tanghalan/peek/';
 const DRAWINGS = WORKS.filter((w) => w.kind === 'art');
 const FRAME = { bulwagan: '#f0b429', kuwentuhan: '#eaa100', mit: '#2a6b8f', prep: '#128253', resp: '#e8700b', rec: '#7a53c6' };
-const GAP = 10;
-const EVERY = 4500;
-const SLIDE = 'flex:none;position:relative;display:block;width:min(280px,calc(100% - 52px));aspect-ratio:16/9;border-radius:16px;overflow:hidden;scroll-snap-align:start;text-align:left;color:#fff;background:#17344a';
+const SLIDE = REEL_SLIDE + ';background:#17344a';
 const SCHIP = 'position:absolute;left:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;font-weight:900;background:rgba(14,34,51,.82);border-radius:999px;padding:4px 9px';
 const STRIPE = 'position:absolute;left:0;right:0;bottom:0;height:4px;background:repeating-linear-gradient(90deg,#128253 0 35px,#e8700b 35px 70px,#7a53c6 70px 105px,#2a6b8f 105px 140px)';
-const calm = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 
 // Five pictures for the day: a room, a drawing, a room, a drawing, a room.
 export function slidesOf(day) {
@@ -87,35 +86,8 @@ function MuseumEntry({ c, from }) {
   const seen = Object.keys(prog.seen).length, visited = Object.keys(prog.rooms).length;
   const fresh = !seen && !visited;
   const [slides] = useState(() => slidesOf(Math.floor(Date.now() / 864e5)));
-  const [at, setAt] = useState(0);
-  const reel = useRef(null), hold = useRef(0);
+  const r = useReel(slides.length);
   const enter = (roomId) => c.go('museum', { museumFrom: from, museumRoom: roomId || null });
-
-  const measure = () => {
-    const el = reel.current, first = el && el.firstElementChild;
-    return first ? { el, step: first.offsetWidth + GAP, max: el.scrollWidth - el.clientWidth } : null;
-  };
-  const current = (m) => (m.el.scrollLeft >= m.max - 2 ? slides.length - 1 : Math.round(m.el.scrollLeft / m.step));
-  const show = (i, byHand) => {
-    const m = measure();
-    if (!m) return;
-    if (byHand) hold.current = Date.now() + 9000;
-    m.el.scrollTo({ left: Math.min(i * m.step, m.max), behavior: calm() ? 'auto' : 'smooth' });
-  };
-  const busy = () => { hold.current = Date.now() + 9000; };
-  useEffect(() => {
-    if (calm()) return undefined;
-    let onScreen = true;
-    const io = typeof IntersectionObserver !== 'undefined' && reel.current ? new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; }) : null;
-    if (io) io.observe(reel.current);
-    const t = setInterval(() => {
-      const m = measure();
-      if (!m || !onScreen || document.hidden || Date.now() < hold.current) return;
-      const i = current(m);
-      show(i >= slides.length - 1 ? 0 : i + 1);
-    }, EVERY);
-    return () => { clearInterval(t); if (io) io.disconnect(); };
-  }, []);
 
   const head = (
     <span style={sx('display:block;padding:0 52px 0 18px')}>
@@ -137,23 +109,11 @@ function MuseumEntry({ c, from }) {
     </span>
   );
   const pictures = (
-    <div ref={reel} className="hscroll" role="group" aria-roledescription="carousel" aria-label="Pictures from TANGHALAN"
-      onScroll={() => { const m = measure(); if (m) setAt(current(m)); }} onPointerDown={busy} onWheel={busy} onFocus={busy}
-      style={sx('display:flex;gap:' + GAP + 'px;scroll-snap-type:x mandatory;scroll-padding-left:18px;padding:0 0 12px 18px;margin-bottom:-12px')}>
+    <Reel r={r} label="Pictures from TANGHALAN">
       {slides.map((s, i) => <Slide key={i} s={s} onPick={enter} />)}
-      <span aria-hidden="true" style={sx('flex:none;width:8px')} />
-    </div>
+    </Reel>
   );
-  const dots = (
-    <span style={sx('display:flex;justify-content:center;align-items:center')}>
-      {slides.map((s, i) => (
-        <button key={i} onClick={() => show(i, true)} aria-label={'Picture ' + (i + 1) + ' of ' + slides.length} aria-current={i === at ? 'true' : undefined}
-          style={sx('width:24px;height:24px;display:flex;align-items:center;justify-content:center')}>
-          <span style={sx('display:block;height:7px;border-radius:999px;transition:width .25s ease,background-color .25s ease;' + (i === at ? 'width:18px;background-color:#ffd873' : 'width:7px;background-color:rgba(255,255,255,.35)'))} />
-        </button>
-      ))}
-    </span>
-  );
+  const dots = <ReelDots r={r} />;
   return (
     <div style={sx('position:relative;height:100%')}>
       <div data-museum-card="" onClick={(e) => { if (!e.target.closest('button')) enter(); }}

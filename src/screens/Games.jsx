@@ -2,7 +2,7 @@ import { sx, pr } from '../ui/sx.js';
 import { Mascot } from '../ui/art.jsx';
 import { P, PO, G, LIVE, STORIES, howTo, pillarOf, isStory } from '../data.js';
 import { MuseumTile } from './Tanghalan.jsx';
-import { StoryShelfCard } from './Stories.jsx';
+import { StoryShelfCard, HvPillarCard } from './Stories.jsx';
 
 const BG = 'radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef)';
 
@@ -77,6 +77,8 @@ export function Games({ c }) {
                       style={sx('position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:1.5px solid #d5e3ea;color:#4f6572;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;background:#fff')}>i</button>
                   </div>
                 )))}
+                {/* after the games: the part of the Handaventures stories that belongs to this pillar */}
+                <HvPillarCard c={c} pid={pid} />
               </div>
             </div>
           );
