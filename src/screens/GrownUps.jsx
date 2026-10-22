@@ -228,7 +228,7 @@ export function FinishSheet({ c }) {
     <>
       <div style={sx("font:800 23px/1.1 'Baloo 2',sans-serif")}>A grown-up's help, please 👪</div>
       <p style={sx('margin:0;font-weight:700;font-size:15px;color:#25404e;line-height:1.45')}>{nick}'s player card needs two more things: {nick}'s birthday, and the parent, guardian or teacher who looks after {nick}'s play. Bayani uses the birthday to suggest games that fit {nick}'s age.</p>
-      <p style={sx('margin:0;font-weight:700;font-size:13.5px;color:#4f6572;line-height:1.45')}>Until then, the levels for ages 10 to 15 ask for a grown-up.</p>
+      <p style={sx('margin:0;font-weight:700;font-size:13.5px;color:#4f6572;line-height:1.45')}>Until then, the levels for ages 10 to 15 ask for a grown-up. A player who is 18 or older only needs a birthday and their own OK.</p>
       <button onClick={() => me && c.editPlayer(me, 'home')} style={sx('background:#128253;color:#fff;font-weight:900;font-size:16px;padding:13px;border-radius:999px;box-shadow:0 4px 0 #0b5e3b')}>👪 Fill it in now</button>
       <button onClick={() => patch({ sheet: null })} style={sx('padding:6px;font-weight:900;font-size:15px;color:#4f6572')}>Later</button>
     </>

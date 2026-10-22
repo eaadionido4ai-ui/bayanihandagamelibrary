@@ -3,13 +3,17 @@ import { sx } from '../ui/sx.js';
 import { game } from '../data.js';
 
 // Games that are pages of their own (built from games/ into public/games/ by scripts/build-games.mjs) play in a
-// frame, the way the Handaventures stories do: the order games (Quake in Order, Heart in Order and Press On). The
-// frame opens at the level picked on the intro (&level=) and with the sound setting (&sound=). The game tells the
-// library when a round ends, what Bayani should read aloud, and when the player leaves (postMessage with source
-// 'bayani-game').
-export function frameSrc(g, mode, sound) {
+// frame, the way the Handaventures stories do: the order games (Quake in Order, Heart in Order and Press On) and
+// Weather Studio. The frame opens at the level picked on the intro (&level=) and with the sound setting (&sound=).
+// A game with frameName (Weather Studio) also gets the voice setting (&voice=) and the player's nickname (&name=),
+// since it reads its forecast aloud itself and puts the nickname on its cue card. The game tells the library when a
+// round ends, what Bayani should read aloud, and when the player leaves (postMessage with source 'bayani-game').
+// The frame may use the microphone, for Weather Studio's voice recording (only after a grown-up's OK in the game).
+export function frameSrc(g, mode, sound, more) {
   const level = g.frameModes ? g.frameModes[mode] || g.frameModes[0] : null;
-  return g.frame + '?embed=1' + (level ? '&level=' + level : '') + '&sound=' + (sound ? 1 : 0);
+  let src = g.frame + '?embed=1' + (level ? '&level=' + level : '') + '&sound=' + (sound ? 1 : 0);
+  if (more) Object.keys(more).forEach((k) => { if (more[k] != null) src += '&' + k + '=' + encodeURIComponent(more[k]); });
+  return src;
 }
 export function GamePlay({ c }) {
   const g = game(c.s.gameId);
@@ -17,7 +21,7 @@ export function GamePlay({ c }) {
   const live = useRef(c);
   live.current = c;
   // Fixed at the start, so earning a badge never reloads the game.
-  const [src] = useState(() => frameSrc(g, c.s.mode, c.s.sound));
+  const [src] = useState(() => frameSrc(g, c.s.mode, c.s.sound, g.frameName ? { voice: c.s.voice ? 1 : 0, name: c.nick } : null));
   useEffect(() => {
     function onMessage(e) {
       const d = e.data;
@@ -36,7 +40,7 @@ export function GamePlay({ c }) {
   }, [g]);
   return (
     <div data-screen-label="Gameplay" style={sx('position:absolute;inset:0;background:#e8f2f7;padding:env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);display:flex')}>
-      <iframe ref={frame} src={src} title={g.name} style={sx('flex:1;width:100%;height:100%;border:0;display:block;background:#e8f2f7')} />
+      <iframe ref={frame} src={src} title={g.name} allow="microphone; autoplay" style={sx('flex:1;width:100%;height:100%;border:0;display:block;background:#e8f2f7')} />
     </div>
   );
 }

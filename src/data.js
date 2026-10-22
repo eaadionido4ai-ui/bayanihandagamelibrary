@@ -170,6 +170,22 @@ export const G = [
     note: 'Drag downward or tap the top-view button for a top view. Pinch or use the plus and minus buttons to zoom.',
     remind: 'Keep your family go bag near the door, and check it with a grown-up every few months.',
   },
+  // Weather Studio (Oct 2026), a test game (test: true): it carries the Test Game label and stays out of the badge
+  // count until it is final. A page of its own (games/weather-studio/page.html, copied into public/games/ by
+  // scripts/build-games.mjs) that plays in a frame like the order games; frameName passes the voice setting and the
+  // player's nickname. One preset forecast (Bagyong Kulog over Barangay Handa) and one preset flood hazard map in
+  // UP NOAH's colors, of a made-up barangay.
+  {
+    id: 'weather', p: 'prep', test: true, name: 'Weather Studio', icon: '📺', frame: 'games/weather-studio.html', frameModes: ['easy', 'hard'], frameName: true, levelAges: ['young', 'older'],
+    short: 'Be the weather reporter: read the wind signal and the rain warning, then a flood hazard map.',
+    desc: 'Bagyong Kulog is coming to Barangay Handa. Watch Bayani\'s forecast, make your own, read the flood hazard map, and go on air with your voice.',
+    badge: ['Weather Reporter', '📺'], modesLabel: 'Pick a level',
+    modes: [['🙂', 'Easy', 'Pick the wind signal and the rain warning, then find the safe place on the flood map.'], ['🎯', 'Difficult', 'Read wind speeds and rain amounts, sort places by flood hazard, and pick the safest road.']],
+    steps: [['1', 'Watch', 'Bayani reads the forecast in the weather studio.'], ['2', 'Build', 'Make your own forecast: weather stickers, the wind signal and the rain warning.'], ['3', 'Read the map', 'Find the places a flood could reach on a flood hazard map.'], ['4', 'Advise', 'Pick the tips that keep families safe.'], ['5', 'Present', 'Read your forecast on air, and record it with a grown-up\'s OK.']],
+    tip: 'On a flood hazard map, red means high danger, orange medium and yellow low. Places with no color are where the map does not expect a flood.',
+    note: 'This is a test game, so it may change after we try it with players. The map colors follow UP NOAH flood hazard maps; Barangay Handa is made up. A recording needs a grown-up\'s OK and stays on this device.',
+    remind: 'With a grown-up, look up your own barangay\'s flood map at noah.up.edu.ph, and listen to PAGASA and your barangay when a storm comes.',
+  },
   {
     id: 'fire', p: 'resp', name: 'Fire Extinguisher 3D', icon: '🧯', short: 'Pull, Aim, Squeeze, Sweep. Put out the fire the PASS way.', levelAges: ['young', 'older'],
     desc: 'Pull, Aim, Squeeze, Sweep. Put out the fire the PASS way.',
@@ -286,7 +302,9 @@ export const G = [
   ...STORIES,
 ];
 
-export const LIVE = G.filter((g) => !g.soon);
+// The games and stories that count toward badges and ranks. Test games play like the others but do not count yet.
+export const LIVE = G.filter((g) => !g.soon && !g.test);
+export const isTest = (g) => !!(g && g.test);
 
 // Age labels (EA, October 2026). Every game and story is for ages 6 to 10; the Difficult level of the games
 // that have Easy and Difficult (levelAges on the game, one band per level, in the order of its modes) is for

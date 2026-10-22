@@ -42,6 +42,14 @@ npm run android:open    # open in Android Studio, then Run or build an APK
 
 Set your own `appId` in `capacitor.config.json` before publishing.
 
+Weather Studio records the player's voice (after a grown-up's OK), so after `npx cap add android` add the microphone
+permission to `android/app/src/main/AndroidManifest.xml`:
+
+```xml
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
+<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+```
+
 The launcher icon comes from `assets/` (the Bayanihan house logo). After `npx cap add android`,
 generate the Android icon sizes with:
 
@@ -103,13 +111,22 @@ a white cross on green (ISO 7010 E003), as in the order games.
 Since October 2026 a player has a birthday and a grown-up, and the games carry age labels
 (EA's call).
 
-- **The new player page** asks for the avatar and nickname, the birthday (month, day and
-  year), and a part for the grown-up: who is setting up the player (a parent or guardian,
-  or a teacher), their name, the school for a teacher, a short privacy notice and a consent
-  box (the Data Privacy Act of 2012, RA 10173). "Let's play" turns on once everything is
-  filled in, and the page lists what is still missing. The next new player starts with the
-  same grown-up, so a teacher can set up a class quickly; the consent box is ticked for
-  each child.
+- **The new player page** asks for the avatar and nickname, the birthday (the month and day
+  picked from lists, the year typed in, any year from 1900 to this year), and a part for the
+  grown-up: who is setting up the player (a parent or guardian, or a teacher), their name,
+  the school for a teacher, a short privacy notice and a consent box (the Data Privacy Act
+  of 2012, RA 10173). "Let's play" turns on once everything is filled in, and the page lists
+  what is still missing. A year that is too short, out of range or makes a day that has not
+  come yet gets a short note on what to fix. The next new player starts with the same
+  grown-up, so a teacher can set up a class quickly; the consent box is ticked for each
+  child.
+- **Grown-ups can play too** (EA's call, October 2026). When the birthday shows a player is
+  18 or older (the age of majority in the Philippines), the grown-up part turns into "Your
+  privacy": the same notice in the player's own words and their own consent ("I am 18 or
+  older..."). No parent, guardian or teacher is asked for or kept, and every game and level
+  is open with no grown-up check. The consent records who gave it (`by: 'grownup'` or
+  `'self'`); if the birthday is changed between a child's and a grown-up's, the box has to
+  be ticked again by the right person.
 - **On this device only.** The details live in `bayanihanda_profiles_v1`
   (`src/profiles.js`) and are never sent anywhere. Edit players shows and changes them
   (with the day the consent was given), and removing a player deletes them.
@@ -313,6 +330,42 @@ The first aid scenes use the green first aid sign (a white cross on green), neve
 protects. "Stop the Bleed" is a trademark of the US Department of Defense, so the bleeding game has a name of its
 own.
 
+## Weather Studio, a test game
+
+A weather desk for kids under Get Ready, added in October 2026 as a **test game**: its card and intro carry a
+purple 🧪 TEST GAME label (`test: true` in `src/data.js`, `TestChip` in `src/ui/age.jsx`), and it stays out of the
+badge count and ranks (`LIVE`) until it is final. The name is a working title.
+
+- **One preset forecast and one preset flood map.** Friday, 6 PM: Bayani's forecast (Bagyong Kulog 300 km away,
+  Signal No. 1). Saturday, 8 AM: the player's own news, from which they work out Signal No. 2 and an orange rain
+  warning. Then a flood hazard map of a made-up Barangay Handa, colored the UP NOAH way (yellow low, orange
+  medium, red high, no color), then the safety tips, then the player reads the forecast on air from a cue card
+  written from their own picks.
+- **Two levels.** *Easy* (ages 6 to 10): Signals 1 to 3 in plain words, the rain colors as be alert, be prepared
+  and take action, then which color means high, three places to check, and the safer place for families.
+  *Difficult* (ages 10 to 15): all five signals with lead times and wind speeds (PAGASA), the rain amounts per
+  color, what a 100-year rain means, sorting four places by hazard with no hints, the safest of three roads, and
+  why the riverside is red. The map's colors and its right answers come from the same numbers.
+- **Voice.** Bayani reads the forecast with the device's own voices only, so nothing is sent out to be spoken.
+  The Android WebView has no speech, so there it shows captions.
+- **Recording** needs a grown-up's OK (a times-table question), stays in memory on the device, and is gone on
+  delete or when the game closes. Where the microphone is not available, Present offers practice out loud or a
+  clip from the phone's recorder app. The Android app needs the microphone permission for this (below).
+- **In the library** it plays in a frame like the order games, as
+  `games/weather-studio.html?embed=1&level=easy|hard&sound=0|1&voice=0|1&name=...` (`frameName` on its entry
+  passes the voice setting and the nickname). It opens at Watch, and Bayani waits for Play, since the frame has
+  had no tap yet. Back from Watch and "Back to the library" send `exit`. The library's grown-up check runs before
+  a younger player starts Difficult, so the game skips its own.
+- **On its own** (`npm run test:games` writes `games/standalone/Weather-Studio.html`) it opens at a title screen
+  with a level picker, and asks a grown-up before Difficult.
+
+| Part | Where |
+| --- | --- |
+| The game, one page | `games/weather-studio/page.html` (the build fills in the fonts at `<!--@FONTS-->`) |
+| Build | `PAGES` in `scripts/build-games.mjs` writes `public/games/weather-studio.html` (not committed) |
+| Card, intro, levels | the `weather` entry in `src/data.js` |
+| Tests | `games/tests/weather-studio.test.cjs` (`npm run test:games`): both levels to the end, the library link, the map's zones |
+
 ## Credits on the info tags
 
 Every game's info tag (the **i** button) starts with the notice **Subject for code and
@@ -400,6 +453,10 @@ works, collected through teachers with parents' consent:
   before the library is used with classes.
 - **Play time limits** (rest reminders and a daily limit by age) are planned, using the
   players' birthdays.
+- **Weather Studio is a test game.** It needs EA's review and a pilot test, a final name,
+  and a check of its PAGASA and UP NOAH wording by the validators. On Android it has no
+  voice (the WebView has no speech) and needs the microphone permission above. Its badge
+  does not count until the Test Game label comes off.
 - **Not yet tested on a phone.** Everything was checked in Chromium at phone (412×915)
   and tablet (1280×800) sizes, with software WebGL.
 

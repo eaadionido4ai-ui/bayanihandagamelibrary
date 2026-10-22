@@ -1,7 +1,7 @@
 import { sx, pr } from '../ui/sx.js';
 import { Mascot, Logo, Dots } from '../ui/art.jsx';
 import { AV, MAX_PLAYERS, av } from '../data.js';
-import { ageOn, complete, daysIn, draftCheck, profileOf, validDate } from '../profiles.js';
+import { FIRST_YEAR, bornOk, complete, daysIn, draftCheck, isAdult, profileOf } from '../profiles.js';
 import { CONTACT_EMAIL } from './GrownUps.jsx';
 
 const BG = 'radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef)';
@@ -101,27 +101,32 @@ const SUB = "font:800 19px/1 'Baloo 2',sans-serif";
 const ROLE = (on) => 'flex:1 1 0;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 8px;border-radius:16px;font-weight:900;font-size:15px;background:#fff;'
   + (on ? 'border:3px solid #128253;color:#0c5c3a;box-shadow:0 3px 0 #b9e3cd' : 'border:3px solid #eadfc4;color:#4f6572');
 const clean = (v, n) => v.replace(/[<>]/g, '').slice(0, n);
+const fullYear = (y) => (/^\d{4}$/.test(y || '') ? y : ''); // the typed year, once all 4 numbers are in
 const listOf = (a) => (a.length > 1 ? a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1] : a[0] || '');
 
-// What the age means for this player (AGE in data.js).
+// What the age means for this player (AGE in data.js). Grown-ups are welcome to play too.
 function ageNote(age) {
   if (age == null) return '';
+  if (isAdult(age)) return 'Age ' + age + '. Grown-ups are welcome to play! Every game and level is open, and no parent, guardian or teacher is needed.';
   if (age < 6) return 'Age ' + age + '. Every game will ask for a grown-up to play along.';
   if (age < 10) return 'Age ' + age + '. Games for ages 6 to 10 fit. Difficult levels, for ages 10 to 15, ask for a grown-up.';
   return 'Age ' + age + '. Every game and level fits.';
 }
 
-// A new player, or a change to one: the avatar and nickname, the birthday, and the grown-up part (who sets the
-// player up, their school if they are a teacher, and their privacy consent). Everything stays on this device
-// (src/profiles.js). A new player needs it all; an older player may be saved with the grown-up part left for later.
+// A new player, or a change to one: the avatar and nickname, the birthday (month and day to pick, the year to
+// type), and the grown-up part (who sets the player up, their school if they are a teacher, and their privacy
+// consent). A player 18 or older gets a short privacy part with their own consent instead, with no parent,
+// guardian or teacher. Everything stays on this device (src/profiles.js). A new player needs it all; an older
+// player may be saved with the grown-up part left for later.
 export function AddPlayer({ c }) {
   const { s, patch, players } = c;
   const d = s.draft, da = av(d.av), dn = d.nick.trim();
   const editing = !!d.id;
   const set = (k, v) => patch((p) => ({ draft: { ...p.draft, [k]: v } }));
-  // a day past the end of the new month (say, 31 in June) moves back to its last day
+  // a day past the end of the new month (say, 31 in June) moves back to its last day; a year still being typed
+  // counts as a leap year, so February 29 stays until the whole year is in
   const setDate = (k, v) => patch((p) => {
-    const n = { ...p.draft, [k]: v }, max = daysIn(n.by, n.bm);
+    const n = { ...p.draft, [k]: v }, max = daysIn(fullYear(n.by), n.bm);
     if (n.bd && +n.bd > max) n.bd = String(max);
     return { draft: n };
   });
@@ -129,13 +134,30 @@ export function AddPlayer({ c }) {
   const chk = draftCheck(d);
   const skip = editing && !d.had && chk.empty;
   const ready = !!dn && (chk.ok || skip);
-  const age = validDate(chk.born) ? ageOn(chk.born) : null;
+  const age = chk.age, adult = chk.adult;
   const year = new Date().getFullYear();
-  const years = Array.from({ length: 16 }, (_, i) => String(year - 3 - i));
-  const days = Array.from({ length: daysIn(d.by, d.bm) }, (_, i) => String(i + 1));
+  // the year is typed, so any year works; this says what to fix when it does not
+  const yearHint = !d.by ? ''
+    : d.by.length < 4 ? 'Type the year with 4 numbers, like 2016.'
+    : +d.by < FIRST_YEAR || +d.by > year ? 'Please check the year. It should be from ' + FIRST_YEAR + ' to ' + year + '.'
+    : d.bm && d.bd && !bornOk(chk.born) ? 'That day has not come yet. Please check the birthday.' : '';
+  const days = Array.from({ length: daysIn(fullYear(d.by), d.bm) }, (_, i) => String(i + 1));
   const teacher = d.role === 'teacher';
   const pf = editing ? profileOf(d.id) : null;
   const cta = editing ? 'Save' : "Let's play";
+  // the consent box counts for the kind of player the birthday shows: a child's grown-up, or a player 18 or older
+  const toggleConsent = () => patch((p) => ({ draft: { ...p.draft, consent: !chk.consent, cfor: chk.who } }));
+  const agreedOn = pf && pf.consent && chk.consent && (pf.consent.by === 'self') === adult ? pf.consent.on : null;
+  const consentBox = (text) => (
+    <>
+      <button role="checkbox" aria-checked={chk.consent} onClick={toggleConsent}
+        style={sx('display:flex;gap:12px;align-items:flex-start;text-align:left;background:#fff;border-radius:16px;padding:12px;border:2px solid ' + (chk.consent ? '#128253' : '#eadfc4'))}>
+        <span style={sx('flex:none;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#fff;' + (chk.consent ? 'background:#128253' : 'border:3px solid #c9b98f;box-sizing:border-box'))}>{chk.consent ? '✓' : ''}</span>
+        <span style={sx('font-weight:800;font-size:14px;color:#25404e;line-height:1.45')}>{text}</span>
+      </button>
+      {agreedOn && <div style={sx('font-size:12.5px;font-weight:800;color:#5c4000')}>Agreed on {new Date(agreedOn + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</div>}
+    </>
+  );
   const sel = (label, value, k, opts, names) => (
     <select value={value} onChange={(e) => setDate(k, e.target.value)} aria-label={label} className="fo"
       style={{ ...sx(FIELD + ';padding:12px 8px;min-width:0'), color: value ? '#16303f' : '#8fa3b0' }}>
@@ -176,10 +198,25 @@ export function AddPlayer({ c }) {
         <div style={sx('display:grid;grid-template-columns:1.6fr 1fr 1.2fr;gap:8px')}>
           {sel('Month', d.bm, 'bm', MONTHS.map((m, i) => String(i + 1)), MONTHS)}
           {sel('Day', d.bd, 'bd', days)}
-          {sel('Year', d.by, 'by', years)}
+          <input value={d.by} onChange={(e) => setDate('by', e.target.value.replace(/\D/g, '').slice(0, 4))}
+            inputMode="numeric" pattern="[0-9]*" maxLength={4} placeholder="Year" aria-label="Year, 4 numbers" autoComplete="off" className="fo"
+            style={sx(FIELD + ';padding:12px 8px;min-width:0;text-align:center;letter-spacing:1px')} />
         </div>
         {age != null && <p aria-live="polite" style={sx('margin:-4px 0 0;font-weight:800;font-size:14px;color:#2f5d77;line-height:1.4')}>🎂 {ageNote(age)}</p>}
+        {age == null && yearHint && <p data-year-hint="" aria-live="polite" style={sx('margin:-4px 0 0;font-weight:800;font-size:14px;color:#9a4200;line-height:1.4')}>{yearHint}</p>}
 
+        {adult ? (
+          <div data-self="" style={sx('background:#eef6fa;border:2px solid #cfe3ee;border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px;margin-top:6px')}>
+            <div>
+              <div style={sx("font:800 20px/1.1 'Baloo 2',sans-serif;padding-top:2px")}>🔒 Your privacy</div>
+              <div style={sx('font-weight:700;font-size:14px;color:#2f5d77;margin-top:4px;line-height:1.4')}>You are 18 or older, so no parent, guardian or teacher is needed.</div>
+            </div>
+            <p style={sx('margin:0;font-weight:700;font-size:13.5px;color:#25404e;line-height:1.5')}>
+              <b style={sx('font-weight:900')}>🔒 Privacy notice.</b> BAYANIHanda keeps your nickname, picture and date of birth on this device only. Nothing is sent over the internet or shared with anyone, including UPRI. The date of birth shows which games fit your age. You can see or change these details anytime in Edit players, and removing the player deletes them. Questions? Email {CONTACT_EMAIL}.
+            </p>
+            {consentBox('I am 18 or older. I agree to keep these details on this device for these purposes, under the Data Privacy Act of 2012 (RA 10173).')}
+          </div>
+        ) : (
         <div data-grownup="" style={sx('background:#fff5df;border:2px solid #ffe2a8;border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px;margin-top:6px')}>
           <div>
             <div style={sx("font:800 20px/1.1 'Baloo 2',sans-serif;padding-top:2px")}>👪 For the grown-up</div>
@@ -197,13 +234,9 @@ export function AddPlayer({ c }) {
           <p style={sx('margin:0;font-weight:700;font-size:13.5px;color:#5c4000;line-height:1.5')}>
             <b style={sx('font-weight:900')}>🔒 Privacy notice.</b> BAYANIHanda keeps this player's nickname, picture and date of birth, and your name{teacher ? ' and school' : ''}, on this device only. Nothing is sent over the internet or shared with anyone, including UPRI. The date of birth shows which games fit the child's age and when to ask for a grown-up. You can see or change these details anytime in Edit players, and removing the player deletes them. Questions? Email {CONTACT_EMAIL}.
           </p>
-          <button role="checkbox" aria-checked={!!d.consent} onClick={() => set('consent', !d.consent)}
-            style={sx('display:flex;gap:12px;align-items:flex-start;text-align:left;background:#fff;border-radius:16px;padding:12px;border:2px solid ' + (d.consent ? '#128253' : '#eadfc4'))}>
-            <span style={sx('flex:none;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#fff;' + (d.consent ? 'background:#128253' : 'border:3px solid #c9b98f;box-sizing:border-box'))}>{d.consent ? '✓' : ''}</span>
-            <span style={sx('font-weight:800;font-size:14px;color:#25404e;line-height:1.45')}>I am this child's parent or guardian, or a teacher with the parent's or guardian's permission. I agree to keep these details on this device for these purposes, under the Data Privacy Act of 2012 (RA 10173).</span>
-          </button>
-          {pf && pf.consent && d.consent && <div style={sx('font-size:12.5px;font-weight:800;color:#5c4000')}>Agreed on {new Date(pf.consent.on + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</div>}
+          {consentBox('I am this child\'s parent or guardian, or a teacher with the parent\'s or guardian\'s permission. I agree to keep these details on this device for these purposes, under the Data Privacy Act of 2012 (RA 10173).')}
         </div>
+        )}
 
         <div style={sx('display:flex;flex-direction:column;gap:12px;margin-top:6px')}>
           {ready ? <button onClick={c.savePlayer} {...pr(CTA, CTA_ON)}>{cta}</button>
