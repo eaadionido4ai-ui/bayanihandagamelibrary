@@ -16,11 +16,14 @@ export const P = {
 export const PO = ['mit', 'prep', 'resp', 'rec'];
 
 // Info tags (the i buttons and Credits). Every tag shows the validation notice, then
-// blocks of [label, name, position, office].
+// blocks of [label, name, position, office]. A block with no label (null) adds one more person under the label above.
+// A game with credits of its own carries them (credits:); creditsOf() picks the blocks for a game.
 export const VALIDATION = 'Subject for code and content validation';
 const EA = ['Edward Andrew A. Dionido', 'Science Research Specialist II', 'UPRI'];
+const CT = ['Celine Tatco', 'Senior Project Associate', 'UPRI'];
 export const CREDITS_LIBRARY = [['Conceptualized and developed with AI assistance by', ...EA]];
-export const CREDITS_HV = [['Concept by', 'Celine Tatco', 'Senior Project Associate', 'UPRI'], ['Developed with AI assistance by', ...EA]];
+export const CREDITS_HV = [['Concept by', ...CT], ['Developed with AI assistance by', ...EA]];
+export const CREDITS_CARDS = [['Concept by', ...EA], [null, ...CT], ['Developed with AI assistance by', ...EA]];
 
 // Handaventures: five choose-your-path stories that take a hazard from before, through during, to after.
 // They have a place of their own, like TANGHALAN: a card on Home below the four pillars and a tile on Games,
@@ -299,12 +302,37 @@ export const G = [
     next: 'Next map',
     remind: 'Water always flows downhill and pools in low places. Keep the waterway clear.',
   },
+  // Handa vs. Hazard (Oct 2026), a test game: a card game (games/handa-vs-hazard/page.html, copied into public/games/
+  // by scripts/build-games.mjs) that plays in a frame. Hazard cards stack to grow stronger, and the player stacks
+  // Before, During and After cards to match them (EA's idea). Its cards cover all four pillars, so it shows under each
+  // (pillars), with a line for the part that belongs there (byPillar). frameVoice passes the voice setting.
+  {
+    id: 'cards', p: 'prep', pillars: ['mit', 'prep', 'resp', 'rec'], test: true, name: 'Handa vs. Hazard', icon: '🃏', credits: CREDITS_CARDS,
+    frame: 'games/handa-vs-hazard.html', frameModes: ['easy', 'hard'], frameVoice: true, levelAges: ['young', 'older'],
+    short: 'A card game: hazards grow stronger as their cards stack, and so do your Before, During and After cards.',
+    byPillar: {
+      mit: 'Before cards that remove dangers, like tying tall cabinets to the wall and not overloading outlets.',
+      prep: 'Before cards that get you ready, like packing the go bag and charging the radio.',
+      resp: 'During cards that keep you safe as the hazard hits, like duck, cover and hold.',
+      rec: 'After cards that help the barangay bounce back, like staying away from fallen wires.',
+    },
+    desc: 'A hazard is coming to Barangay Handa, and every matching hazard card makes it stronger. Stack the right Before, During and After cards to match it and keep every home safe.',
+    badge: ['Handa Player', '🃏'], modesLabel: 'Pick a level',
+    modes: [['🙂', 'Easy', 'Typhoon, flood, earthquake and fire in five rounds. The cards you can play glow.'], ['🎯', 'Difficult', 'Six hazards with landslides and storm surges, real warning scales, two storm updates a round, and no hints.']],
+    steps: [['1', 'Supplies', 'A hazard is coming. Pick 2 supply cards that help with it.'], ['2', 'Before', 'Play Before cards. Then a storm update may stack the hazard stronger.'], ['3', 'During', 'Play During cards. If your Handa matches the hazard, every home stays safe.'], ['4', 'After', 'After cards fix damaged homes and help the barangay bounce back.']],
+    tip: 'Get ready early. A hazard can grow stronger, and every Before card you play still counts when it hits.',
+    note: 'This is a test game, so it may change after we try it with players. On Difficult, typhoons use PAGASA\'s wind signals, floods PAGASA\'s rainfall warnings, and earthquakes the PHIVOLCS Earthquake Intensity Scale.',
+    remind: 'For every hazard, know what to do before, during and after. Ask a grown-up to help you get your home ready.',
+  },
   ...STORIES,
 ];
 
 // The games and stories that count toward badges and ranks. Test games play like the others but do not count yet.
 export const LIVE = G.filter((g) => !g.soon && !g.test);
 export const isTest = (g) => !!(g && g.test);
+// The pillars a game shows under on Games and Home: its own (p), or several (pillars, each with its own line on the
+// card in byPillar), as with Handa vs. Hazard.
+export const inPillar = (g, pid) => (g && g.pillars ? g.pillars.indexOf(pid) >= 0 : !!g && g.p === pid);
 
 // Age labels (EA, October 2026). Every game and story is for ages 6 to 10; the Difficult level of the games
 // that have Easy and Difficult (levelAges on the game, one band per level, in the order of its modes) is for
@@ -354,7 +382,7 @@ export const TRIVIA = [
   ['Finding and fixing hazards before a disaster is called mitigation.', 'hazard'],
 ];
 
-export const creditsOf = (g) => (g && (g.id === HV.id || isStory(g)) ? CREDITS_HV : CREDITS_LIBRARY);
+export const creditsOf = (g) => (g && g.credits ? g.credits : g && (g.id === HV.id || isStory(g)) ? CREDITS_HV : CREDITS_LIBRARY);
 
 export const MAX_PLAYERS = 10;
 

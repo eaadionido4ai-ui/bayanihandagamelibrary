@@ -158,8 +158,9 @@ function Credits({ blocks }) {
     <>
       <span style={sx('align-self:center;display:flex;align-items:center;gap:6px;background:#fff5df;border:2px solid #ffe2a8;color:#7a5400;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:900;text-align:center')}>🧪 {VALIDATION}</span>
       {blocks.map((b, i) => (
-        <div key={i} style={sx('display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px' + (i ? ';border-top:2px solid #eef2f4;padding-top:12px' : ''))}>
-          <span style={sx('font-size:12px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:#4f6572')}>{b[0]}</span>
+        // a block with no label is one more person under the label above, so no line between them
+        <div key={i} style={sx('display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px' + (i && b[0] ? ';border-top:2px solid #eef2f4;padding-top:12px' : ''))}>
+          {b[0] && <span style={sx('font-size:12px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:#4f6572')}>{b[0]}</span>}
           <span style={sx("font:800 20px/1.15 'Baloo 2',sans-serif;padding-top:3px;color:#16303f")}>{b[1]}</span>
           <span style={sx('font-size:14.5px;font-weight:700;color:#3d5563')}>{b[2]}</span>
           <span style={sx('font-size:14.5px;font-weight:800;color:#3d5563')}>{b[3]}</span>

@@ -1,6 +1,6 @@
 import { sx, pr } from '../ui/sx.js';
 import { Mascot } from '../ui/art.jsx';
-import { P, PO, G, LIVE, STORIES, howTo, pillarOf, isStory, ageOf, agesOf, needsGrownUp } from '../data.js';
+import { P, PO, G, LIVE, STORIES, howTo, pillarOf, isStory, ageOf, agesOf, needsGrownUp, inPillar } from '../data.js';
 import { AgeChip, TestChip } from '../ui/age.jsx';
 import { MuseumTile } from './Tanghalan.jsx';
 import { StoryShelfCard, HvPillarCard } from './Stories.jsx';
@@ -30,7 +30,7 @@ export function Games({ c }) {
           ))}
         </div>
         {banner && (() => {
-          const live = G.filter((x) => x.p === banner.id && !x.soon && !x.test);
+          const live = G.filter((x) => inPillar(x, banner.id) && !x.soon && !x.test);
           return (
             <div style={{ ...sx('border-radius:24px;color:#fff;padding:16px 18px;display:flex;gap:14px;align-items:center;box-shadow:0 5px 0 rgba(0,0,0,.12)'), background: banner.banner }}>
               <span style={sx('width:62px;height:62px;border-radius:20px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:33px;flex:none')}>{banner.icon}</span>
@@ -53,7 +53,7 @@ export function Games({ c }) {
                 </div>
               )}
               <div style={sx('display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:12px')}>
-                {G.filter((x) => x.p === pid && !isStory(x)).map((g) => (g.soon ? (
+                {G.filter((x) => inPillar(x, pid) && !isStory(x)).map((g) => (g.soon ? (
                   <div key={g.id} onClick={() => c.openGame(g.id)} style={sx('display:flex;gap:14px;align-items:center;background:rgba(255,255,255,.55);border:2px dashed #b9ccd8;border-radius:22px;padding:14px;cursor:pointer')}>
                     <span style={sx('width:66px;height:66px;border-radius:20px;flex:none;background:#b9c6cf;display:flex;align-items:center;justify-content:center;font-size:34px;filter:grayscale(.6)')}>{g.icon}</span>
                     <span style={sx('flex:1;min-width:0;display:flex;flex-direction:column;gap:4px')}>
@@ -68,7 +68,8 @@ export function Games({ c }) {
                       <span style={{ ...sx('width:66px;height:66px;border-radius:20px;flex:none;display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)'), background: p.grad }}>{g.icon}</span>
                       <span style={sx('flex:1;min-width:0;display:flex;flex-direction:column;gap:4px')}>
                         <span style={sx("font:800 18.5px/1.1 'Baloo 2',sans-serif;padding:3px 30px 0 0")}>{g.name}</span>
-                        <span style={sx('font-size:13.5px;font-weight:700;color:#4f6572;line-height:1.35')}>{g.short}</span>
+                        {/* a game under several pillars says which of its parts belongs to this one */}
+                        <span style={sx('font-size:13.5px;font-weight:700;color:#4f6572;line-height:1.35')}>{g.byPillar && g.byPillar[pid] ? g.byPillar[pid] : g.short}</span>
                         <span style={sx('display:flex;gap:6px;flex-wrap:wrap;margin-top:3px')}>
                           {g.test ? <TestChip /> : <span style={sx('font-size:11px;font-weight:900;letter-spacing:.5px;background:#e6f3f9;color:#1f5675;border-radius:999px;padding:3px 8px')}>3D · PLAY NOW</span>}
                           {agesOf(g).map((b) => <AgeChip key={b.id} band={b} grownUp={needsGrownUp(c.age, b)} />)}
@@ -122,7 +123,7 @@ export function Intro({ c }) {
           <div style={{ ...sx('border-radius:28px;color:#fff;padding:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;box-shadow:0 6px 0 rgba(0,0,0,.12)'), background: gp.banner }}>
             <span style={sx('width:86px;height:86px;border-radius:26px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:48px;flex:none;box-shadow:0 4px 0 rgba(0,0,0,.15)')}>{g.icon}</span>
             <div style={sx('flex:1 1 220px;min-width:0')}>
-              <span style={sx('display:inline-block;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;background:rgba(0,0,0,.24);border-radius:999px;padding:4px 10px;white-space:nowrap')}>{gp.icon} {gp.name}</span>
+              <span style={sx('display:inline-block;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;background:rgba(0,0,0,.24);border-radius:999px;padding:4px 10px;white-space:nowrap')}>{g.pillars ? g.pillars.map((id) => P[id].icon).join('') + ' ' + (g.pillars.length === PO.length ? 'All four pillars' : g.pillars.map((id) => P[id].name).join(', ')) : gp.icon + ' ' + gp.name}</span>
               <div style={sx("font:800 28px/1.05 'Baloo 2',sans-serif;margin-top:8px")}>{g.name}</div>
               <p style={sx('margin:6px 0 0;font-size:15px;font-weight:700;line-height:1.45;text-wrap:pretty')}>{g.desc}</p>
               <div style={sx('display:flex;gap:6px;flex-wrap:wrap;margin-top:10px')}>{g.test && <TestChip big />}{agesOf(g).map((b) => <AgeChip key={b.id} band={b} grownUp={needsGrownUp(c.age, b)} big />)}</div>

@@ -1,5 +1,5 @@
-// Runs the tests of every game that plays in a frame: the order games and Weather Studio (after npm run test:games
-// builds the pages).
+// Runs the tests of every game that plays in a frame: the order games, Weather Studio and Handa vs. Hazard (after
+// npm run test:games builds the pages).
 const fs = require('fs');
 const path = require('path');
 
