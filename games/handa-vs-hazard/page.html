@@ -1,0 +1,857 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Handa vs. Hazard</title>
+<meta name="description" content="A BAYANIHanda card game: hazards grow stronger as matching cards stack, and so do your Before, During and After responses.">
+<!-- Handa vs. Hazard, a test game of the BAYANIHanda library. scripts/build-games.mjs copies this page into
+     public/games/handa-vs-hazard.html with the fonts filled in below (and, with --standalone, into
+     games/standalone/Handa-vs-Hazard.html with the fonts inside). -->
+<!--@FONTS-->
+<style>
+/* page basics */
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+[hidden]{display:none!important}
+:root{
+  /* Layout: one phone-width column. The hazard's cards face your Handa cards across a VS meter, the barangay's
+     six homes sit above them, and your hand of cards fills the bottom. One dark game-table look on purpose. */
+  --navy:#13283a;--navy-0:rgba(19,40,58,0);--panel:#1d3b52;--panel-hi:#29506e;--frame:#0b1b28;--shadow:rgba(0,0,0,.35);--scrim:rgba(5,14,22,.72);
+  --sun:#ffd24d;--sun-edge:#b38a00;--sun-ink:#2e2200;
+  --cta:#d9650a;--cta-edge:#a34a05;
+  --ink:#ffffff;--muted:#cfe0ea;--dim:#8fb2c6;
+  --paper:#ffffff;--paper-2:#eef3f6;--paper-ink:#13283a;--paper-dim:#4f6577;--paper-line:#cfdae2;--card-edge:#9fb3c2;
+  --before:#128253;--before-soft:#e5f6ee;--during:#b35205;--during-soft:#fff1e3;--after:#7a53c6;--after-soft:#f1ebfd;
+  --haz:#5c2323;--haz-2:#2c1414;--haz-ink:#ffffff;--haz-line:#ff8a7a;
+  --go:#1aa46a;--go-deep:#0f7a4b;--go-edge:#0c6a43;--nope:#ff9f43;--nope-ink:#9a4200;--warn:#ff9c94;
+  --lv1:#ffe14a;--lv2:#ff9a3c;--lv3:#e8453b;
+  --young-bg:#ffeca8;--young-fg:#6b4a00;--older-bg:#ffe0ee;--older-fg:#a3195b;
+  --home:#ffffff;--roof:#f2760c;--home-hit:#6c7f8e;
+  --display:'Baloo 2','Arial Rounded MT Bold','Trebuchet MS',system-ui,sans-serif;
+  --body:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;background:var(--navy);color:var(--ink)}
+body{font-family:var(--body);font-size:15px;line-height:1.4;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+body.locked{overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+a{color:var(--sun);font-weight:900}
+:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+.app{max-width:560px;min-height:100%;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 0;display:flex;flex-direction:column;gap:12px}
+
+/* header */
+.top{display:flex;align-items:center;gap:10px}
+.ibtn{width:44px;height:44px;flex:none;border-radius:14px;border:0;background:var(--paper);color:var(--paper-ink);display:grid;place-items:center;padding:0;box-shadow:0 4px 0 var(--shadow)}
+.ibtn.dark{background:var(--panel);color:var(--ink);box-shadow:0 4px 0 var(--frame)}
+.ibtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--frame)}
+.h1{flex:1;min-width:0;margin:0;font-family:var(--display);font-weight:800;font-size:22px;line-height:1.05;text-wrap:balance}
+.h2{margin:0;font-family:var(--display);font-weight:800;font-size:19px;line-height:1.1;text-wrap:balance}
+.age{flex:none;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;border-radius:999px;padding:5px 9px;white-space:nowrap}
+.age.young{background:var(--young-bg);color:var(--young-fg)}
+.age.older{background:var(--older-bg);color:var(--older-fg)}
+.eyebrow{font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase}
+
+/* round progress */
+.round{display:flex;align-items:center;gap:10px}
+.round b{flex:none;font-family:var(--display);font-size:16px;font-weight:800;color:var(--sun);line-height:1}
+.steps{flex:1;min-width:0;list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.steps li{display:flex;flex-direction:column;gap:3px;font-size:9.5px;font-weight:900;letter-spacing:.4px;text-transform:uppercase;color:var(--dim);text-align:center}
+.steps i{display:block;height:5px;border-radius:5px;background:var(--panel)}
+.steps .done{color:var(--muted)}.steps .done i{background:var(--go)}
+.steps .now{color:var(--sun)}.steps .now i{background:var(--sun)}
+
+/* the barangay */
+.town{display:flex;align-items:center;gap:10px;background:var(--panel);border-radius:16px;padding:8px 12px}
+.town .lbl{flex:none;font-size:11px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);line-height:1.15}
+.homes{flex:1;min-width:0;display:flex;gap:4px;justify-content:center}
+.homes svg{width:30px;height:30px;flex:none}
+.stars{flex:none;font-weight:900;font-size:15px;color:var(--sun);white-space:nowrap}
+
+/* the board: hazard vs Handa */
+.board{display:grid;grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr);gap:8px;align-items:stretch}
+.side{border-radius:18px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-width:0}
+.side.hz{background:linear-gradient(160deg,var(--haz),var(--haz-2));box-shadow:0 4px 0 var(--frame)}
+.side.hd{background:var(--panel);box-shadow:0 4px 0 var(--frame)}
+.side .tag{font-size:10.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.side.hz .tag{color:var(--haz-line)}
+.stack{position:relative;width:92px;height:100px;margin:2px 0 2px}
+.hc{position:absolute;left:0;top:0;width:66px;height:88px;border-radius:10px;background:linear-gradient(160deg,#7a2d2d,#3a1717);border:2px solid var(--haz-line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--haz-ink);box-shadow:0 3px 0 rgba(0,0,0,.4);transform:translate(calc(var(--i) * 11px),calc(var(--i) * 3px)) rotate(calc(var(--i) * 6deg - 6deg))}
+/* a stack of matching hazard cards fans out, centered, so a stronger hazard looks bigger */
+.stack .hc{left:calc((26px - (var(--n) - 1) * 11px) / 2);top:4px}
+.hc .n{font-size:9px;font-weight:900;letter-spacing:.6px}
+.lvname{font-weight:900;font-size:13px;line-height:1.2;color:var(--ink)}
+.hzname{font-family:var(--display);font-weight:800;font-size:18px;line-height:1}
+.hzname small{display:block;font-family:var(--body);font-size:11px;font-weight:800;color:var(--muted);margin-top:2px}
+.pips{display:flex;gap:4px}
+.pips i{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.18)}
+.pips i.l1{background:var(--lv1)}.pips i.l2{background:var(--lv2)}.pips i.l3{background:var(--lv3)}
+.vs{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.vs .num{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:28px;font-weight:800;line-height:1;padding-top:3px}
+.vs .num.h{background:var(--lv3);color:var(--ink);box-shadow:0 3px 0 #8e2219}
+.vs .num.r{background:var(--go-deep);color:var(--ink);box-shadow:0 3px 0 var(--go-edge)}
+.vs .num.r.ok{background:var(--sun);color:var(--paper-ink);box-shadow:0 3px 0 var(--sun-edge)}
+.vs span.w{font-family:var(--display);font-weight:800;font-size:15px;color:var(--muted)}
+.piles{display:flex;gap:6px;width:100%;justify-content:center}
+.pile{flex:1;min-width:0;border-radius:12px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.pile b{font-family:var(--display);font-size:22px;font-weight:800;line-height:1}
+.pile span{font-size:9.5px;font-weight:900;letter-spacing:.5px;text-transform:uppercase}
+.pile.b{background:var(--before-soft);color:var(--before)}
+.pile.d{background:var(--during-soft);color:var(--during)}
+.pile.a{background:var(--after-soft);color:var(--after)}
+.meter{height:10px;border-radius:10px;background:var(--frame);position:relative;overflow:hidden}
+.meter i{position:absolute;left:0;top:0;bottom:0;border-radius:10px;background:var(--go)}
+.meter i.ok{background:var(--sun)}
+.meter u{position:absolute;top:0;bottom:0;width:3px;background:var(--lv3);text-decoration:none}
+.warnchip{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;background:var(--frame);border:2px dashed var(--haz-line);color:var(--ink);border-radius:999px;padding:5px 12px 5px 6px;font-size:13px;font-weight:900}
+.warnchip span.ic{width:26px;height:26px;border-radius:50%;background:var(--haz);display:grid;place-items:center}
+
+/* Bayani says */
+.say{display:flex;gap:8px;align-items:flex-end}
+.say-face{width:50px;flex:none}
+.say-face svg{display:block;width:100%;height:auto}
+.say-text{flex:1;min-width:0;margin:0;background:var(--paper);color:var(--paper-ink);border-radius:18px 18px 18px 4px;padding:10px 13px;font-size:14.5px;font-weight:800;line-height:1.42;border:3px solid var(--paper)}
+.say-text b{font-weight:900}
+.say.good .say-text{border-color:var(--go)}.say.good .say-text b{color:var(--go-deep)}
+.say.nope .say-text{border-color:var(--nope)}.say.nope .say-text b{color:var(--nope-ink)}
+.say.bad .say-text{border-color:var(--lv3)}.say.bad .say-text b{color:#a3241b}
+.say-hear{width:42px;height:42px;flex:none;align-self:center;border-radius:12px;border:0;background:var(--panel);color:var(--ink);display:grid;place-items:center;padding:0;box-shadow:0 3px 0 var(--frame)}
+
+/* cards */
+.zone{display:flex;flex-direction:column;gap:8px}
+.zone .zl{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(102px,1fr));gap:10px}
+.card{position:relative;width:100%;min-height:150px;border-radius:14px;border:0;background:var(--paper);color:var(--paper-ink);padding:0 0 22px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 4px 0 var(--card-edge);text-align:left}
+.card:active{transform:translateY(3px);box-shadow:0 1px 0 var(--card-edge)}
+.card .band{display:flex;align-items:center;justify-content:space-between;gap:4px;padding:5px 6px 5px 8px;color:var(--ink);font-size:10.5px;font-weight:900;letter-spacing:.8px}
+.card.ph-b .band{background:var(--before)}.card.ph-d .band{background:var(--during)}.card.ph-a .band{background:var(--after)}
+.card.ph-b{background:linear-gradient(var(--paper) 60%,var(--before-soft))}
+.card.ph-d{background:linear-gradient(var(--paper) 60%,var(--during-soft))}
+.card.ph-a{background:linear-gradient(var(--paper) 60%,var(--after-soft))}
+.card .hzb{width:22px;height:22px;flex:none;border-radius:50%;background:var(--paper);color:var(--haz);display:grid;place-items:center}
+.card .pic{font-size:30px;line-height:1;text-align:center;padding:8px 0 4px}
+.card .tx{padding:0 8px;font-size:12.5px;font-weight:900;line-height:1.22}
+.card .hzn{position:absolute;left:8px;bottom:6px;font-size:10px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;color:var(--paper-dim)}
+.card .pw{position:absolute;right:6px;bottom:5px;font-family:var(--display);font-weight:800;font-size:14px;line-height:1;border-radius:999px;padding:3px 6px 1px;background:var(--paper-ink);color:var(--sun)}
+.card.wild{background:linear-gradient(160deg,#fff7d1,#ffe2a8)}
+.card.wild .band{background:linear-gradient(90deg,#1aa46a,#d9650a,#7a53c6)}
+.card.glow{box-shadow:0 0 0 3px var(--sun),0 4px 0 var(--sun-edge)}
+.card.dim{opacity:.5}
+.card.picked{outline:3px solid var(--go);outline-offset:2px}
+.reveal{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.rv{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:900;text-align:center;max-width:120px}
+.rv .hc{position:relative;transform:none}
+.rv .tagx{border-radius:999px;padding:3px 9px}
+.rv .tagx.up{background:var(--lv3);color:var(--ink)}
+.rv .tagx.next{background:var(--panel-hi);color:var(--ink)}
+.rv .tagx.max{background:var(--frame);color:var(--muted)}
+.banner{border-radius:18px;padding:12px 14px;display:flex;gap:12px;align-items:center;font-weight:800;line-height:1.35}
+.banner.safe{background:var(--sun);color:var(--sun-ink);box-shadow:0 4px 0 var(--sun-edge)}
+.banner.hit{background:#ffd9d4;color:#5a1610;box-shadow:0 4px 0 #c97066}
+.banner .big{font-family:var(--display);font-size:22px;font-weight:800;line-height:1.05}
+.banner .em{font-size:34px;flex:none}
+
+/* dock and buttons */
+.dock{position:sticky;bottom:0;z-index:5;margin-top:auto;padding-block:14px calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,var(--navy-0),var(--navy) 38%)}
+.dock:empty{padding:0}
+.cta{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:60px;border-radius:999px;border:0;background:var(--cta);color:var(--ink);font-family:var(--display);font-weight:800;font-size:21px;line-height:1.1;box-shadow:0 6px 0 var(--cta-edge);padding:8px 20px;text-align:center}
+.cta:active{transform:translateY(4px);box-shadow:0 2px 0 var(--cta-edge)}
+.cta.ghost{background:var(--panel);box-shadow:0 5px 0 var(--frame)}
+.cta.wait{background:var(--panel);color:var(--muted);box-shadow:0 5px 0 var(--frame);cursor:default}
+.cta.small{min-height:52px;font-size:18px}
+.row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.linkbtn{background:transparent;border:0;color:var(--muted);font-weight:900;font-size:14px;min-height:44px;padding:0 6px;display:inline-flex;align-items:center;gap:6px;text-decoration:underline;text-underline-offset:3px}
+.center{display:flex;justify-content:center}
+
+/* title and end */
+.hero{border-radius:22px;background:radial-gradient(120% 90% at 30% 20%,#2b5577,#13283a 70%);border:6px solid var(--frame);padding:16px;display:flex;align-items:center;gap:12px;overflow:hidden}
+.hero .fan{position:relative;width:196px;height:150px;flex:none}
+.hero .fan .f{position:absolute}
+.hero .fan .hzf{left:0;top:22px;width:76px;height:100px}
+.hero .fan .c1,.hero .fan .c2{width:104px;transform-origin:top left}
+.hero .fan .c1{left:56px;top:6px;transform:scale(.72) rotate(3deg)}
+.hero .fan .c2{left:116px;top:20px;transform:scale(.72) rotate(12deg)}
+.hero .mas{width:78px;flex:none;margin-left:auto}
+.title-h{margin:0;font-family:var(--display);font-weight:800;font-size:30px;line-height:1.02;text-wrap:balance}
+.lede{margin:0;color:var(--muted);font-size:15.5px;font-weight:700;line-height:1.45}
+.how{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.how li{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border-radius:16px;padding:10px 12px;font-size:14px;font-weight:800;line-height:1.4;color:var(--muted)}
+.how li b{color:var(--ink)}
+.how .n{width:28px;height:28px;flex:none;border-radius:50%;background:var(--sun);color:var(--paper-ink);display:grid;place-items:center;font-family:var(--display);font-size:16px;font-weight:800;padding-top:2px}
+.levels{display:grid;gap:10px}
+.level{position:relative;border-radius:20px;border:3px solid var(--panel);background:var(--panel);padding:12px 14px 12px 46px;text-align:left;display:flex;flex-direction:column;gap:6px;box-shadow:0 4px 0 var(--frame)}
+.level::before{content:"";position:absolute;left:14px;top:15px;width:20px;height:20px;border-radius:50%;border:3px solid var(--dim)}
+.level.on{border-color:var(--sun);background:var(--panel-hi)}
+.level.on::before{border-color:var(--sun);background:radial-gradient(circle,var(--sun) 45%,transparent 50%)}
+.lv-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lv-top b{font-family:var(--display);font-size:20px;font-weight:800;line-height:1}
+.lv-txt{font-size:14px;font-weight:700;color:var(--muted);line-height:1.4}
+.lv-note{font-size:12.5px;font-weight:800;color:var(--sun)}
+.result{border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--panel)}
+.result .row{display:flex;align-items:center;gap:12px}
+.badge{background:var(--sun);color:var(--sun-ink);border-radius:22px;padding:14px 16px;display:flex;gap:14px;align-items:center;box-shadow:0 5px 0 var(--sun-edge)}
+.badge .medal{width:58px;height:58px;flex:none;border-radius:50%;background:var(--paper-ink);color:var(--sun);display:grid;place-items:center;border:4px solid var(--paper);font-size:28px}
+.badge b{display:block;font-family:var(--display);font-weight:800;font-size:21px;line-height:1.05}
+.badge p{margin:2px 0 0;font-size:13px;font-weight:800;line-height:1.35}
+.learned{margin:0;padding-left:20px;display:grid;gap:5px;font-weight:800;font-size:14px;line-height:1.4;color:var(--muted)}
+.learned b{color:var(--ink)}
+
+/* sheets */
+.scrim{position:fixed;inset:0;z-index:30;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:560px;max-height:92%;overflow:auto;background:var(--paper);color:var(--paper-ink);border-radius:24px 24px 0 0;padding-block:18px calc(18px + env(safe-area-inset-bottom,0px));padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+.sh-h{margin:0;font-family:var(--display);font-weight:800;font-size:24px;line-height:1.1}
+.sh-h3{margin:6px 0 0;font-size:13px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:var(--paper-dim)}
+.sh-p{margin:0;font-size:14.5px;font-weight:700;line-height:1.5}
+.sh-list{margin:0;padding-left:20px;display:grid;gap:5px;font-size:14px;font-weight:700;line-height:1.45}
+.sh-list a{color:var(--cta-edge)}
+.sel{user-select:all;-webkit-user-select:all;font-weight:900}
+.credits{margin:0;display:grid;gap:4px}
+.credits dt{margin-top:6px;font-size:12px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:var(--paper-dim)}
+.credits dd{margin:0;font-size:14.5px;font-weight:700;line-height:1.35}
+.credits dd b{font-weight:900}
+.sh-btn{min-height:52px;border-radius:999px;border:0;background:var(--cta);color:var(--ink);font-family:var(--display);font-weight:800;font-size:18px;box-shadow:0 5px 0 var(--cta-edge)}
+.sh-btn.ghost{background:var(--paper-2);color:var(--paper-ink);box-shadow:0 4px 0 var(--paper-line)}
+.gate{display:flex;flex-direction:column;gap:8px;background:var(--paper-2);border-radius:18px;padding:12px}
+.kq{font-size:13px;font-weight:900;color:var(--paper-dim);text-align:center}
+.kq.big{font-family:var(--display);font-size:28px;font-weight:800;color:var(--paper-ink)}
+.kdisp{height:52px;border-radius:14px;background:var(--navy);color:var(--sun);display:grid;place-items:center;font-family:var(--display);font-size:28px;font-weight:800;letter-spacing:3px;font-variant-numeric:tabular-nums}
+.kbad{margin:0;text-align:center;font-weight:900;color:var(--nope-ink);font-size:14px}
+.keys{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.key{height:54px;border-radius:14px;border:0;background:var(--paper);color:var(--paper-ink);font-family:var(--display);font-size:24px;font-weight:800;box-shadow:0 3px 0 var(--paper-line)}
+.key.ok{background:var(--go-deep);color:var(--ink);box-shadow:0 3px 0 var(--go-edge)}
+.mini{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mini div{border-radius:12px;padding:8px;font-size:12.5px;font-weight:800;line-height:1.3}
+
+/* one-shot effects */
+.shake{animation:shake .42s ease-in-out}
+.pop{animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+.flip{animation:flip .5s ease-out}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes flip{from{transform:rotateY(90deg)}to{transform:rotateY(0)}}
+@media (max-width:370px){.board{grid-template-columns:minmax(0,1fr) 52px minmax(0,1fr)}.vs .num{width:44px;height:44px;font-size:24px}.homes svg{width:24px;height:24px}}
+@media (min-width:600px){.levels{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="app" id="app"></main>
+<div id="sheet"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ===== Helpers ===== */
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var rnd = function (a, b) { return a + Math.floor(Math.random() * (b - a + 1)); };
+  var pick = function (a) { return a[Math.floor(Math.random() * a.length)]; };
+  var shuffle = function (a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
+  var ico = function (body, size, sw) { return '<svg width="' + (size || 22) + '" height="' + (size || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 2.2) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + body + '</svg>'; };
+
+  /* ===== Inside the BAYANIHanda library (?embed=1, in a frame) =====
+     The library opens the game at the level picked on its intro (&level=easy|hard) with its sound and voice settings
+     (&sound=0|1, &voice=0|1). It has already asked for a grown-up when the player is younger than the level's age
+     label. The game tells the library when the player leaves (postMessage, source 'bayani-game', type 'exit') and
+     keeps nothing on the device. The library also reads Bayani's lines aloud (type 'say', and 'hush' to stop): it has
+     had the player's tap on Play, while a frame gets no tap of its own until the player taps inside it, and without a
+     tap a phone stays silent. */
+  var params = (function () { try { return new URLSearchParams(window.location.search); } catch (e) { return { get: function () { return null; } }; } })();
+  var EMBED = params.get('embed') === '1' && window.parent !== window;
+  function post(msg) {
+    if (!EMBED) return;
+    try { window.parent.postMessage(Object.assign({ source: 'bayani-game', game: 'cards' }, msg), '*'); } catch (e) { /* not in a frame */ }
+  }
+
+  var P = {
+    back: '<path d="M15 5l-7 7 7 7"/>', next: '<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>',
+    speaker: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6a8 8 0 0 1 0 12"/>',
+    mute: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5v.5"/>',
+    replay: '<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/>'
+  };
+  // The hazards' own pictures, drawn the same on every phone
+  var HZI = {
+    typhoon: '<circle cx="12" cy="12" r="3"/><path d="M12 9c0-3 2-5 6-5-2 1-3 3-3 5"/><path d="M12 15c0 3-2 5-6 5 2-1 3-3 3-5"/>',
+    flood: '<path d="M6 11V7l6-4 6 4v4"/><path d="M2 15c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2"/><path d="M2 20c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2"/>',
+    quake: '<path d="M2 12h4l2-5 3 10 3-12 2 7h6"/><path d="M3 20h18"/>',
+    fire: '<path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>',
+    slide: '<path d="M2 20h20"/><path d="M3 20l8-12 5 6"/><circle cx="16.5" cy="16.5" r="2"/><circle cx="20" cy="18.8" r="1.2"/>',
+    surge: '<path d="M2 19c3 0 4-2 6-2s3 2 6 2 4-2 8-2"/><path d="M5 14c0-5 4-9 9-9 3 0 5 2 5 4-2-1-4 0-4 2 0 3 4 3 6 1"/>'
+  };
+  var hico = function (hz, size) { return ico(HZI[hz], size || 20, 2.3); };
+  var PLAY = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+
+  function mascot(o) {
+    o = o || {};
+    var arm = o.point ? '<rect x="49" y="22" width="7" height="20" rx="3.5" fill="#e8ab70" transform="rotate(-55 51 40)"/>' : '<rect x="47" y="39" width="7" height="18" rx="3.5" fill="#e8ab70"/>';
+    var mouth = o.smile !== false ? '<path d="M31 30 q5 4 10 0" stroke="#2a2320" stroke-width="1.8" fill="none" stroke-linecap="round"/>' : '<ellipse cx="36" cy="31" rx="3.5" ry="2.5" fill="#2a2320"/>';
+    return '<svg viewBox="0 0 72 80" aria-hidden="true">' +
+      '<path d="M24 36 L48 36 L52 70 L20 70 Z" fill="#f2760c" opacity="0.92"/><rect x="24" y="37" width="24" height="26" rx="8" fill="#1f6f8b"/>' +
+      '<polygon points="36,41 38.2,46 43.6,46.4 39.4,49.9 40.8,55.2 36,52.2 31.2,55.2 32.6,49.9 28.4,46.4 33.8,46" fill="#ffd24d"/>' +
+      '<rect x="18" y="39" width="7" height="18" rx="3.5" fill="#e8ab70"/>' + arm +
+      '<rect x="28" y="61" width="7" height="14" rx="3" fill="#35506b"/><rect x="37" y="61" width="7" height="14" rx="3" fill="#35506b"/>' +
+      '<circle cx="36" cy="24" r="13" fill="#e8ab70"/><path d="M23 23 a13 13 0 0 1 26 0 v-3 a13 13 0 0 0 -26 0 Z" fill="#3a2a22"/>' +
+      '<path d="M21 18 a15 10 0 0 1 30 0 Z" fill="#ffc53d"/><rect x="19" y="16" width="34" height="4.5" rx="2.25" fill="#eaa100"/>' +
+      '<circle cx="31" cy="25" r="1.9" fill="#2a2320"/><circle cx="41" cy="25" r="1.9" fill="#2a2320"/>' + mouth + '</svg>';
+  }
+
+  /* ===== The cards =====
+     Hazards (Filipino name first). levels: what each intensity is called. Easy uses plain words; Difficult uses the real
+     scales where there is one: PAGASA's wind signals, PAGASA's rainfall warnings, and the PHIVOLCS Earthquake
+     Intensity Scale. Responses: three actions per hazard for Before, During and After. */
+  var HZ = {
+    typhoon: { name: 'Bagyo', en: 'Typhoon', easy: ['Strong winds', 'Very strong winds', 'Even stronger winds'], hard: ['Signal No. 1', 'Signal No. 2', 'Signal No. 3'] },
+    flood: { name: 'Baha', en: 'Flood', easy: ['Yellow rain warning', 'Orange rain warning', 'Red rain warning'], hard: ['Yellow warning: 7.5 to 15 mm of rain an hour', 'Orange warning: 15 to 30 mm an hour', 'Red warning: over 30 mm an hour'] },
+    quake: { name: 'Lindol', en: 'Earthquake', easy: ['Strong shaking', 'Very strong shaking', 'Destructive shaking'], hard: ['Intensity V: Strong', 'Intensity VI: Very Strong', 'Intensity VII: Destructive'] },
+    fire: { name: 'Sunog', en: 'Fire', easy: ['Small fire', 'Spreading fire', 'Big fire'], hard: ['Small fire', 'Spreading fire', 'Big fire'] },
+    slide: { name: 'Guho', en: 'Landslide', easy: ['Cracks on the slope', 'Rocks falling', 'Big landslide'], hard: ['Cracks on the slope', 'Rocks falling', 'Big landslide'] },
+    surge: { name: 'Daluyong', en: 'Storm surge', easy: ['High waves', 'Water at the shore', 'Big storm surge'], hard: ['High waves', 'Water at the shore', 'Big storm surge'] }
+  };
+  var ACTIONS = {
+    typhoon: {
+      b: [['Bring loose things inside', '📥'], ['Charge the radio and power bank', '🔋'], ['Listen to PAGASA updates', '📻']],
+      d: [['Stay inside, away from windows', '🏠'], ['Go to the evacuation center when told', '🏫'], ['Keep your go bag close', '🎒']],
+      a: [['Stay away from fallen wires', '⚡'], ['Wait for the all-clear before going out', '✅'], ['Help clean up with a grown-up', '🧹']]
+    },
+    flood: {
+      b: [['Move important things up high', '📦'], ['Put papers in a plastic pouch', '📄'], ['Know your evacuation route', '🗺️']],
+      d: [['Go to higher ground early', '⛰️'], ['Never walk or play in floodwater', '🚫'], ['Stay away from rivers and canals', '🚷']],
+      a: [['Wash hands with clean water', '💧'], ['Throw away food that touched floodwater', '🗑️'], ['Get scratches checked', '🏥']]
+    },
+    quake: {
+      b: [['Tie tall cabinets to the wall', '🗄️'], ['Know the safe spots in each room', '🔍'], ['Join the earthquake drill', '🔔']],
+      d: [['Duck, cover and hold', '🙇'], ['Stay away from windows and shelves', '📚'], ['Outside? Move to an open space', '🏞️']],
+      a: [['Walk out calmly when the shaking stops', '🚶'], ['Stay in the open during aftershocks', '⚠️'], ['Check for injuries and tell a grown-up', '🗣️']]
+    },
+    fire: {
+      b: [['Don’t overload outlets', '🔌'], ['Test the smoke alarm', '🚨'], ['Plan two ways out', '🚪']],
+      d: [['Get down low under the smoke', '⬇️'], ['Get out and stay out', '🏃'], ['Call 911 or shout for help', '📞']],
+      a: [['Never go back inside', '⛔'], ['Meet at your meeting place', '📍'], ['Talk about how you feel', '💬']]
+    },
+    slide: {
+      b: [['Watch for cracks on slopes', '👀'], ['Plant trees and grass on slopes', '🌱'], ['Learn the warning signs', '📋']],
+      d: [['Move away from the slope’s path', '🏃'], ['Listen for rumbling sounds', '👂'], ['Go to the evacuation center early', '🏫']],
+      a: [['Stay away from the slide area', '⛔'], ['Report broken roads and pipes', '📞'], ['Wait for the all-clear', '✅']]
+    },
+    surge: {
+      b: [['Know if your home is near the shore', '🗺️'], ['Leave the coast early when warned', '🚗'], ['Pack the go bag', '🎒']],
+      d: [['Stay at the evacuation center inland', '🏫'], ['Stay far from the shore', '🚫'], ['Listen to PAGASA warnings', '📻']],
+      a: [['Wait for the all-clear before going home', '✅'], ['Watch out for debris', '⚠️'], ['Help your neighbors', '🤝']]
+    }
+  };
+  var PH = {
+    b: { word: 'BEFORE', name: 'Before', doing: 'get ready', step: 'before' },
+    d: { word: 'DURING', name: 'During', doing: 'stay safe while it happens', step: 'during' },
+    a: { word: 'AFTER', name: 'After', doing: 'bounce back', step: 'after' }
+  };
+  var STEP_PH = { before: 'b', during: 'd', after: 'a' };
+  var STEPS = [['supply', 'Supplies'], ['before', 'Before'], ['update', 'Update'], ['during', 'During'], ['after', 'After']];
+  // Easy: four hazards, one storm update a round, glowing hints. Difficult: six hazards, two updates, no hints.
+  // grow: the chance that a storm update brings another card of the same hazard, so hazards often build up.
+  var LV = {
+    easy: { hz: ['typhoon', 'flood', 'quake', 'fire'], rounds: 5, updates: 1, grow: 0.35, hints: true, wild: 0.12, label: 'Ages 6 to 10', age: 'young' },
+    hard: { hz: ['typhoon', 'flood', 'quake', 'fire', 'slide', 'surge'], rounds: 6, updates: 2, grow: 0.4, hints: false, wild: 0.08, label: 'Ages 10 to 15', age: 'older' }
+  };
+  var HOMES = 6, HAND_MAX = 8;
+
+  /* ===== State ===== */
+  // sound: every sound; voice: Bayani reads his lines aloud by himself (the speaker button always reads, sound on)
+  var S = { screen: 'title', level: 'easy', sound: true, voice: true, sheet: null, okHard: false, once: {} };
+  var G = null, uid = 0;
+  function card(hz, ph, i) { var a = ACTIONS[hz][ph][i]; return { id: 'c' + (++uid), hz: hz, ph: ph, text: a[0], pic: a[1] }; }
+  function anyCard(hz, ph) { return card(hz, ph, rnd(0, ACTIONS[hz][ph].length - 1)); }
+  function wild() { return { id: 'c' + (++uid), wild: true, text: 'Neighbors help each other. +1 for any hazard, any time.', pic: '🤝' }; }
+  function randCard() { var L = LV[S.level]; return Math.random() < L.wild ? wild() : anyCard(pick(L.hz), pick(['b', 'd', 'a'])); }
+  function lvName(hz, n) { return HZ[hz][S.level][Math.max(1, Math.min(3, n)) - 1]; }
+  function hazardDeck() { var d = []; LV[S.level].hz.forEach(function (h) { for (var i = 0; i < 4; i++) d.push(h); }); return shuffle(d); }
+  function fromDeck() { if (!G.deck.length) G.deck = hazardDeck(); return G.deck.shift(); }
+
+  function newGame() {
+    G = { round: 0, rounds: LV[S.level].rounds, deck: hazardDeck(), queue: [], homes: [], stars: 0, hand: [], R: null, say: null, safe: 0, faced: [], wrong: 0, full: 0, dropped: 0 };
+    for (var h = 0; h < HOMES; h++) G.homes.push(true);
+    for (var i = 0; i < 4; i++) G.hand.push(randCard());
+    nextRound();
+  }
+  // A round: a hazard arrives at intensity 1 (from the early warning queue first). Supplies, Before cards, a storm
+  // update that may stack the hazard higher, During cards, the hazard hits, then After cards.
+  function nextRound() {
+    G.round++;
+    if (G.round > G.rounds) { endGame(); return; }
+    var hz = G.queue.length ? G.queue.shift() : fromDeck();
+    G.R = { hz: hz, level: 1, step: 'supply', prep: 0, act: 0, fixed: 0, help: 0, played: { b: [], d: [], a: [] }, supply: makeSupply(hz), picked: 0, reveals: [], damage: 0, result: null };
+    if (G.faced.indexOf(hz) < 0) G.faced.push(hz);
+    var nm = HZ[hz].name, warn = G.queue.length ? ' Early warning: ' + HZ[G.queue[0]].name + ' may come next.' : '';
+    gsay({ lead: nm + ' is coming!', text: 'Right now it is ' + lvName(hz, 1) + '. Pick 2 supply cards that help with ' + nm + '.' + warn });
+  }
+  // Four supply cards to pick 2 from. Easy always has a Before and a During card for the coming hazard; Difficult has
+  // one card for it. There is often one for the next hazard in the early warning.
+  function makeSupply(hz) {
+    var s = [];
+    if (S.level === 'easy') { s.push(anyCard(hz, 'b')); s.push(anyCard(hz, 'd')); }
+    else s.push(anyCard(hz, pick(['b', 'd'])));
+    if (G.queue.length) s.push(anyCard(G.queue[0], pick(['b', 'd', 'a'])));
+    while (s.length < 4) s.push(randCard());
+    return shuffle(s);
+  }
+  function stormUpdate() {
+    var R = G.R, n = LV[S.level].updates, out = [];
+    for (var i = 0; i < n; i++) {
+      var hz = Math.random() < LV[S.level].grow ? R.hz : fromDeck();
+      if (hz === R.hz && R.level < 3) { R.level++; out.push({ hz: hz, kind: 'up' }); }
+      else if (hz === R.hz) { out.push({ hz: hz, kind: 'max' }); }
+      else if (G.queue.length < 2) { G.queue.push(hz); out.push({ hz: hz, kind: 'next' }); }
+      else { G.deck.push(hz); out.push({ hz: hz, kind: 'back' }); }
+    }
+    R.reveals = out;
+    var nm = HZ[R.hz].name, ups = out.filter(function (r) { return r.kind === 'up'; }).length;
+    var nexts = out.filter(function (r) { return r.kind === 'next'; }).map(function (r) { return HZ[r.hz].name; });
+    var text = ups ? 'Another ' + nm + ' card came up' + (ups > 1 ? ', twice' : '') + '! It stacks, so ' + nm + ' is now ' + lvName(R.hz, R.level) + '.'
+      : nm + ' stays at ' + lvName(R.hz, R.level) + '.';
+    if (nexts.length) text += ' ' + nexts.join(' and ') + ' will come after this.';
+    if (out.some(function (r) { return r.kind === 'max'; })) text += ' It cannot get any stronger in this game.';
+    var need = R.level - R.prep;
+    text += need > 0 ? ' You need ' + need + ' more to match it. Play During cards next.' : ' Your Before cards already match it!';
+    gsay({ tone: ups ? 'bad' : 'info', lead: 'Storm update.', text: text });
+  }
+  function hit() {
+    var R = G.R, total = R.prep + R.act, nm = HZ[R.hz].name;
+    if (total >= R.level) {
+      R.result = 'safe'; G.safe++; G.stars++;
+      sfx('win');
+      gsay({ tone: 'good', lead: 'Safe!', text: 'Your Handa of ' + total + ' matched ' + nm + ' at ' + R.level + '. No homes were hurt. Now play After cards to help the barangay bounce back.' });
+    } else {
+      var dmg = R.level - total, done = 0;
+      for (var i = 0; i < G.homes.length && done < dmg; i++) { if (G.homes[i]) { G.homes[i] = false; done++; } }
+      R.damage = done; R.result = 'hit';
+      sfx('bad');
+      gsay({ tone: 'bad', lead: done + ' home' + (done === 1 ? ' was' : 's were') + ' damaged.', text: nm + ' was ' + R.level + ' and your Handa was ' + total + '. Play After cards for ' + nm + ' to fix homes.' });
+    }
+    R.step = 'after';
+  }
+  function endRound() {
+    var R = G.R, drop = Math.max(0, G.hand.length - HAND_MAX);
+    // a hand holds up to 8 cards; the oldest go back if there are more
+    if (drop) { G.dropped += drop; G.hand.splice(0, drop); }
+    R.step = 'done';
+    nextRound();
+    if (drop && G.say && S.screen === 'play') G.say.text += ' Your hand was full, so ' + (drop === 1 ? 'your oldest card' : 'your ' + drop + ' oldest cards') + ' went back to the deck.';
+  }
+  function endGame() {
+    S.screen = 'end';
+    var safe = G.homes.filter(Boolean).length;
+    gsay({ tone: safe === HOMES ? 'good' : 'info', lead: safe === HOMES ? 'Every home is safe!' : safe + ' of ' + HOMES + ' homes are safe.', text: 'That was the whole season. Matching your cards to each hazard, before, during and after, is what keeps a barangay safe.' });
+  }
+
+  /* ===== Bayani's voice (the device's own voices only) and sounds ===== */
+  var TTS = (function () {
+    var ok = typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance === 'function';
+    var voice = null, blocked = false, gen = 0;
+    function choose() {
+      if (!ok) return;
+      var vs = []; try { vs = window.speechSynthesis.getVoices() || []; } catch (e) { vs = []; }
+      var local = vs.filter(function (v) { return /^en/i.test(v.lang) && v.localService; });
+      voice = local.find(function (v) { return /PH/i.test(v.lang); }) || local[0] || null;
+      blocked = vs.length > 0 && !voice;
+    }
+    if (ok) { choose(); try { window.speechSynthesis.addEventListener('voiceschanged', choose); } catch (e) { window.speechSynthesis.onvoiceschanged = choose; } }
+    function spoken(t) { return String(t).replace(/[\uD83C-\uDBFF][\uDC00-\uDFFF]/g, '').replace(/No\. (\d)/g, 'Number $1').replace(/(\d) mm\b/g, '$1 millimeters').replace(/\+1/g, 'plus one'); }
+    function stop() { gen++; if (EMBED) { post({ type: 'hush' }); return; } if (ok) { try { window.speechSynthesis.cancel(); } catch (e) { /* ignore */ } } }
+    function say(text, force) {
+      var my = ++gen;
+      if (!S.sound || (!S.voice && !force)) return;
+      if (EMBED) { post({ type: 'say', text: spoken(text), force: !!force }); return; } // the library speaks (see above)
+      if (!ok || blocked) return;
+      var u = new window.SpeechSynthesisUtterance(spoken(text));
+      if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
+      u.rate = 0.95; u.pitch = 1.08;
+      var go = function () { if (my === gen) { try { window.speechSynthesis.speak(u); } catch (e) { /* ignore */ } } };
+      try { if (window.speechSynthesis.speaking || window.speechSynthesis.pending) { window.speechSynthesis.cancel(); setTimeout(go, 90); } else go(); } catch (e) { /* ignore */ }
+    }
+    return { say: say, stop: stop };
+  })();
+  var AC = null;
+  function sfx(kind) {
+    if (!S.sound) return;
+    try {
+      var C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return;
+      AC = AC || new C();
+      if (AC.state === 'suspended') AC.resume();
+      var seq = { good: [[660, 0], [880, 0.11]], bad: [[240, 0], [190, 0.12]], pop: [[520, 0], [780, 0.06]], win: [[523, 0], [659, 0.12], [784, 0.24], [1047, 0.36]], storm: [[180, 0], [150, 0.14], [120, 0.28]] }[kind] || [];
+      var now = AC.currentTime;
+      seq.forEach(function (n) {
+        var o = AC.createOscillator(), g = AC.createGain();
+        o.type = 'triangle'; o.frequency.value = n[0];
+        g.gain.setValueAtTime(0.0001, now + n[1]); g.gain.exponentialRampToValueAtTime(0.15, now + n[1] + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, now + n[1] + 0.24);
+        o.connect(g); g.connect(AC.destination); o.start(now + n[1]); o.stop(now + n[1] + 0.26);
+      });
+    } catch (e) { /* sound is optional */ }
+  }
+  function gsay(obj) { G.say = obj; TTS.say((obj.lead ? obj.lead + ' ' : '') + obj.text); }
+
+  /* ===== Pieces ===== */
+  function backBtn() { return '<button class="ibtn" data-act="quit" data-k="back" aria-label="' + (EMBED ? 'Back to the library' : 'Back to the start') + '">' + ico(P.back, 20, 2.6) + '</button>'; }
+  function soundBtn() { return '<button class="ibtn dark" data-act="sound" data-k="sound" aria-pressed="' + S.sound + '" aria-label="' + (S.sound ? 'Sound is on' : 'Sound is off') + '">' + ico(S.sound ? P.speaker : P.mute, 20) + '</button>'; }
+  function ageChip() { var L = LV[S.level]; return '<span class="age ' + L.age + '">' + L.label + '</span>'; }
+  function bubble(s) {
+    if (!s) return '';
+    return '<div class="say ' + (s.tone || 'info') + '" role="status" aria-live="polite"><div class="say-face">' + mascot({ smile: s.tone !== 'nope' && s.tone !== 'bad' }) + '</div>' +
+      '<p class="say-text">' + (s.lead ? '<b>' + esc(s.lead) + '</b> ' : '') + esc(s.text) + '</p>' +
+      '<button class="say-hear" data-act="hear" data-k="hear" aria-label="Hear Bayani again">' + ico(P.speaker, 18) + '</button></div>';
+  }
+  function house(ok) {
+    return '<svg viewBox="0 0 30 30" role="img" aria-label="' + (ok ? 'Safe home' : 'Damaged home') + '">' +
+      (ok ? '<path d="M4 14 L15 5 L26 14 Z" fill="var(--roof)"/><rect x="7" y="13" width="16" height="12" rx="1.5" fill="var(--home)"/><rect x="13" y="17" width="4" height="8" fill="var(--panel)"/>'
+        : '<path d="M4 15 L14 7 L24 12 Z" fill="var(--home-hit)"/><rect x="7" y="14" width="16" height="11" rx="1.5" fill="var(--home-hit)"/><path d="M12 14 l3 4 -2 3 3 4" stroke="var(--frame)" stroke-width="1.6" fill="none"/>') + '</svg>';
+  }
+  function town() {
+    var safe = G.homes.filter(Boolean).length;
+    return '<div class="town"><span class="lbl">Barangay<br>Handa</span><div class="homes" role="img" aria-label="' + safe + ' of ' + HOMES + ' homes safe">' +
+      G.homes.map(house).join('') + '</div><span class="stars" aria-label="' + G.stars + ' stars">⭐ ' + G.stars + '</span></div>';
+  }
+  function hcard(hz, i, cls) {
+    return '<div class="hc' + (cls ? ' ' + cls : '') + '" style="--i:' + (i || 0) + '"><span class="n">' + esc(HZ[hz].name.toUpperCase()) + '</span>' + hico(hz, 30) + '</div>';
+  }
+  function pips(n) { var h = ''; for (var i = 1; i <= 3; i++) h += '<i class="' + (i <= n ? 'l' + n : '') + '"></i>'; return '<span class="pips" aria-hidden="true">' + h + '</span>'; }
+  function boardHtml() {
+    var R = G.R, total = R.prep + R.act, hz = HZ[R.hz], ok = total >= R.level;
+    var stack = '';
+    for (var i = 0; i < R.level; i++) stack += hcard(R.hz, i, i === R.level - 1 && S.once.stack ? 'pop' : '');
+    var pct = Math.min(100, total / 3 * 100), mark = Math.min(100, R.level / 3 * 100);
+    return '<section class="board" aria-label="' + esc(hz.name) + ' at ' + R.level + ' against your Handa at ' + total + '">' +
+      '<div class="side hz"><span class="tag">Hazard</span><div class="stack" style="--n:' + R.level + '" aria-hidden="true">' + stack + '</div>' +
+      '<div class="hzname">' + esc(hz.name) + '<small>' + esc(hz.en) + '</small></div>' + pips(R.level) + '<div class="lvname">' + esc(lvName(R.hz, R.level)) + '</div></div>' +
+      '<div class="vs"><span class="num h">' + R.level + '</span><span class="w">VS</span><span class="num r' + (ok ? ' ok' : '') + '">' + total + '</span></div>' +
+      '<div class="side hd"><span class="tag">Your Handa</span><div class="piles">' +
+      '<div class="pile b"><b>' + R.played.b.length + '</b><span>Before</span></div><div class="pile d"><b>' + R.played.d.length + '</b><span>During</span></div></div>' +
+      '<div class="pile a" style="width:100%"><b>' + R.played.a.length + '</b><span>After</span></div>' +
+      '<div style="width:100%"><div class="meter" aria-hidden="true"><i class="' + (ok ? 'ok' : '') + '" style="width:' + pct + '%"></i><u style="left:calc(' + mark + '% - 3px)"></u></div></div>' +
+      '<span class="tag" style="color:var(--muted)">' + (ok ? 'Matched!' : 'Needs ' + (R.level - total) + ' more') + '</span></div></section>';
+  }
+  function playable(c) {
+    var R = G.R, ph = STEP_PH[R.step];
+    if (!ph) return false;
+    return !!c.wild || (c.hz === R.hz && c.ph === ph);
+  }
+  function cardHtml(c, act, extra) {
+    extra = extra || {};
+    var cls = ['card', c.wild ? 'wild' : 'ph-' + c.ph];
+    if (extra.glow) cls.push('glow');
+    if (extra.dim) cls.push('dim');
+    if (S.once.shake === c.id) cls.push('shake');
+    if (S.once.pop === c.id) cls.push('pop');
+    var label = c.wild ? 'Bayanihan card: plus one for any hazard, any time' : PH[c.ph].name + ' card for ' + HZ[c.hz].name + ': ' + c.text;
+    // a picture of a card (the title screen) is not a button
+    var open = extra.still ? '<div class="' + cls.join(' ') + '">' : '<button class="' + cls.join(' ') + '" data-act="' + act + '" data-arg="' + c.id + '" data-k="card-' + c.id + '" aria-label="' + esc(label) + '">';
+    var close = extra.still ? '</div>' : '</button>';
+    if (c.wild) {
+      return open + '<span class="band"><span>BAYANIHAN</span><span class="hzb" style="color:var(--before)">★</span></span><span class="pic">' + c.pic + '</span>' +
+        '<span class="tx">' + esc(c.text) + '</span><span class="hzn">Any</span><span class="pw">+1</span>' + close;
+    }
+    return open + '<span class="band"><span>' + PH[c.ph].word + '</span><span class="hzb">' + hico(c.hz, 15) + '</span></span><span class="pic">' + c.pic + '</span>' +
+      '<span class="tx">' + esc(c.text) + '</span><span class="hzn">' + esc(HZ[c.hz].name) + '</span><span class="pw">+1</span>' + close;
+  }
+  function handZone(act, title) {
+    var R = G.R, hints = LV[S.level].hints, live = !!STEP_PH[R.step];
+    var cards = G.hand.map(function (c) {
+      var p = live && playable(c);
+      return cardHtml(c, act, { glow: hints && p, dim: hints && live && !p });
+    }).join('');
+    return '<div class="zone"><div class="zl"><span>' + esc(title || 'Your hand') + '</span><span>' + G.hand.length + ' cards</span></div>' +
+      (G.hand.length ? '<div class="grid">' + cards + '</div>' : '<p class="lede" style="font-size:14px">No cards in your hand. The next supplies will bring more.</p>') + '</div>';
+  }
+  function stepsBar() {
+    var R = G.R, at = -1;
+    STEPS.forEach(function (s, i) { if (s[0] === R.step) at = i; });
+    return '<div class="round"><b>Round ' + G.round + '/' + G.rounds + '</b><ol class="steps" aria-label="Steps of this round">' + STEPS.map(function (s, i) {
+      return '<li class="' + (i < at ? 'done' : i === at ? 'now' : '') + '"' + (i === at ? ' aria-current="step"' : '') + '><i></i>' + s[1] + '</li>';
+    }).join('') + '</ol></div>';
+  }
+
+  /* ===== Screens ===== */
+  var SCREENS = {};
+  SCREENS.title = function () {
+    var hard = S.level === 'hard';
+    var fan = '<div class="fan" aria-hidden="true">' +
+      '<div class="f hzf">' + hcard('typhoon', 0) + hcard('typhoon', 1) + '</div>' +
+      '<div class="f c1">' + cardHtml({ id: 'f1', hz: 'typhoon', ph: 'b', text: 'Bring loose things inside', pic: '📥' }, 'noop', { still: true }) + '</div>' +
+      '<div class="f c2">' + cardHtml({ id: 'f2', hz: 'typhoon', ph: 'd', text: 'Stay inside, away from windows', pic: '🏠' }, 'noop', { still: true }) + '</div></div>';
+    return '<header class="top"><h1 class="h1">Handa vs. Hazard</h1>' +
+      '<button class="ibtn dark" data-act="about" data-k="about" aria-label="About this game">' + ico(P.info, 20) + '</button>' + soundBtn() + '</header>' +
+      '<div class="hero">' + fan + '<div class="mas">' + mascot({ point: false }) + '</div></div>' +
+      '<p class="lede">Hazards grow stronger when their cards stack up. So do you! Stack the right Before, During and After cards to keep Barangay Handa safe.</p>' +
+      '<ol class="how">' +
+      '<li><span class="n">1</span><span><b>A hazard is coming.</b> Pick supply cards that help with it.</span></li>' +
+      '<li><span class="n">2</span><span><b>Get ready.</b> Play Before cards. Then watch the storm update: a matching hazard card makes it stronger.</span></li>' +
+      '<li><span class="n">3</span><span><b>Face it.</b> Play During cards. If your Handa matches the hazard, every home stays safe.</span></li>' +
+      '<li><span class="n">4</span><span><b>Bounce back.</b> After cards fix damaged homes.</span></li></ol>' +
+      '<div class="levels" role="radiogroup" aria-label="Level">' +
+      '<button class="level' + (!hard ? ' on' : '') + '" role="radio" aria-checked="' + !hard + '" data-act="level" data-arg="easy" data-k="lv-easy"><span class="lv-top"><b>Easy</b><span class="age young">Ages 6 to 10</span></span><span class="lv-txt">Typhoon, flood, earthquake and fire. The cards you can play glow.</span></button>' +
+      '<button class="level' + (hard ? ' on' : '') + '" role="radio" aria-checked="' + hard + '" data-act="level" data-arg="hard" data-k="lv-hard"><span class="lv-top"><b>Difficult</b><span class="age older">👪 Ages 10 to 15</span></span><span class="lv-txt">Six hazards with landslides and storm surges, real warning scales, two storm updates a round, and no glowing hints.</span>' +
+      (S.okHard ? '<span class="lv-note">A grown-up is playing along.</span>' : '<span class="lv-note">When you tap Start, Bayani will ask a grown-up to play along.</span>') + '</button></div>' +
+      '<div class="dock"><button class="cta" data-act="start" data-k="start">Start ' + ico(P.next, 22, 2.8) + '</button></div>';
+  };
+  SCREENS.play = function () {
+    var R = G.R, body = '', cta = '';
+    var nm = HZ[R.hz].name;
+    if (R.step === 'supply') {
+      body = '<div class="zone"><div class="zl"><span>Supplies: pick ' + (2 - R.picked) + ' more</span><span>Tap a card</span></div><div class="grid">' +
+        R.supply.map(function (c) { return cardHtml(c, 'take', { glow: LV[S.level].hints && (c.wild || c.hz === R.hz) }); }).join('') + '</div></div>' +
+        handZone('look');
+      cta = '<div class="cta wait" aria-hidden="true">Pick ' + (2 - R.picked) + ' supply card' + (2 - R.picked === 1 ? '' : 's') + '</div>';
+    } else if (R.step === 'before') {
+      body = handZone('play', 'Your hand: play Before cards for ' + nm);
+      cta = '<button class="cta" data-act="ready" data-k="cta">Ready! Storm update ' + ico(P.next, 22, 2.8) + '</button>';
+    } else if (R.step === 'update') {
+      body = '<div class="zone"><div class="zl"><span>Storm update</span></div><div class="reveal">' + R.reveals.map(function (r) {
+        var t = r.kind === 'up' ? '<span class="tagx up">Stacked! +1</span>' : r.kind === 'next' ? '<span class="tagx next">Comes next</span>' : r.kind === 'max' ? '<span class="tagx max">Already at its strongest</span>' : '<span class="tagx max">Back in the deck</span>';
+        return '<div class="rv">' + hcard(r.hz, 0, 'flip') + t + '</div>';
+      }).join('') + '</div></div>' + handZone('look');
+      cta = '<button class="cta" data-act="brace" data-k="cta">Brace for ' + esc(nm) + '! ' + ico(P.next, 22, 2.8) + '</button>';
+    } else if (R.step === 'during') {
+      body = handZone('play', 'Your hand: play During cards for ' + nm);
+      cta = '<button class="cta" data-act="face" data-k="cta">Face ' + esc(nm) + '! ' + ico(P.next, 22, 2.8) + '</button>';
+    } else if (R.step === 'after') {
+      var dmg = G.homes.filter(function (x) { return !x; }).length;
+      body = (R.result === 'safe'
+        ? '<div class="banner safe"><span class="em">🏠</span><div><div class="big">Barangay safe!</div>Your Handa matched ' + esc(nm) + '. +1 ⭐</div></div>'
+        : '<div class="banner hit"><span class="em">🏚️</span><div><div class="big">' + R.damage + ' home' + (R.damage === 1 ? '' : 's') + ' damaged</div>' + (dmg ? 'After cards for ' + esc(nm) + ' fix them.' : 'All fixed!') + '</div></div>') +
+        handZone('play', 'Your hand: play After cards for ' + nm);
+      cta = '<button class="cta" data-act="next" data-k="cta">' + (G.round >= G.rounds ? 'See how you did' : 'Next round') + ' ' + ico(P.next, 22, 2.8) + '</button>';
+    }
+    return '<header class="top">' + backBtn() + '<h1 class="h1">Handa vs. Hazard</h1>' + ageChip() + soundBtn() + '</header>' +
+      stepsBar() + town() + boardHtml() +
+      (G.queue.length ? '<div class="warnchip"><span class="ic">' + hico(G.queue[0], 16) + '</span>Early warning: ' + esc(HZ[G.queue[0]].name) + ' comes next</div>' : '') +
+      bubble(G.say) + body + '<div class="dock">' + cta + '</div>';
+  };
+  SCREENS.end = function () {
+    var safe = G.homes.filter(Boolean).length, all = safe === HOMES;
+    var badge = all ? ['Handa Hero', '🏆', 'Every home in Barangay Handa came through the season safe.']
+      : safe >= 4 ? ['Ready Barangay', '🏅', 'Most homes came through safe. Stack more Before cards next time.']
+        : ['Keep Practicing', '💪', 'Hazards grew stronger than your Handa. Prepare early, and keep cards for the early warning.'];
+    var learned = G.faced.map(function (hz) {
+      return '<li><b>' + esc(HZ[hz].name) + ' (' + esc(HZ[hz].en) + ').</b> Before: ' + esc(ACTIONS[hz].b[0][0].toLowerCase()) + '. During: ' + esc(ACTIONS[hz].d[0][0].toLowerCase()) + '. After: ' + esc(ACTIONS[hz].a[0][0].toLowerCase()) + '.</li>';
+    }).join('');
+    return '<header class="top">' + backBtn() + '<h1 class="h1">Season over!</h1>' + ageChip() + soundBtn() + '</header>' +
+      town() + bubble(G.say) +
+      '<div class="badge"><span class="medal">' + badge[1] + '</span><div><span class="eyebrow">Badge</span><b>' + badge[0] + '</b><p>' + esc(badge[2]) + '</p></div></div>' +
+      '<div class="result"><div class="row"><span class="eyebrow" style="color:var(--muted)">Your season</span></div>' +
+      '<div class="mini"><div style="background:var(--panel-hi)"><b style="font-size:20px">' + safe + '/' + HOMES + '</b><br>homes safe</div><div style="background:var(--panel-hi)"><b style="font-size:20px">' + G.safe + '/' + G.rounds + '</b><br>hazards matched</div><div style="background:var(--panel-hi)"><b style="font-size:20px">⭐ ' + G.stars + '</b><br>stars</div></div></div>' +
+      '<h2 class="h2">What to remember</h2><ul class="learned">' + learned + '</ul>' +
+      '<div class="center"><button class="linkbtn" data-act="about" data-k="about-end">' + ico(P.info, 18) + 'About this game and its sources</button></div>' +
+      '<div class="row2" style="padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))"><button class="cta small ghost" data-act="quit" data-k="change">' + (EMBED ? 'Back to the library' : 'Change level') + '</button><button class="cta small" data-act="again" data-k="again">' + ico(P.replay, 18, 2.4) + 'Play again</button></div>';
+  };
+
+  /* ===== Sheets ===== */
+  var SHEETS = {
+    gate: function () {
+      var g = S.sheet, keys = '';
+      for (var d = 1; d <= 9; d++) keys += '<button class="key" data-act="key" data-arg="' + d + '" data-k="key-' + d + '">' + d + '</button>';
+      keys += '<button class="key" data-act="bksp" data-k="key-b" aria-label="Delete a number">⌫</button><button class="key" data-act="key" data-arg="0" data-k="key-0">0</button><button class="key ok" data-act="ok" data-k="key-ok">OK</button>';
+      return '<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="gh"><h2 id="gh" class="sh-h">Play with a grown-up 👪</h2>' +
+        '<p class="sh-p">The Difficult level is for ages 10 to 15. A grown-up should play along with you.</p>' +
+        '<div class="gate"><div class="kq">Grown-up: answer to start</div><div class="kq big">What is ' + g.a + ' × ' + g.b + '?</div>' +
+        '<div class="kdisp" aria-live="polite">' + (g.entry ? esc(g.entry) : '&nbsp;') + '</div>' +
+        (g.wrong ? '<p class="kbad" role="alert">Not quite. Please ask a grown-up to help.</p>' : '') + '<div class="keys">' + keys + '</div></div>' +
+        '<button class="sh-btn" data-act="easy" data-k="g-easy">Play Easy instead (ages 6 to 10)</button><button class="sh-btn ghost" data-act="close" data-k="g-close">Not now</button></div></div>';
+    },
+    about: function () {
+      var src = [
+        ['PAGASA: the tropical cyclone wind signals', 'https://pagasa.dost.gov.ph/press-release/108'],
+        ['The Varsitarian: how PAGASA’s rainfall warnings work', 'https://varsitarian.net/sci-tech/20250724/explainer-how-do-pagasas-rainfall-warnings-and-weather-advisories-work'],
+        ['PHIVOLCS: Earthquake Intensity Scale', 'https://www.phivolcs.dost.gov.ph/phivolcs-eathquake-intensity-scale/']
+      ];
+      // who made it: name, position, office
+      var EA = ['Edward Andrew A. Dionido', 'Science Research Specialist II', 'UPRI'], CT = ['Celine Tatco', 'Senior Project Associate', 'UPRI'];
+      var who = function (p) { return '<dd><b>' + esc(p[0]) + '</b><br>' + esc(p[1]) + ', ' + esc(p[2]) + '</dd>'; };
+      return '<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ah"><h2 id="ah" class="sh-h">About this game</h2>' +
+        '<p class="sh-p">Handa vs. Hazard is a sample card game for the BAYANIHanda library. Hazard cards stack and grow stronger, and the player stacks Before, During and After cards to match them. It teaches what to do before, during and after each hazard.</p>' +
+        '<h3 class="sh-h3">What is real</h3><ul class="sh-list"><li>On Difficult, the typhoon levels are PAGASA’s wind signals, the flood levels are PAGASA’s yellow, orange and red rainfall warnings, and the earthquake levels follow the PHIVOLCS Earthquake Intensity Scale (V Strong, VI Very Strong, VII Destructive).</li><li>The actions on the cards are common safety advice for each hazard. 911 is the Philippines’ emergency number.</li></ul>' +
+        '<h3 class="sh-h3">What is made up</h3><ul class="sh-list"><li>Barangay Handa and how strong each hazard gets in a round. Real hazards can be stronger than level 3, and they do not always come in this order.</li></ul>' +
+        '<h3 class="sh-h3">Privacy</h3><ul class="sh-list"><li>The game asks for no names and keeps nothing on the device.</li></ul>' +
+        '<h3 class="sh-h3">Credits</h3><p class="sh-p">Subject for code and content validation.</p>' +
+        '<dl class="credits"><dt>Concept by</dt>' + who(EA) + who(CT) + '<dt>Developed with AI assistance by</dt>' + who(EA) + '</dl>' +
+        '<p class="sh-p">Questions? <span class="sel">eadionido@up.edu.ph</span></p>' +
+        '<h3 class="sh-h3">Sources</h3><ul class="sh-list">' + src.map(function (s) { return '<li><a href="' + s[1] + '" target="_blank" rel="noopener">' + esc(s[0]) + '</a></li>'; }).join('') + '</ul>' +
+        '<button class="sh-btn" data-act="close" data-k="a-close">Close</button></div></div>';
+    }
+  };
+
+  /* ===== Render ===== */
+  var lastScreen = null, sheetReturn = null, gateThen = null;
+  function render() {
+    var app = $('#app'), same = lastScreen === S.screen, y = same ? window.scrollY : 0;
+    var ae = document.activeElement, fk = ae && ae.getAttribute ? ae.getAttribute('data-k') : null;
+    app.innerHTML = SCREENS[S.screen]();
+    $('#sheet').innerHTML = S.sheet ? SHEETS[S.sheet.kind]() : '';
+    document.body.classList.toggle('locked', !!S.sheet);
+    if (!same) { lastScreen = S.screen; window.scrollTo(0, 0); } else window.scrollTo(0, y);
+    var target = fk ? document.querySelector('[data-k="' + fk + '"]') : null;
+    if (S.sheet && (!target || !$('#sheet').contains(target))) target = $('#sheet .key') || $('#sheet .sh-btn');
+    if (target) { try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); } }
+    S.once = {};
+  }
+  function openSheet(sh) { var ae = document.activeElement; sheetReturn = ae && ae.getAttribute ? ae.getAttribute('data-k') : null; S.sheet = sh; render(); }
+  function closeSheet() {
+    S.sheet = null; gateThen = null; render();
+    if (sheetReturn) { var el = document.querySelector('[data-k="' + sheetReturn + '"]'); if (el) { try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } } }
+  }
+  function scrollToBoard() { var b = $('.board'); if (b && b.scrollIntoView) { try { b.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { b.scrollIntoView(); } } }
+
+  /* ===== Actions ===== */
+  function wrongPlay(c) {
+    var R = G.R, ph = STEP_PH[R.step], nm = HZ[R.hz].name;
+    G.wrong++;
+    if (c.hz !== R.hz) return { tone: 'nope', lead: 'Not this one.', text: 'That card is for ' + HZ[c.hz].name + ' (' + HZ[c.hz].en.toLowerCase() + '). Right now it is ' + nm + '. Keep it for later!' };
+    return { tone: 'nope', lead: 'Not yet.', text: 'That is a ' + PH[c.ph].name + ' card. Right now it is time to ' + PH[ph].doing + ', so play ' + PH[ph].name + ' cards for ' + nm + '.' };
+  }
+  function start() { G = null; S.screen = 'play'; newGame(); render(); }
+  var ACT = {
+    noop: function () {},
+    sound: function () { S.sound = !S.sound; TTS.stop(); render(); },
+    about: function () { openSheet({ kind: 'about' }); },
+    close: function () { closeSheet(); },
+    scrim: function () { closeSheet(); },
+    level: function (v) { S.level = v === 'hard' ? 'hard' : 'easy'; render(); },
+    start: function () {
+      if (S.level === 'hard' && !S.okHard) { gateThen = function () { S.okHard = true; start(); }; openSheet({ kind: 'gate', a: rnd(3, 9), b: rnd(6, 9), entry: '', wrong: false }); return; }
+      start();
+    },
+    hear: function () { if (G && G.say) TTS.say((G.say.lead ? G.say.lead + ' ' : '') + G.say.text, true); },
+    // Inside the library there is no title screen here: Back returns to the library's intro.
+    quit: function () { TTS.stop(); if (EMBED) { post({ type: 'exit' }); return; } S.screen = 'title'; render(); },
+    again: function () { TTS.stop(); start(); },
+    take: function (id) {
+      var R = G.R;
+      if (R.step !== 'supply' || R.picked >= 2) return;
+      var i = R.supply.findIndex(function (c) { return c.id === id; });
+      if (i < 0) return;
+      var c = R.supply.splice(i, 1)[0];
+      G.hand.push(c); R.picked++; S.once.pop = c.id; sfx('pop');
+      var nm = HZ[R.hz].name;
+      if (R.picked >= 2) {
+        R.step = 'before';
+        gsay({ text: 'Before ' + nm + ' arrives, play Before cards for ' + nm + '. Each one adds +1 to your Handa. Hazards can grow stronger, so get ready as much as you can! Then tap Ready.' });
+      } else {
+        var helps = c.wild || c.hz === R.hz;
+        gsay({ tone: helps ? 'good' : 'info', lead: helps ? 'Good pick!' : 'Saved for later.', text: (helps ? 'That helps with ' + nm + '.' : 'That card is for ' + HZ[c.hz].name + '.') + ' Pick 1 more.' });
+      }
+      render();
+    },
+    look: function () {
+      var R = G.R;
+      gsay({ tone: 'info', text: R.step === 'supply' ? 'First pick 2 supply cards from the top row.' : 'Tap Brace when you are ready. Then you can play During cards.' });
+      render();
+    },
+    play: function (id) {
+      var R = G.R, ph = STEP_PH[R.step];
+      if (!ph) return;
+      var i = G.hand.findIndex(function (c) { return c.id === id; });
+      if (i < 0) return;
+      var c = G.hand[i], nm = HZ[R.hz].name;
+      if (!playable(c)) { S.once.shake = c.id; sfx('bad'); gsay(wrongPlay(c)); render(); return; }
+      G.hand.splice(i, 1);
+      R.played[ph].push(c);
+      if (ph === 'b') { R.prep++; sfx('good'); gsay({ tone: 'good', lead: '+1 Before!', text: (c.wild ? 'Bayanihan: neighbors help each other.' : c.text + '.') + ' Your Handa is ' + (R.prep + R.act) + ' against ' + nm + ' at ' + R.level + '.' }); }
+      else if (ph === 'd') {
+        R.act++; sfx('good');
+        var tot = R.prep + R.act;
+        gsay({ tone: 'good', lead: '+1 During!', text: (c.wild ? 'Bayanihan: neighbors help each other.' : c.text + '.') + (tot >= R.level ? ' Your Handa now matches ' + nm + '. Tap Face it when you are ready.' : ' ' + (R.level - tot) + ' more to match ' + nm + '.') });
+      } else {
+        var k = G.homes.indexOf(false);
+        if (k >= 0) { G.homes[k] = true; R.fixed++; sfx('win'); gsay({ tone: 'good', lead: 'A home is fixed!', text: (c.wild ? 'Neighbors helped rebuild.' : c.text + '.') + ' Bouncing back is part of being ready.' }); }
+        else { G.stars++; R.help++; sfx('good'); gsay({ tone: 'good', lead: '+1 ⭐', text: (c.wild ? 'Neighbors helped each other.' : c.text + '.') + ' No homes need fixing, so you helped the barangay bounce back stronger.' }); }
+      }
+      render();
+    },
+    ready: function () {
+      var R = G.R;
+      if (R.step !== 'before') return;
+      R.step = 'update';
+      sfx('storm');
+      var lv = R.level;
+      stormUpdate();
+      if (R.level > lv) S.once.stack = true;
+      render(); scrollToBoard();
+    },
+    brace: function () {
+      var R = G.R, nm = HZ[R.hz].name;
+      if (R.step !== 'update') return;
+      R.step = 'during';
+      var need = R.level - R.prep;
+      gsay({ text: nm + ' is here! Play During cards for ' + nm + '. Your Before cards still count. ' + (need > 0 ? 'You need ' + need + ' more.' : 'You already match it, but more never hurts.') + ' Then tap Face it.' });
+      render();
+    },
+    face: function () {
+      if (G.R.step !== 'during') return;
+      hit(); render(); scrollToBoard();
+    },
+    next: function () {
+      if (G.R.step !== 'after') return;
+      endRound(); render(); scrollToBoard();
+    },
+    key: function (d) { var g = S.sheet; if (!g || g.kind !== 'gate' || g.entry.length >= 3) return; g.entry += String(d); g.wrong = false; render(); },
+    bksp: function () { var g = S.sheet; if (!g || g.kind !== 'gate') return; g.entry = g.entry.slice(0, -1); render(); },
+    ok: function () {
+      var g = S.sheet;
+      if (!g || g.kind !== 'gate') return;
+      if (g.entry && Number(g.entry) === g.a * g.b) { var fn = gateThen; gateThen = null; S.sheet = null; sfx('good'); if (fn) fn(); else render(); }
+      else { g.wrong = true; g.entry = ''; g.a = rnd(3, 9); g.b = rnd(6, 9); sfx('bad'); render(); }
+    },
+    easy: function () { S.sheet = null; gateThen = null; S.level = 'easy'; start(); }
+  };
+
+  /* ===== Events ===== */
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('[data-act]') : null;
+    if (!t || t.getAttribute('aria-disabled') === 'true') return;
+    var act = t.getAttribute('data-act');
+    if (act === 'scrim' && e.target !== t) return;
+    var fn = ACT[act];
+    if (fn) { e.preventDefault(); fn(t.getAttribute('data-arg')); }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (S.sheet && e.key === 'Escape') { closeSheet(); return; }
+    if (S.sheet && S.sheet.kind === 'gate') {
+      if (/^[0-9]$/.test(e.key)) { e.preventDefault(); ACT.key(e.key); }
+      else if (e.key === 'Backspace') { e.preventDefault(); ACT.bksp(); }
+      else if (e.key === 'Enter' && e.target && e.target.tagName !== 'BUTTON') { e.preventDefault(); ACT.ok(); }
+    }
+  });
+  window.addEventListener('pagehide', function () { TTS.stop(); });
+  // For the tests (games/tests/handa-vs-hazard.test.cjs): the game's state and actions.
+  window.__cards = { state: function () { return { S: S, G: G }; }, act: ACT, embed: EMBED };
+
+  /* ===== Boot (keeps a game going if the page is updated while open) ===== */
+  var hot = window.claude && window.claude.hot;
+  function snapshot() { return JSON.parse(JSON.stringify({ level: S.level, sound: S.sound, okHard: S.okHard, screen: S.screen, G: G, uid: uid })); }
+  var booted = false;
+  function boot(data) {
+    if (booted) return;
+    booted = true;
+    try {
+      if (data && data.level) {
+        S.level = data.level; S.sound = data.sound !== false; S.okHard = !!data.okHard;
+        if (data.G && data.screen !== 'title') { G = data.G; uid = data.uid || 1000; S.screen = data.screen; }
+      }
+    } catch (e) { S.screen = 'title'; G = null; }
+    if (EMBED) {
+      S.level = params.get('level') === 'hard' ? 'hard' : 'easy';
+      S.sound = params.get('sound') !== '0';
+      S.voice = params.get('voice') !== '0';
+      S.okHard = true; // the library already asked for a grown-up when the player's age called for one
+      start();
+      return;
+    }
+    render();
+  }
+  try { if (hot && typeof hot.snapshot === 'function') hot.snapshot(snapshot); } catch (e) { /* ignore */ }
+  if (hot && typeof hot.ready === 'function') { try { hot.ready(boot); } catch (e) { boot({}); } setTimeout(function () { boot({}); }, 1500); }
+  else boot((hot && hot.data) || {});
+})();
+</script>
+</body>
+</html>

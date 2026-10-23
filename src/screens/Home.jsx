@@ -1,6 +1,6 @@
 import { sx, pr } from '../ui/sx.js';
 import { Mascot, Logo, Wordmark } from '../ui/art.jsx';
-import { P, PO, G, LIVE, TIPS, TRIVIA, game } from '../data.js';
+import { P, PO, G, LIVE, TIPS, TRIVIA, game, inPillar } from '../data.js';
 import { quietOffer } from '../tour.js';
 import { MuseumCard } from './Tanghalan.jsx';
 import { StoryShelfCard } from './Stories.jsx';
@@ -83,8 +83,9 @@ export default function Home({ c }) {
             <div><div style={sx("font:800 22px/1.1 'Baloo 2',sans-serif")}>Pick an adventure</div><div style={sx('font-size:14px;font-weight:700;color:#4f6572;margin-top:2px')}>Tap a card to see its games.</div></div>
             <div style={sx('display:grid;grid-template-columns:1fr 1fr;gap:12px')}>
               {PO.map((pid) => {
-                const p = P[pid], gs = G.filter((x) => x.p === pid), live = gs.filter((x) => !x.soon), soon = gs.length - live.length;
-                const done = live.filter((x) => mine[x.id]).length, gm = live.length;
+                const p = P[pid], gs = G.filter((x) => inPillar(x, pid)), live = gs.filter((x) => !x.soon), soon = gs.length - live.length;
+                // the ring counts badges, so test games (which do not earn one yet) stay out of it
+                const badged = live.filter((x) => !x.test), done = badged.filter((x) => mine[x.id]).length, gm = live.length;
                 const card = pr('position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:#fff;border-radius:22px;padding:14px 13px 12px;box-shadow:0 5px 0 rgba(20,48,66,.1);min-height:176px', 'transform:translateY(3px);box-shadow:0 2px 0 rgba(20,48,66,.1)');
                 return (
                   <button key={pid} onClick={() => c.go('games', { filter: pid })} className={card.className} style={{ ...card.style, border: '2px solid ' + p.border }}>
@@ -94,12 +95,12 @@ export default function Home({ c }) {
                     <span style={sx('margin-top:auto;display:flex;flex-direction:column;align-items:flex-start;gap:5px')}>
                       <span style={sx('font-size:12.5px;font-weight:900;background:#e3eff4;border-radius:999px;padding:4px 10px')}>{gm}{gm === 1 ? ' game' : ' games'}{soon ? ' +' + soon + ' soon' : ''}</span>
                     </span>
-                    <span style={sx('position:absolute;top:12px;right:12px;width:40px;height:40px')} aria-label={done + ' of ' + live.length + ' badges'}>
+                    <span style={sx('position:absolute;top:12px;right:12px;width:40px;height:40px')} aria-label={done + ' of ' + badged.length + ' badges'}>
                       <svg width="40" height="40" viewBox="0 0 40 40" style={{ transform: 'rotate(-90deg)', display: 'block' }}>
                         <circle cx="20" cy="20" r="15" fill="none" stroke="#d5e3ea" strokeWidth="4" />
-                        <circle cx="20" cy="20" r="15" fill="none" stroke={p.ring} strokeWidth="4" strokeLinecap="round" strokeDasharray="94.25" strokeDashoffset={(94.25 * (1 - done / live.length)).toFixed(2)} style={{ transition: 'stroke-dashoffset .6s ease' }} />
+                        <circle cx="20" cy="20" r="15" fill="none" stroke={p.ring} strokeWidth="4" strokeLinecap="round" strokeDasharray="94.25" strokeDashoffset={(94.25 * (1 - (badged.length ? done / badged.length : 0))).toFixed(2)} style={{ transition: 'stroke-dashoffset .6s ease' }} />
                       </svg>
-                      <span style={sx('position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900')}>{done}/{live.length}</span>
+                      <span style={sx('position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900')}>{done}/{badged.length}</span>
                     </span>
                   </button>
                 );

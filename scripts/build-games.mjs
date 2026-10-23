@@ -1,6 +1,6 @@
 // Builds the games that open in a frame inside the library, from games/: the order games (Quake in Order and the two
-// first aid games), and Weather Studio, a test game that is a whole page of its own (games/weather-studio/page.html,
-// see PAGES below). The order games share one engine:
+// first aid games), and the test games that are whole pages of their own, Weather Studio and Handa vs. Hazard
+// (games/<id>/page.html, see PAGES below). The order games share one engine:
 //
 //   node scripts/build-games.mjs [--standalone]
 //
@@ -35,6 +35,7 @@ const shared = join(root, 'games', 'shared');
 // (<!--@FONTS-->) and copies them. Weather Studio (a test game) is one.
 const PAGES = [
   { id: 'weather-studio', src: 'page.html', name: 'Weather-Studio.html' },
+  { id: 'handa-vs-hazard', src: 'page.html', name: 'Handa-vs-Hazard.html' },
 ];
 
 // parts: more shared code a game needs (the first aid games share their room)

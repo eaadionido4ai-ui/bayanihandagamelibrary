@@ -78,7 +78,7 @@ Logo 1b, the Bayanihan house: four neighbors in the pillar colors lifting a hous
 | HUD style | `src/engine/game-hud.css` | Restyles the real HUDs to the design: corner buttons, status pill, Bayani hint bubble, side buttons, bottom sheets. |
 | Museum | `src/museum/`, `src/screens/Tanghalan.jsx` | TANGHALAN, the walkable 3D museum (below). |
 | Stories | `stories/`, `scripts/build-stories.mjs`, `src/screens/Stories.jsx` | Handaventures, the story series (below). |
-| Games in a frame | `games/`, `scripts/build-games.mjs`, `src/screens/GameFrame.jsx` | Games that are pages of their own: the order games, Quake in Order, Heart in Order and Press On (below). |
+| Games in a frame | `games/`, `scripts/build-games.mjs`, `src/screens/GameFrame.jsx` | Games that are pages of their own: the order games (Quake in Order, Heart in Order and Press On), and the test games Weather Studio and Handa vs. Hazard (below). |
 | Island tour | `tour/`, `scripts/build-tour.mjs`, `src/screens/Tour.jsx`, `src/tour.js` | Bayani's 3D island tour of the library, and the presenter's tour for pitches (below). |
 
 To pick up a newer version of the web app, replace the file in `project/uploads/` and
@@ -366,6 +366,49 @@ badge count and ranks (`LIVE`) until it is final. The name is a working title.
 | Card, intro, levels | the `weather` entry in `src/data.js` |
 | Tests | `games/tests/weather-studio.test.cjs` (`npm run test:games`): both levels to the end, the library link, the map's zones |
 
+## Handa vs. Hazard, a test card game
+
+A digital card game for ages 6 to 15, added in October 2026 as a **test game**, with the same 🧪 TEST GAME label
+as Weather Studio: it stays out of the badge count and ranks until it is final. Hazard cards stack and grow
+stronger, and the player stacks Before, During and After cards to match them.
+
+- **A round.** A hazard arrives at level 1. The player picks 2 of 4 supply cards, plays Before cards, and taps
+  Ready for the storm update: another card of the same hazard stacks it one level higher (3 at most), and a
+  different hazard goes to the early warning and comes next. Then During cards, and the hazard hits. If the
+  player's Handa (Before plus During cards) matches its level, no home is hurt and the player earns a star; if
+  not, as many homes are damaged as the Handa is short by. After cards fix damaged homes, or earn a star when
+  none needs fixing. Bayanihan cards count +1 for any hazard at any step, and a hand keeps up to 8 cards between
+  rounds.
+- **Two levels.** *Easy* (ages 6 to 10): typhoon, flood, earthquake and fire in five rounds, one storm update a
+  round, and the cards that fit glow. *Difficult* (ages 10 to 15): landslides and storm surges join in, six
+  rounds, two storm updates a round, no hints, and real scales for the levels: PAGASA's wind signals for
+  typhoons, PAGASA's yellow, orange and red rainfall warnings for floods, and the PHIVOLCS Earthquake Intensity
+  Scale (V Strong, VI Very Strong, VII Destructive) for earthquakes.
+- **Under all four pillars.** The game has Before, During and After cards, so it belongs to every pillar. Its
+  entry lists them (`pillars: ['mit', 'prep', 'resp', 'rec']`) and gives the card a line of its own under each
+  one (`byPillar`): Before cards that remove dangers under Stop Hazards Early, Before cards that get you ready
+  under Get Ready, During cards under Act Fast, and After cards under Bounce Back. Games, Home and the teacher's
+  corner list games with `inPillar(g, pid)` from `src/data.js`; a game with no `pillars` stays under its one
+  pillar (`p`). The intro says "All four pillars". Home's pillar cards count it as a game, while their badge
+  rings count only the games that earn a badge.
+- **Voice.** In the library, the library reads Bayani's lines aloud (the game sends `say`, and `hush` to stop),
+  since a frame has had no tap of its own and a phone would stay silent for the first line. `frameVoice` on its
+  entry passes the voice setting, so with Bayani's voice off a line is read only when the speaker button is
+  tapped. On its own, the game speaks with the device's own voices only.
+- **In the library** it plays in a frame as `games/handa-vs-hazard.html?embed=1&level=easy|hard&sound=0|1&voice=0|1`
+  and opens at round 1. Back and "Back to the library" on the end screen send `exit`. The library's grown-up
+  check runs before a younger player starts Difficult, so the game skips its own. It asks for no names and keeps
+  nothing on the device.
+- **On its own** (`npm run test:games` writes `games/standalone/Handa-vs-Hazard.html`) it opens at a title screen
+  with a level picker, and asks a grown-up before Difficult.
+
+| Part | Where |
+| --- | --- |
+| The game, one page | `games/handa-vs-hazard/page.html` (the build fills in the fonts at `<!--@FONTS-->`) |
+| Build | `PAGES` in `scripts/build-games.mjs` writes `public/games/handa-vs-hazard.html` (not committed) |
+| Card, intro, levels, pillars, credits | the `cards` entry in `src/data.js` (`pillars`, `byPillar`, `credits: CREDITS_CARDS`) |
+| Tests | `games/tests/handa-vs-hazard.test.cjs` (`npm run test:games`): both levels to the end, 36 seasons on fixed seeds that check the stacking and damage rules, the library's voice, Back, and the title screen on its own |
+
 ## Credits on the info tags
 
 Every game's info tag (the **i** button) starts with the notice **Subject for code and
@@ -376,9 +419,15 @@ content validation**, then says who made it:
 - Handaventures: *Concept by* Celine Tatco, Senior Project Associate, UPRI, and
   *Developed with AI assistance by* Edward Andrew A. Dionido, Science Research
   Specialist II, UPRI.
+- Handa vs. Hazard: *Concept by* Edward Andrew A. Dionido, Science Research Specialist
+  II, UPRI, and Celine Tatco, Senior Project Associate, UPRI, and *Developed with AI
+  assistance by* Edward Andrew A. Dionido, Science Research Specialist II, UPRI. The
+  game's own About sheet says the same.
 
-The texts are in `src/data.js` (`VALIDATION`, `CREDITS_LIBRARY`, `CREDITS_HV`). Behind
-BAYANIHanda in Settings shows the same credit.
+The texts are in `src/data.js` (`VALIDATION`, `CREDITS_LIBRARY`, `CREDITS_HV`,
+`CREDITS_CARDS`). A game with credits of its own carries them on its entry (`credits:`),
+and a block with no label adds one more person under the label above it. Behind
+BAYANIHanda in Settings shows the library's credit.
 
 ## TANGHALAN, the museum
 
@@ -457,6 +506,10 @@ works, collected through teachers with parents' consent:
   and a check of its PAGASA and UP NOAH wording by the validators. On Android it has no
   voice (the WebView has no speech) and needs the microphone permission above. Its badge
   does not count until the Test Game label comes off.
+- **Handa vs. Hazard is a test game.** It needs a review by EA and Celine Tatco, a pilot
+  test with players, and a check of its card advice and its PAGASA and PHIVOLCS wording by
+  the validators. On Android, Bayani's lines show in his speech bubble with no voice (the
+  WebView has no speech). Its badge does not count until the Test Game label comes off.
 - **Not yet tested on a phone.** Everything was checked in Chromium at phone (412×915)
   and tablet (1280×800) sizes, with software WebGL.
 

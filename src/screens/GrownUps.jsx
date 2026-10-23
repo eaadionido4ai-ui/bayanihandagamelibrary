@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { sx, pr } from '../ui/sx.js';
-import { AGE, P, PO, G, LIVE, av, ageOf, game, needsGrownUp } from '../data.js';
+import { AGE, P, PO, G, LIVE, av, ageOf, game, needsGrownUp, inPillar } from '../data.js';
 
 const BG = 'radial-gradient(120% 70% at 50% -10%,#eef6fa,#cfe6ef)';
 const LABEL = 'font-size:12px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:#4f6572;margin:6px 4px 0';
@@ -37,7 +37,7 @@ function Lessons() {
         {['📘 Lessons', '📊 Class', '🖨️ Printables'].map((t, i) => <span key={t} style={{ ...sx('flex:1;text-align:center;padding:8px 4px;border-radius:999px;font-weight:800;font-size:13px'), background: i === 0 ? '#16303f' : 'transparent', color: i === 0 ? '#fff' : '#3d5563' }}>{t}</span>)}
       </div>
       {PO.map((pid) => {
-        const p = P[pid], gs = G.filter((g) => g.p === pid && !g.soon);
+        const p = P[pid], gs = G.filter((g) => inPillar(g, pid) && !g.soon);
         return (
           <div key={pid} style={sx('display:flex;gap:11px;align-items:center;background:#fff;border-radius:18px;padding:11px;box-shadow:0 4px 0 rgba(20,48,66,.08)')}>
             <span style={{ ...sx('width:48px;height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:25px;flex:none'), background: p.grad }}>{p.icon}</span>
