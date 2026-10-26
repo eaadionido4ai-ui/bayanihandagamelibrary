@@ -1,6 +1,6 @@
 // Builds the games that open in a frame inside the library, from games/: the order games (Quake in Order and the two
-// first aid games), and the test games that are whole pages of their own, Weather Studio and Handa vs. Hazard
-// (games/<id>/page.html, see PAGES below). The order games share one engine:
+// first aid games), and the test games that are whole pages of their own, Weather Studio, Handa vs. Hazard and
+// Bayanihan Mode (games/<id>/page.html, see PAGES below). The order games share one engine:
 //
 //   node scripts/build-games.mjs [--standalone]
 //
@@ -32,10 +32,12 @@ const standalone = process.argv.includes('--standalone');
 const shared = join(root, 'games', 'shared');
 
 // Games that are whole pages of their own, not built from the order-game template: the build fills in their fonts
-// (<!--@FONTS-->) and copies them. Weather Studio (a test game) is one.
+// (<!--@FONTS-->) and copies them. Weather Studio (a test game) is one. scripts: code files of the game's own that the
+// page takes in at a slot (Bayanihan Mode keeps its rules in engine.js, so its tests and balance check can run them).
 const PAGES = [
   { id: 'weather-studio', src: 'page.html', name: 'Weather-Studio.html' },
   { id: 'handa-vs-hazard', src: 'page.html', name: 'Handa-vs-Hazard.html' },
+  { id: 'bayanihan-mode', src: 'page.html', name: 'Bayanihan-Mode.html', scripts: { '/*@ENGINE*/': 'engine.js' } },
 ];
 
 // parts: more shared code a game needs (the first aid games share their room)
@@ -105,8 +107,12 @@ for (const g of GAMES) {
   }
 }
 for (const g of PAGES) {
-  const page = read(join(root, 'games', g.id, g.src));
+  let page = read(join(root, 'games', g.id, g.src));
   if (page.split('<!--@FONTS-->').length !== 2) throw new Error('games/' + g.id + '/' + g.src + ' needs exactly one <!--@FONTS-->');
+  for (const [slot, file] of Object.entries(g.scripts || {})) {
+    if (page.split(slot).length !== 2) throw new Error('games/' + g.id + '/' + g.src + ' needs exactly one ' + slot);
+    page = page.replace(slot, () => inScript(read(join(root, 'games', g.id, file))));
+  }
   writeFileSync(join(out, g.id + '.html'), page.replace('<!--@FONTS-->', () => fonts((pkg, w) => 'fonts/' + fontFile(pkg, w))));
   built.push('public/games/' + g.id + '.html');
   if (standalone) {

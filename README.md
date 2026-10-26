@@ -78,7 +78,7 @@ Logo 1b, the Bayanihan house: four neighbors in the pillar colors lifting a hous
 | HUD style | `src/engine/game-hud.css` | Restyles the real HUDs to the design: corner buttons, status pill, Bayani hint bubble, side buttons, bottom sheets. |
 | Museum | `src/museum/`, `src/screens/Tanghalan.jsx` | TANGHALAN, the walkable 3D museum (below). |
 | Stories | `stories/`, `scripts/build-stories.mjs`, `src/screens/Stories.jsx` | Handaventures, the story series (below). |
-| Games in a frame | `games/`, `scripts/build-games.mjs`, `src/screens/GameFrame.jsx` | Games that are pages of their own: the order games (Quake in Order, Heart in Order and Press On), and the test games Weather Studio and Handa vs. Hazard (below). |
+| Games in a frame | `games/`, `scripts/build-games.mjs`, `src/screens/GameFrame.jsx` | Games that are pages of their own: the order games (Quake in Order, Heart in Order and Press On), and the test games Weather Studio, Handa vs. Hazard and Bayanihan Mode (below). |
 | Island tour | `tour/`, `scripts/build-tour.mjs`, `src/screens/Tour.jsx`, `src/tour.js` | Bayani's 3D island tour of the library, and the presenter's tour for pitches (below). |
 
 To pick up a newer version of the web app, replace the file in `project/uploads/` and
@@ -409,6 +409,47 @@ stronger, and the player stacks Before, During and After cards to match them.
 | Card, intro, levels, pillars, credits | the `cards` entry in `src/data.js` (`pillars`, `byPillar`, `credits: CREDITS_CARDS`) |
 | Tests | `games/tests/handa-vs-hazard.test.cjs` (`npm run test:games`): both levels to the end, 36 seasons on fixed seeds that check the stacking and damage rules, the library's voice, Back, and the title screen on its own |
 
+## Bayanihan Mode, a test game for 2 to 4 players
+
+Handa vs. Hazard for a group on one phone, added in October 2026 as a **test game** with the same 🧪 TEST GAME label:
+it stays out of the badge count and ranks until it is final. Bayanihan Mode is a working title. It uses the same
+cards as Handa vs. Hazard, in the library's own look (the sky background, white cards, Baloo 2 and Nunito, the pillar
+colors and Bayani).
+
+- **Setup.** 2 to 4 players type a nickname each (inside the library, the player's own nickname is the first one)
+  and pick how to play: *All together*, one barangay with 6 homes and one shared Handa, or *Teams*, Team Agila and
+  Team Kalabaw with 3 homes each, for 2 or 4 players. Names stay in the page's memory for one game and are never
+  saved.
+- **A round.** The phone is passed around, and a "Pass the phone to Ana" screen hides each hand between turns. On a
+  Before turn a player takes 1 supply card, then may play 1 card that fits and give 1 card to another player. The
+  storm update turns over two hazard cards (a matching one stacks the hazard, 3 at most; another hazard goes to the
+  early warning). During turns follow, then the hazard hits, then After turns, where After cards fix damaged homes or
+  earn a star. A season is 4 rounds, and the first player moves along each round.
+- **A bigger group needs more Handa.** A side needs the hazard's level times its players, divided by 2 and rounded
+  up; a side that is short loses that many homes, at most the hazard's level. In Teams, giving a card to the other
+  team earns your team a star; more safe homes wins, stars break a tie, and an even game is "Both teams win!"
+- **Balance.** `node games/bayanihan-mode/balance.cjs` plays thousands of seeded seasons. With the numbers in
+  `engine.js` (`LV` and `SET`), careful players keep every home safe in about 95% of Easy seasons and 65 to 80% of
+  Difficult ones, and a young player who picks at random earns the top badge in about 55 to 65% of Easy seasons.
+- **The end.** A barangay badge (Handa Hero, Ready Barangay or Keep Practicing) or the winning team, a helper badge for
+  every player (Best Helper, Fixer, Quick Responder or Early Bird), and what to remember for each hazard faced.
+- **Under all four pillars,** like Handa vs. Hazard, with a line of its own under each (`byPillar`).
+- **In the library** it plays in a frame as
+  `games/bayanihan-mode.html?embed=1&level=easy|hard&sound=0|1&voice=0|1&name=...` (`frameName` on its entry). The
+  level comes from the library's intro, so the game shows no level picker, and the library's grown-up check runs
+  before a younger player starts Difficult. The library reads Bayani's lines aloud (`say` and `hush`). Back on the
+  setup and "Back to the library" at the end send `exit`.
+- **On its own** (`npm run test:games` writes `games/standalone/Bayanihan-Mode.html`) it opens at its own setup with a
+  banner and a level picker, and asks a grown-up before Difficult.
+
+| Part | Where |
+| --- | --- |
+| The game, one page | `games/bayanihan-mode/page.html` (the build fills in the fonts at `<!--@FONTS-->` and the rules from `engine.js`) |
+| The rules | `games/bayanihan-mode/engine.js`, plain ES5 and seeded, shared by the page, the tests and `balance.cjs` |
+| Build | `PAGES` in `scripts/build-games.mjs` (its `scripts` field fills the rules slot) writes `public/games/bayanihan-mode.html` (not committed) |
+| Card, intro, levels, pillars, credits | the `bayanihan` entry in `src/data.js` |
+| Tests | `games/tests/bayanihan-mode.test.cjs` (`npm run test:games`): 400 seasons on the rules, whole games in the library's copy all together and in teams, and the single file |
+
 ## Credits on the info tags
 
 Every game's info tag (the **i** button) starts with the notice **Subject for code and
@@ -422,7 +463,7 @@ content validation**, then says who made it:
 - Handa vs. Hazard: *Concept by* Edward Andrew A. Dionido, Science Research Specialist
   II, UPRI, and Celine Tatco, Senior Project Associate, UPRI, and *Developed with AI
   assistance by* Edward Andrew A. Dionido, Science Research Specialist II, UPRI. The
-  game's own About sheet says the same.
+  game's own About sheet says the same. Bayanihan Mode carries the same credits.
 
 The texts are in `src/data.js` (`VALIDATION`, `CREDITS_LIBRARY`, `CREDITS_HV`,
 `CREDITS_CARDS`). A game with credits of its own carries them on its entry (`credits:`),
@@ -510,6 +551,9 @@ works, collected through teachers with parents' consent:
   test with players, and a check of its card advice and its PAGASA and PHIVOLCS wording by
   the validators. On Android, Bayani's lines show in his speech bubble with no voice (the
   WebView has no speech). Its badge does not count until the Test Game label comes off.
+- **Bayanihan Mode is a test game,** with a working title. It needs the same review as Handa
+  vs. Hazard, and a pilot with groups of 2 to 4 players to check how long turns take and
+  whether the balance feels right.
 - **Not yet tested on a phone.** Everything was checked in Chromium at phone (412×915)
   and tablet (1280×800) sizes, with software WebGL.
 

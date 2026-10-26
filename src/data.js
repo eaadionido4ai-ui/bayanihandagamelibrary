@@ -324,6 +324,26 @@ export const G = [
     note: 'This is a test game, so it may change after we try it with players. On Difficult, typhoons use PAGASA\'s wind signals, floods PAGASA\'s rainfall warnings, and earthquakes the PHIVOLCS Earthquake Intensity Scale.',
     remind: 'For every hazard, know what to do before, during and after. Ask a grown-up to help you get your home ready.',
   },
+  {
+    // Handa vs. Hazard for 2 to 4 players on one phone (games/bayanihan-mode). frameName: the player's nickname is the
+    // first player's name. Bayanihan Mode is a working title.
+    id: 'bayanihan', p: 'prep', pillars: ['mit', 'prep', 'resp', 'rec'], test: true, name: 'Bayanihan Mode', icon: '🤝', credits: CREDITS_CARDS,
+    frame: 'games/bayanihan-mode.html', frameModes: ['easy', 'hard'], frameName: true, levelAges: ['young', 'older'],
+    short: 'Handa vs. Hazard for 2 to 4 players on one phone: keep Barangay Handa safe together or in teams.',
+    byPillar: {
+      mit: 'Handa vs. Hazard with 2 to 4 friends: plan together which dangers to remove before the hazard comes.',
+      prep: 'Handa vs. Hazard with 2 to 4 friends: share your supply cards so the whole barangay gets ready.',
+      resp: 'Handa vs. Hazard with 2 to 4 friends: bring the barangay\'s Handa up to what the hazard needs when it hits.',
+      rec: 'Handa vs. Hazard with 2 to 4 friends: play After cards to fix homes and bounce back together.',
+    },
+    desc: 'Handa vs. Hazard for 2 to 4 players. Pass one phone around, stack Before, During and After cards, and keep Barangay Handa safe all together or in two teams.',
+    badge: ['Bayanihan Player', '🤝'], modesLabel: 'Pick a level',
+    modes: [['🙂', 'Easy', 'Typhoon, flood, earthquake and fire in four rounds. The cards you can play glow.'], ['🎯', 'Difficult', 'Landslides and storm surges join in, with the real warning scales and no glowing hints.']],
+    steps: [['1', 'Pass the phone', 'Take turns. Keep your cards hidden from the others.'], ['2', 'Before', 'Take 1 supply card. Play 1 card, or give one to a friend.'], ['3', 'Storm, then During', 'The hazard may stack stronger. Bring your Handa up to what it needs.'], ['4', 'After', 'After cards fix damaged homes. Four rounds make a season.']],
+    tip: 'Talk it over with your friends! On your turn, play 1 card that fits, or give a card to someone who needs it.',
+    note: 'This is a test game, so it may change after we try it with players. Play all together or in two teams; teams need 2 or 4 players. A bigger group needs more Handa, and the board always shows how much.',
+    remind: 'For every hazard, know what to do before, during and after, and help your neighbors get ready too.',
+  },
   ...STORIES,
 ];
 
