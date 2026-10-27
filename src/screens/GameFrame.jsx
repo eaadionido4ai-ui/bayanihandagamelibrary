@@ -4,10 +4,10 @@ import { game } from '../data.js';
 
 // Games that are pages of their own (built from games/ into public/games/ by scripts/build-games.mjs) play in a
 // frame, the way the Handaventures stories do: the order games (Quake in Order, Heart in Order and Press On),
-// Weather Studio and Handa vs. Hazard. The frame opens at the level picked on the intro (&level=) and with the
-// sound setting (&sound=). A game with frameName (Weather Studio) also gets the voice setting (&voice=) and the
-// player's nickname (&name=), since it reads its forecast aloud itself and puts the nickname on its cue card; one
-// with frameVoice (Handa vs. Hazard) gets only the voice setting. The game tells the library when a round ends,
+// Weather Studio, Handa vs. Hazard and Bayanihan Mode. The frame opens at the level picked on the intro (&level=)
+// and with the sound setting (&sound=). A game with frameName also gets the voice setting (&voice=) and the nickname
+// of the player (&name=): Weather Studio puts it on its cue card, and Bayanihan Mode makes it the first player's name.
+// One with frameVoice (Handa vs. Hazard) gets only the voice setting. The game tells the library when a round ends,
 // what Bayani should read aloud, and when the player leaves (postMessage with source 'bayani-game').
 // The frame may use the microphone, for Weather Studio's voice recording (only after a grown-up's OK in the game).
 export function frameSrc(g, mode, sound, more) {
