@@ -191,6 +191,12 @@ module.exports = async function () {
     const about = g.q('#sheet').textContent;
     t.ok(/Concept by/.test(about) && /Celine Tatco/.test(about) && /Developed with AI assistance by/.test(about) && /Subject for code and content validation/.test(about), 'About: the validation notice and the credits');
     t.ok(g.q('#sheet').querySelectorAll('a[href^="https://"]').length === 3, 'About: three sources, each a link');
+    const caps = g.q('#sheet').querySelectorAll('.aff-btn');
+    t.ok(caps.length === 2, 'About: a cap icon beside each of the two credits with Edward Andrew A. Dionido, none beside Celine Tatco (' + caps.length + ')');
+    if (caps.length) caps[1].click();
+    const aff = caps.length > 1 && g.q('#' + caps[1].getAttribute('aria-controls'));
+    t.ok(!!aff && !aff.hidden && /MS Environmental Science \(Ongoing\)/.test(aff.textContent) && /De La Salle University Dasmariñas/.test(aff.textContent)
+      && !!g.q('#sheet [role="dialog"]'), 'About: tapping a cap icon shows the other affiliation and keeps the sheet open');
     g.tap('a-close');
     g.tap('leave-end');
     t.ok(g.msgs('exit').length === 1, 'library: Back to the library tells the library the players left');

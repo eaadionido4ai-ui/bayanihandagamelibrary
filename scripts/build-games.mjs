@@ -4,14 +4,17 @@
 //
 //   node scripts/build-games.mjs [--standalone]
 //
-//   games/shared/template.html   the page, with five slots (fonts, styles, three.js, the code and Bayani) and {{TITLE}}
+//   games/shared/template.html   the page, with six slots (fonts, the credits icon, styles, three.js, the code and
+//                                Bayani) and {{TITLE}}
 //   games/shared/core.css        the styles (a game can add games/<id>/style.css)
 //   games/shared/kit3d.js        the 3D helpers
 //   games/shared/aidroom.js      the first aid classroom (for the first aid games)
 //   games/shared/core.js         the screens, ordering the steps, the simulation player, the results, the library link
 //   games/<id>/game.js           the game itself: its words, steps, levels, rules, scene and pictures
 //
-// Bayani comes from src/assets/mascot.svg.
+// Bayani comes from src/assets/mascot.svg. Every page, the order games and the PAGES below alike, also gets the small
+// cap icon beside a credited name that shows the person's other affiliations (<!--@PEOPLE-->): games/shared/people.js
+// with the list in games/shared/people.json, which the app shell reads too.
 //
 // Writes:
 //   public/games/<id>.html          the copy the library opens in a frame. It runs offline: three.js comes from
@@ -32,7 +35,7 @@ const standalone = process.argv.includes('--standalone');
 const shared = join(root, 'games', 'shared');
 
 // Games that are whole pages of their own, not built from the order-game template: the build fills in their fonts
-// (<!--@FONTS-->) and copies them. Weather Studio (a test game) is one. scripts: code files of the game's own that the
+// (<!--@FONTS-->) and the credits icon (<!--@PEOPLE-->) and copies them. Weather Studio (a test game) is one. scripts: code files of the game's own that the
 // page takes in at a slot (Bayanihan Mode keeps its rules in engine.js, so its tests and balance check can run them).
 const PAGES = [
   { id: 'weather-studio', src: 'page.html', name: 'Weather-Studio.html' },
@@ -61,7 +64,11 @@ const escHtml = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;',
 // keeps code that is put inside <script> from closing the tag early
 const inScript = (js) => js.replace(/<\/script/gi, '<\\/script');
 
-const SLOTS = ['<!--@FONTS-->', '/*@CSS*/', '<!--@THREE-->', '/*@APP*/', '<!--@MASCOT-->'];
+// the other affiliations of credited people and the cap icon that shows them, the same in every page
+const people = '<script>\n' + inScript('var PEOPLE = ' + JSON.stringify(JSON.parse(read(join(shared, 'people.json'))))
+  + ';\n' + read(join(shared, 'people.js'))) + '</script>';
+
+const SLOTS = ['<!--@FONTS-->', '<!--@PEOPLE-->', '/*@CSS*/', '<!--@THREE-->', '/*@APP*/', '<!--@MASCOT-->'];
 function fill(template, parts, where) {
   let html = template;
   for (const slot of SLOTS) {
@@ -88,6 +95,7 @@ for (const g of GAMES) {
     '/*@CSS*/': coreCss + (existsSync(style) ? '\n' + read(style) : ''),
     '/*@APP*/': inScript([kit, ...(g.parts || []).map((f) => read(join(shared, f))), core, read(join(dir, 'game.js'))].join('\n')),
     '<!--@MASCOT-->': mascot,
+    '<!--@PEOPLE-->': people,
   };
   // 1. the library's copy
   writeFileSync(join(out, g.id + '.html'), fill(page, {
@@ -113,6 +121,8 @@ for (const g of PAGES) {
     if (page.split(slot).length !== 2) throw new Error('games/' + g.id + '/' + g.src + ' needs exactly one ' + slot);
     page = page.replace(slot, () => inScript(read(join(root, 'games', g.id, file))));
   }
+  if (page.split('<!--@PEOPLE-->').length !== 2) throw new Error('games/' + g.id + '/' + g.src + ' needs exactly one <!--@PEOPLE-->');
+  page = page.replace('<!--@PEOPLE-->', () => people);
   writeFileSync(join(out, g.id + '.html'), page.replace('<!--@FONTS-->', () => fonts((pkg, w) => 'fonts/' + fontFile(pkg, w))));
   built.push('public/games/' + g.id + '.html');
   if (standalone) {

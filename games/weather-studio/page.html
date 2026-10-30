@@ -9,6 +9,7 @@
      public/games/weather-studio.html with the fonts filled in below (and, with --standalone, into
      games/standalone/Weather-Studio.html with the fonts inside). -->
 <!--@FONTS-->
+<!--@PEOPLE-->
 <style>
 /* page basics */
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -1237,7 +1238,8 @@ a{color:var(--sun);font-weight:900}
         '<li>The flood map colors follow UP NOAH flood hazard maps: yellow for low, orange for medium and red for high. UP NOAH flood maps show what a 100-year rain could do.</li></ul>' +
         '<h3 class="sh-h3">What is made up</h3><ul class="sh-list"><li>Bagyong Kulog, Barangay Handa, and every place and flood area on the map are made up for practice. To see a real barangay, open noah.up.edu.ph with a grown-up.</li></ul>' +
         '<h3 class="sh-h3">Privacy</h3><ul class="sh-list"><li>The nickname and any recording stay on this device. The game never sends them anywhere, and a recording is gone when you delete it or close the game.</li></ul>' +
-        '<h3 class="sh-h3">Credits</h3><p class="sh-p">Subject for code and content validation. Conceptualized and developed with AI assistance by Edward Andrew A. Dionido, Science Research Specialist II, UPRI.</p>' +
+        '<h3 class="sh-h3">Credits</h3><p class="sh-p">Subject for code and content validation. Conceptualized and developed with AI assistance by Edward Andrew A. Dionido' + affIcon('Edward Andrew A. Dionido', 'aff-dev') + ', Science Research Specialist II, UPRI.</p>' +
+        affMore('Edward Andrew A. Dionido', 'aff-dev') +
         '<p class="sh-p">Questions? <span class="sel">eadionido@up.edu.ph</span></p>' +
         '<h3 class="sh-h3">Sources</h3><ul class="sh-list">' + src.map(function (s) { return '<li><a href="' + s[1] + '" target="_blank" rel="noopener">' + esc(s[0]) + '</a></li>'; }).join('') + '</ul>' +
         '<button class="sh-btn" data-act="close" data-k="a-close">Close</button></div></div>';

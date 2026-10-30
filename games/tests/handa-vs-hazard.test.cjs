@@ -200,6 +200,12 @@ module.exports = async function () {
     const about = g.q('#sheet').textContent;
     t.ok(/Concept by/i.test(about) && /Celine Tatco/.test(about) && /Developed with AI assistance by/i.test(about) && /Edward Andrew A\. Dionido/.test(about) && /Subject for code and content validation/.test(about), 'About: the validation notice, the concept and the developer credits');
     t.ok(g.q('#sheet').querySelectorAll('a[href^="https://"]').length === 3, 'About: three sources, each a link');
+    const caps = g.q('#sheet').querySelectorAll('.aff-btn');
+    t.ok(caps.length === 2, 'About: a cap icon beside each of the two credits with Edward Andrew A. Dionido, none beside Celine Tatco (' + caps.length + ')');
+    if (caps.length) caps[0].click();
+    const aff = caps.length && g.q('#' + caps[0].getAttribute('aria-controls')), aff2 = caps.length > 1 && g.q('#' + caps[1].getAttribute('aria-controls'));
+    t.ok(!!aff && !aff.hidden && /MS Environmental Science \(Ongoing\)/.test(aff.textContent) && /De La Salle University Dasmariñas/.test(aff.textContent)
+      && !!aff2 && aff2.hidden && !!g.q('#sheet [role="dialog"]'), 'About: tapping a cap icon shows that credit\'s other affiliation and keeps the sheet open');
     g.tap('a-close');
     g.tap('change');
     t.ok(g.msgs('exit').length === 1, 'Back to the library tells the library the player left');

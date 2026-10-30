@@ -35,7 +35,7 @@ const SCREENS = ['phone-home-top', 'phone-home-pillars', 'phone-hv-story', 'phon
 const KIDS_SCREENS = ['screens/tab-home.webp']; // Bayani's tour only shows the tablet on the stand
 
 const template = readFileSync(join(src, 'tour.html'), 'utf8');
-for (const tag of ['<!--@FONTS-->', '<!--@THREE-->', '<div id="stage"']) {
+for (const tag of ['<!--@FONTS-->', '<!--@PEOPLE-->', '<!--@THREE-->', '<div id="stage"']) {
   if (template.split(tag).length !== 2) throw new Error('tour/tour.html needs exactly one ' + tag);
 }
 // every screen the page names must be in the list, or the page would look for a file that is not there
@@ -53,7 +53,12 @@ function page(html, title, note) {
     + (note ? '<!-- ' + note + ' -->\n' : '')
     + html.slice(0, cut) + '</head>\n<body>\n' + html.slice(cut) + '</body>\n</html>\n';
 }
-const fill = (html, fonts, three) => html.replace('<!--@FONTS-->', () => fonts).replace('<!--@THREE-->', () => three);
+// The small cap icon beside a credited name that shows the person's other affiliations, the same as in the games:
+// games/shared/people.js with the list in games/shared/people.json.
+const people = '<script>\n' + ('var PEOPLE = ' + JSON.stringify(JSON.parse(readFileSync(join(root, 'games', 'shared', 'people.json'), 'utf8')))
+  + ';\n' + readFileSync(join(root, 'games', 'shared', 'people.js'), 'utf8')).replace(/<\/script/gi, '<\\/script') + '</script>';
+const fill = (html, fonts, three) => html.replace('<!--@FONTS-->', () => fonts).replace('<!--@PEOPLE-->', () => people)
+  .replace('<!--@THREE-->', () => three);
 const face = (fam, w, url) => "@font-face{font-family:'" + fam + "';font-style:normal;font-weight:" + w + ';font-display:block;src:url(' + url + ") format('woff2')}";
 const copy = (from, to) => { mkdirSync(dirname(to), { recursive: true }); copyFileSync(from, to); };
 

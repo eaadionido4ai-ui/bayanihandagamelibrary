@@ -24,6 +24,9 @@ const CT = ['Celine Tatco', 'Senior Project Associate', 'UPRI'];
 export const CREDITS_LIBRARY = [['Conceptualized and developed with AI assistance by', ...EA]];
 export const CREDITS_HV = [['Concept by', ...CT], ['Developed with AI assistance by', ...EA]];
 export const CREDITS_CARDS = [['Concept by', ...EA], [null, ...CT], ['Developed with AI assistance by', ...EA]];
+// Other affiliations of credited people, by name: a small cap icon beside the name shows them. The same list feeds the
+// game pages and the tour (scripts/build-games.mjs and build-tour.mjs put it in with games/shared/people.js).
+export { default as PEOPLE } from '../games/shared/people.json';
 
 // Handaventures: five choose-your-path stories that take a hazard from before, through during, to after.
 // They have a place of their own, like TANGHALAN: a card on Home below the four pillars and a tile on Games,

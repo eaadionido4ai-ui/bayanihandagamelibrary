@@ -154,6 +154,12 @@ async function flows(t, G) {
     t.ok(w.speechSynthesis.spoken.length === 1, 'on its own: the speaker button reads the story aloud');
     q('#info').click();
     t.ok(q('#sheet').classList.contains('on') && /Edward Andrew A\. Dionido/.test(q('#sheet').textContent) && q('#about').textContent.length > 40, 'on its own: the About sheet has the credit and what the game teaches');
+    const cap = q('#sheet .aff-btn'), aff = cap && d.getElementById(cap.getAttribute('aria-controls'));
+    t.ok(!!aff && aff.hidden && cap.getAttribute('aria-expanded') === 'false', 'on its own: a small cap icon beside the developer\'s name, his other affiliation hidden');
+    if (cap) cap.click();
+    t.ok(!!aff && !aff.hidden && cap.getAttribute('aria-expanded') === 'true' && /MS Environmental Science \(Ongoing\)/.test(aff.textContent)
+      && /College of Professional and Graduate Studies, De La Salle University Dasmariñas/.test(aff.textContent) && q('#sheet').classList.contains('on'),
+      'on its own: tapping the cap icon shows his other affiliation and keeps the sheet open');
     q('#close').click();
     if (G.practice) {
       q('#go').click(); q('#simulate').click(); q('#skip').click();
