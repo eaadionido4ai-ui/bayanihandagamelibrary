@@ -157,7 +157,7 @@ async function flows(t, G) {
     const cap = q('#sheet .aff-btn'), aff = cap && d.getElementById(cap.getAttribute('aria-controls'));
     t.ok(!!aff && aff.hidden && cap.getAttribute('aria-expanded') === 'false', 'on its own: a small cap icon beside the developer\'s name, his other affiliation hidden');
     if (cap) cap.click();
-    t.ok(!!aff && !aff.hidden && cap.getAttribute('aria-expanded') === 'true' && /MS Environmental Science \(Ongoing\)/.test(aff.textContent)
+    t.ok(!!aff && !aff.hidden && cap.getAttribute('aria-expanded') === 'true' && /^Affiliations/.test(aff.textContent) && /MS Environmental Science \(Ongoing\)/.test(aff.textContent)
       && /College of Professional and Graduate Studies, De La Salle University Dasmariñas/.test(aff.textContent) && q('#sheet').classList.contains('on'),
       'on its own: tapping the cap icon shows his other affiliation and keeps the sheet open');
     q('#close').click();

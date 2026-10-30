@@ -204,8 +204,8 @@ module.exports = async function () {
     t.ok(caps.length === 2, 'About: a cap icon beside each of the two credits with Edward Andrew A. Dionido, none beside Celine Tatco (' + caps.length + ')');
     if (caps.length) caps[0].click();
     const aff = caps.length && g.q('#' + caps[0].getAttribute('aria-controls')), aff2 = caps.length > 1 && g.q('#' + caps[1].getAttribute('aria-controls'));
-    t.ok(!!aff && !aff.hidden && /MS Environmental Science \(Ongoing\)/.test(aff.textContent) && /De La Salle University Dasmariñas/.test(aff.textContent)
-      && !!aff2 && aff2.hidden && !!g.q('#sheet [role="dialog"]'), 'About: tapping a cap icon shows that credit\'s other affiliation and keeps the sheet open');
+    t.ok(!!aff && !aff.hidden && /^Affiliations/.test(aff.textContent) && /MS Environmental Science \(Ongoing\)/.test(aff.textContent) && /De La Salle University Dasmariñas/.test(aff.textContent)
+      && caps[0].getAttribute('aria-label') === 'Affiliations of Edward Andrew A. Dionido' && !!aff2 && aff2.hidden && !!g.q('#sheet [role="dialog"]'), 'About: tapping a cap icon shows that credit\'s other affiliation and keeps the sheet open');
     g.tap('a-close');
     g.tap('change');
     t.ok(g.msgs('exit').length === 1, 'Back to the library tells the library the player left');

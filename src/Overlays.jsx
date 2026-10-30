@@ -170,7 +170,7 @@ function Person({ b }) {
       <span style={sx("display:inline-flex;align-items:center;justify-content:center;gap:2px;font:800 20px/1.15 'Baloo 2',sans-serif;padding-top:3px;color:#16303f")}>
         {b[1]}
         {more && (
-          <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls={id} aria-label={'Other affiliation of ' + b[1]} title="Other affiliation"
+          <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls={id} aria-label={'Affiliations of ' + b[1]} title="Affiliations"
             style={sx('flex:none;width:28px;height:28px;margin:-6px -4px -6px 0;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;'
               + (open ? 'background:#e6f3f9;color:#2a6b8f' : 'background:transparent;color:#7a8f9b'))}>
             <Cap />
@@ -181,7 +181,7 @@ function Person({ b }) {
       <span style={sx('font-size:14.5px;font-weight:800;color:#3d5563')}>{b[3]}</span>
       {more && (
         <span id={id} style={sx((open ? 'display:flex' : 'display:none') + ';flex-direction:column;align-items:center;gap:1px;margin-top:6px;max-width:300px;padding:8px 12px;border-radius:12px;background:#f4f8fa;border:1.5px solid #dfe9ee;font-size:13px;font-weight:700;line-height:1.35;color:#3d5563')}>
-          <span style={sx('font-size:10.5px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:#4f6572')}>Also</span>
+          <span style={sx('font-size:10.5px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:#4f6572')}>Affiliations</span>
           {more.map((l, i) => <span key={i} style={i ? undefined : sx('font-weight:900;color:#16303f')}>{l}</span>)}
         </span>
       )}

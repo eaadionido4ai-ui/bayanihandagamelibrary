@@ -470,11 +470,11 @@ The texts are in `src/data.js` (`VALIDATION`, `CREDITS_LIBRARY`, `CREDITS_HV`,
 and a block with no label adds one more person under the label above it. Behind
 BAYANIHanda in Settings shows the library's credit.
 
-**Other affiliations.** Wherever Edward Andrew A. Dionido's name appears in the credits (every
+**Affiliations.** Wherever Edward Andrew A. Dionido's name appears in the credits (every
 info tag, Behind BAYANIHanda, the About sheets of the order games, Weather Studio, Handa vs.
-Hazard and Bayanihan Mode, and the presenter's tour script), a small cap icon beside it shows his
-other affiliation when tapped: MS Environmental Science (Ongoing), College of Professional and
-Graduate Studies, De La Salle University Dasmariñas. Tapping it again hides it. Other
+Hazard and Bayanihan Mode, and the presenter's tour script), a small cap icon beside it opens a
+note headed Affiliations when tapped: MS Environmental Science (Ongoing), College of Professional
+and Graduate Studies, De La Salle University Dasmariñas. Tapping it again hides it. These
 affiliations are listed once, by name, in `games/shared/people.json`. The app shell reads that
 file (`PEOPLE` in `src/data.js`), and the builds put it, with `games/shared/people.js`, into
 every game page and the tour at `<!--@PEOPLE-->`. To give another person the icon, or to update

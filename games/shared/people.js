@@ -20,12 +20,12 @@
   function icon(name, id) {
     if (!P[name]) return '';
     return '<button type="button" class="aff-btn" aria-expanded="false" aria-controls="' + esc(id) + '" aria-label="'
-      + esc('Other affiliation of ' + name) + '" title="Other affiliation">' + CAP + '</button>';
+      + esc('Affiliations of ' + name) + '" title="Affiliations">' + CAP + '</button>';
   }
   function more(name, id) {
     var a = P[name], h;
     if (!a) return '';
-    h = '<span class="aff-more" id="' + esc(id) + '" hidden><span class="aff-lab">Also</span>';
+    h = '<span class="aff-more" id="' + esc(id) + '" hidden><span class="aff-lab">Affiliations</span>';
     for (var i = 0; i < a.length; i++) h += '<span class="aff-l' + (i ? '' : ' aff-1') + '">' + esc(a[i]) + '</span>';
     return h + '</span>';
   }
