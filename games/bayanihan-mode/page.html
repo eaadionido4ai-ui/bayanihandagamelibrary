@@ -10,6 +10,7 @@
      and the rules from engine.js in the ENGINE slot (and, with --standalone, into
      games/standalone/Bayanihan-Mode.html with the fonts inside). -->
 <!--@FONTS-->
+<!--@PEOPLE-->
 <style>
 /* page basics */
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -627,7 +628,8 @@ a{color:var(--link)}
         ['The Varsitarian: how PAGASA’s rainfall warnings work', 'https://varsitarian.net/sci-tech/20250724/explainer-how-do-pagasas-rainfall-warnings-and-weather-advisories-work'],
         ['PHIVOLCS: Earthquake Intensity Scale', 'https://www.phivolcs.dost.gov.ph/phivolcs-eathquake-intensity-scale/']
       ];
-      var who = function (p) { return '<div class="nm">' + p[0] + '</div><div class="po">' + p[1] + '</div><div class="po" style="font-weight:800">' + p[2] + '</div>'; };
+      // the cap icon beside a name shows the person's other affiliations (games/shared/people.js)
+      var n = 0, who = function (p) { var id = 'aff-' + (++n); return '<div class="nm">' + p[0] + affIcon(p[0], id) + '</div><div class="po">' + p[1] + '</div><div class="po" style="font-weight:800">' + p[2] + '</div>' + affMore(p[0], id); };
       var EA = ['Edward Andrew A. Dionido', 'Science Research Specialist II', 'UPRI'], CT = ['Celine Tatco', 'Senior Project Associate', 'UPRI'];
       return '<div class="scrim" data-act="scrim"><div class="sheet up" role="dialog" aria-modal="true" aria-labelledby="ah"><span class="handle"></span><h2 id="ah">About Bayanihan Mode</h2>' +
         '<p>Handa vs. Hazard for 2 to 4 players on one phone, a test game for the BAYANIHanda library. Hazard cards stack and grow stronger, and the players stack Before, During and After cards to match them, all together or in two teams. Bayanihan Mode is a working title.</p>' +

@@ -2,11 +2,13 @@
   BAYANIHanda Island, the 3D tour of the game library. One file, two modes:
     kids   Bayani guides a child around the island, one stop at a time. The library opens it in a frame.
     pitch  A clickable tour with a one-minute guided mode and a presenter script, for talks and pitches.
-  scripts/build-tour.mjs makes the pages; it fills in the two @ lines (fonts and the 3D engine) and picks the mode.
+  scripts/build-tour.mjs makes the pages; it fills in the three @ lines (fonts, the credits icon and the 3D engine)
+  and picks the mode.
 -->
 <title>BAYANIHanda 3D Tour</title>
 <meta name="description" content="A clickable 3D tour of the BAYANIHanda Game Library with a one-minute guided mode and a presenter script.">
 <!--@FONTS-->
+<!--@PEOPLE-->
 <style>
   /* One deliberate daylight world: a floating island over a soft sky, in the library's own colors. */
   :root {
@@ -110,6 +112,8 @@
   .script li.on { background: #fff; color: var(--ink); }
   .script li.on b { color: var(--orange); }
   .script .credit { margin: calc(14px * var(--u)) 0 0; font-size: calc(11.5px * var(--u)); font-weight: 700; line-height: 1.45; color: #a9c2cf; }
+  .script .credit .aff-btn { width: 22px; height: 22px; margin-left: 2px; }
+  .script .aff-more { color: #a9c2cf; font-size: calc(11.5px * var(--u)); }
   [hidden] { display: none !important; }
 
   /* loading and no-3D notes */
@@ -249,7 +253,8 @@
   <h2>Presenter script</h2>
   <div class="sub" id="scriptSub"></div>
   <ol id="scriptList"></ol>
-  <p class="credit">Subject for code and content validation. Conceptualized and developed with AI assistance by Edward Andrew A. Dionido, Science Research Specialist II, UPRI. Handaventures concept by Celine Tatco, Senior Project Associate, UPRI.</p>
+  <p class="credit">Subject for code and content validation. Conceptualized and developed with AI assistance by Edward Andrew A. Dionido<span data-aff-icon="Edward Andrew A. Dionido" data-aff="aff-dev"></span>, Science Research Specialist II, UPRI. Handaventures concept by Celine Tatco, Senior Project Associate, UPRI.</p>
+  <span data-aff-more="Edward Andrew A. Dionido" data-aff="aff-dev"></span>
 </aside>
 
 <nav class="bar" aria-label="Tour">

@@ -361,7 +361,7 @@ badge count and ranks (`LIVE`) until it is final. The name is a working title.
 
 | Part | Where |
 | --- | --- |
-| The game, one page | `games/weather-studio/page.html` (the build fills in the fonts at `<!--@FONTS-->`) |
+| The game, one page | `games/weather-studio/page.html` (the build fills in the fonts at `<!--@FONTS-->` and the credits icon at `<!--@PEOPLE-->`) |
 | Build | `PAGES` in `scripts/build-games.mjs` writes `public/games/weather-studio.html` (not committed) |
 | Card, intro, levels | the `weather` entry in `src/data.js` |
 | Tests | `games/tests/weather-studio.test.cjs` (`npm run test:games`): both levels to the end, the library link, the map's zones |
@@ -404,7 +404,7 @@ stronger, and the player stacks Before, During and After cards to match them.
 
 | Part | Where |
 | --- | --- |
-| The game, one page | `games/handa-vs-hazard/page.html` (the build fills in the fonts at `<!--@FONTS-->`) |
+| The game, one page | `games/handa-vs-hazard/page.html` (the build fills in the fonts at `<!--@FONTS-->` and the credits icon at `<!--@PEOPLE-->`) |
 | Build | `PAGES` in `scripts/build-games.mjs` writes `public/games/handa-vs-hazard.html` (not committed) |
 | Card, intro, levels, pillars, credits | the `cards` entry in `src/data.js` (`pillars`, `byPillar`, `credits: CREDITS_CARDS`) |
 | Tests | `games/tests/handa-vs-hazard.test.cjs` (`npm run test:games`): both levels to the end, 36 seasons on fixed seeds that check the stacking and damage rules, the library's voice, Back, and the title screen on its own |
@@ -444,7 +444,7 @@ colors and Bayani).
 
 | Part | Where |
 | --- | --- |
-| The game, one page | `games/bayanihan-mode/page.html` (the build fills in the fonts at `<!--@FONTS-->` and the rules from `engine.js`) |
+| The game, one page | `games/bayanihan-mode/page.html` (the build fills in the fonts at `<!--@FONTS-->`, the credits icon at `<!--@PEOPLE-->` and the rules from `engine.js`) |
 | The rules | `games/bayanihan-mode/engine.js`, plain ES5 and seeded, shared by the page, the tests and `balance.cjs` |
 | Build | `PAGES` in `scripts/build-games.mjs` (its `scripts` field fills the rules slot) writes `public/games/bayanihan-mode.html` (not committed) |
 | Card, intro, levels, pillars, credits | the `bayanihan` entry in `src/data.js` |
@@ -469,6 +469,16 @@ The texts are in `src/data.js` (`VALIDATION`, `CREDITS_LIBRARY`, `CREDITS_HV`,
 `CREDITS_CARDS`). A game with credits of its own carries them on its entry (`credits:`),
 and a block with no label adds one more person under the label above it. Behind
 BAYANIHanda in Settings shows the library's credit.
+
+**Affiliations.** Wherever Edward Andrew A. Dionido's name appears in the credits (every
+info tag, Behind BAYANIHanda, the About sheets of the order games, Weather Studio, Handa vs.
+Hazard and Bayanihan Mode, and the presenter's tour script), a small cap icon beside it opens a
+note headed Affiliations when tapped: MS Environmental Science (Ongoing), College of Professional
+and Graduate Studies, De La Salle University Dasmariñas. Tapping it again hides it. These
+affiliations are listed once, by name, in `games/shared/people.json`. The app shell reads that
+file (`PEOPLE` in `src/data.js`), and the builds put it, with `games/shared/people.js`, into
+every game page and the tour at `<!--@PEOPLE-->`. To give another person the icon, or to update
+a line when a degree is finished, change only that file.
 
 ## TANGHALAN, the museum
 

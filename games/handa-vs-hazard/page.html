@@ -9,6 +9,7 @@
      public/games/handa-vs-hazard.html with the fonts filled in below (and, with --standalone, into
      games/standalone/Handa-vs-Hazard.html with the fonts inside). -->
 <!--@FONTS-->
+<!--@PEOPLE-->
 <style>
 /* page basics */
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -666,7 +667,8 @@ a{color:var(--sun);font-weight:900}
       ];
       // who made it: name, position, office
       var EA = ['Edward Andrew A. Dionido', 'Science Research Specialist II', 'UPRI'], CT = ['Celine Tatco', 'Senior Project Associate', 'UPRI'];
-      var who = function (p) { return '<dd><b>' + esc(p[0]) + '</b><br>' + esc(p[1]) + ', ' + esc(p[2]) + '</dd>'; };
+      // the cap icon beside a name shows the person's other affiliations (games/shared/people.js)
+      var n = 0, who = function (p) { var id = 'aff-' + (++n); return '<dd><b>' + esc(p[0]) + '</b>' + affIcon(p[0], id) + '<br>' + esc(p[1]) + ', ' + esc(p[2]) + affMore(p[0], id) + '</dd>'; };
       return '<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ah"><h2 id="ah" class="sh-h">About this game</h2>' +
         '<p class="sh-p">Handa vs. Hazard is a sample card game for the BAYANIHanda library. Hazard cards stack and grow stronger, and the player stacks Before, During and After cards to match them. It teaches what to do before, during and after each hazard.</p>' +
         '<h3 class="sh-h3">What is real</h3><ul class="sh-list"><li>On Difficult, the typhoon levels are PAGASA’s wind signals, the flood levels are PAGASA’s yellow, orange and red rainfall warnings, and the earthquake levels follow the PHIVOLCS Earthquake Intensity Scale (V Strong, VI Very Strong, VII Destructive).</li><li>The actions on the cards are common safety advice for each hazard. 911 is the Philippines’ emergency number.</li></ul>' +

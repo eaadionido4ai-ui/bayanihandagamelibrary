@@ -143,6 +143,13 @@ module.exports = async function () {
   if (fs.existsSync(SOLO)) {
     const g = await open(SOLO, '', false);
     t.ok(!g.W.embed && g.S().screen === 'title', 'on its own: opens at the title screen');
+    g.tap('about');
+    const cap = g.q('#sheet .aff-btn'), aff = cap && g.q('#' + cap.getAttribute('aria-controls'));
+    t.ok(/Edward Andrew A\. Dionido/.test(g.q('#sheet').textContent) && !!aff && aff.hidden, 'on its own: the About credits have a small cap icon beside the developer\'s name');
+    if (cap) cap.dispatchEvent(new g.w.MouseEvent('click', { bubbles: true }));
+    t.ok(!!aff && !aff.hidden && /MS Environmental Science \(Ongoing\)/.test(aff.textContent) && /De La Salle University Dasmariñas/.test(aff.textContent)
+      && g.S().sheet && g.S().sheet.kind === 'about', 'on its own: tapping the cap icon shows his other affiliation and keeps the sheet open');
+    g.tap('a-close');
     g.tap('lv-hard'); g.tap('start');
     const sh = g.S().sheet;
     t.ok(sh && sh.kind === 'gate' && sh.reason === 'hard', 'on its own: Difficult asks a grown-up first');
