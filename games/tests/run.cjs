@@ -1,5 +1,6 @@
-// Runs the tests of every game that plays in a frame: the order games, Weather Studio, Handa vs. Hazard and Bayanihan
-// Mode (after npm run test:games builds the pages).
+// Runs the tests of every game that plays in a frame: the order games, Weather Studio, Handa vs. Hazard, Bayanihan
+// Mode, Lipad-Iwas and Lusot sa Usok (after npm run test:games builds the pages). Helpers that are not *.test.cjs
+// (harness.cjs, lipad-iwas-pilot.cjs, lusot-sa-usok-bot.cjs) are left for the tests that need them.
 const fs = require('fs');
 const path = require('path');
 

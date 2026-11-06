@@ -78,7 +78,7 @@ Logo 1b, the Bayanihan house: four neighbors in the pillar colors lifting a hous
 | HUD style | `src/engine/game-hud.css` | Restyles the real HUDs to the design: corner buttons, status pill, Bayani hint bubble, side buttons, bottom sheets. |
 | Museum | `src/museum/`, `src/screens/Tanghalan.jsx` | TANGHALAN, the walkable 3D museum (below). |
 | Stories | `stories/`, `scripts/build-stories.mjs`, `src/screens/Stories.jsx` | Handaventures, the story series (below). |
-| Games in a frame | `games/`, `scripts/build-games.mjs`, `src/screens/GameFrame.jsx` | Games that are pages of their own: the order games (Quake in Order, Heart in Order and Press On), and the test games Weather Studio, Handa vs. Hazard and Bayanihan Mode (below). |
+| Games in a frame | `games/`, `scripts/build-games.mjs`, `src/screens/GameFrame.jsx` | Games that are pages of their own: the order games (Quake in Order, Heart in Order and Press On), and the test games Weather Studio, Handa vs. Hazard, Bayanihan Mode, Lipad-Iwas and Lusot sa Usok (below). |
 | Island tour | `tour/`, `scripts/build-tour.mjs`, `src/screens/Tour.jsx`, `src/tour.js` | Bayani's 3D island tour of the library, and the presenter's tour for pitches (below). |
 
 To pick up a newer version of the web app, replace the file in `project/uploads/` and
@@ -137,9 +137,10 @@ Since October 2026 a player has a birthday and a grown-up, and the games carry a
 - **Age labels** (`AGE`, `ageOf` and `agesOf` in `src/data.js`): every game and story is for
   ages 6 to 10 (yellow), and the Difficult level of the games with Easy and Difficult (Fire
   Extinguisher 3D, Quake in Order, Heart in Order and Press On, `levelAges` on each) is for
-  ages 10 to 15 (pink). The labels show on the game cards, the game intros and each level,
-  the story intros and the story shelf. A label carries 👪 when the player is younger than
-  it (`src/ui/age.jsx`).
+  ages 10 to 15 (pink). Lusot sa Usok is the one game that is for ages 10 to 15 at both
+  levels (`levelAges: ['older', 'older']`; see below). The labels show on the game cards,
+  the game intros and each level, the story intros and the story shelf. A label carries 👪
+  when the player is younger than it (`src/ui/age.jsx`).
 - **A grown-up plays along.** When a player is younger than a level's label (under 10 on
   Difficult, under 6 on anything), Start shows "Play with a grown-up": a grown-up answers
   a times-table question to start, or a Difficult level can be played at Easy instead. A
@@ -450,6 +451,87 @@ colors and Bayani).
 | Card, intro, levels, pillars, credits | the `bayanihan` entry in `src/data.js` |
 | Tests | `games/tests/bayanihan-mode.test.cjs` (`npm run test:games`): 400 seasons on the rules, whole games in the library's copy all together and in teams, and the single file |
 
+## Lipad-Iwas, a test game
+
+A tap-to-fly game for ages 6 to 15, added in November 2026 as a **test game** with the same 🧪 TEST GAME label: it
+stays out of the badge count and ranks until it is final. Lipad-Iwas is a working title. It was made as a project of
+its own (one file that works offline), and its files are copied here unchanged.
+
+- **The play.** Maya the messenger bird flies on her own, and a tap makes her flap up. She dodges the hazards of four
+  worlds (Bagyo, a typhoon; Baha, a flood; Lindol, a strong quake by the sea; Bulkan, a restless volcano) and flies
+  low over each home to warn the family inside. Go bag items fill a bag that gives her a shield for one bump. A bump
+  costs a heart and opens a Hazard Card with one safety tip, so even a mistake teaches something, and finishing a
+  world adds its three cards. Warning all 12 homes earns 3 stars, 9 or more 2, and reaching the evacuation center 1.
+- **Two levels.** *Easy* (ages 6 to 10): wide gaps, a slower flight and a tall warning zone over each home.
+  *Difficult* (ages 10 to 15): faster, with narrower gaps and a twist in each world (gusts of wind, rising water,
+  aftershocks). The warnings in force follow PAGASA (Signal No. 2 and 3; the orange and red rainfall warnings) and
+  PHIVOLCS (the Earthquake Intensity Scale; Alert Levels 3 and 4).
+- **Under all four pillars.** The twelve Hazard Cards cover before, during and after each hazard, so, like Handa vs.
+  Hazard, its entry lists every pillar (`pillars`) with a line for each (`byPillar`): the cards that stop dangers
+  early (tying down loose things, fastening heavy furniture) under Stop Hazards Early, the warning flight and the go
+  bag under Get Ready, the During cards under Act Fast, and the After cards under Bounce Back.
+- **In the library** it plays in a frame as `games/lipad-iwas.html?embed=1&level=easy|hard&sound=0|1&voice=0|1`
+  (`frameVoice` on its entry). It opens at the worlds, past its About page, with every world open. The level comes
+  from the library's intro, so the game shows no level picker and skips its own grown-up question. The library reads
+  the mission, each Hazard Card, How to play and the results aloud (`say` and `hush`), and a speaker button on each
+  card reads it again. The Library button on the worlds screen and "Take a break" (after 20 minutes of play) send
+  `exit`. It asks for no names and keeps nothing on the device: stars and cards last until the game is closed.
+- **On its own** (`npm run test:games` writes `games/standalone/Lipad-Iwas.html`) it opens at its About page (the
+  abstract, the credits, How to play and a user manual placeholder), opens the worlds one by one, asks a grown-up
+  before Difficult, and saves its stars and cards on the device.
+
+| Part | Where |
+| --- | --- |
+| The game, copied unchanged from its own project's `src/` | `games/lipad-iwas/`: `page.html` (the build fills in the fonts at `<!--@FONTS-->`, the credits icon at `<!--@PEOPLE-->`, and one file at each of `/*@CSS*/`, `/*@ENGINE*/`, `/*@DRAW*/` and `/*@APP*/`), `style.css`, `engine.js` (the rules, plain ES5 and seeded), `draw.js` (the pictures) and `app.js` (the screens) |
+| Build | `PAGES` in `scripts/build-games.mjs` (with `SOLO_FILES`) writes `public/games/lipad-iwas.html` (not committed) |
+| Card, intro, levels, pillars | the `lipad` entry in `src/data.js` |
+| Tests | `games/tests/lipad-iwas.test.cjs` (`npm run test:games`): the cards, every world on both levels with the autopilot (`lipad-iwas-pilot.cjs`, from the game's project), a whole world in the library's copy, and the single file |
+
+## Lusot sa Usok, a test game
+
+A school fire escape for ages 10 to 15, added in November 2026 as a **test game** with the same 🧪 TEST GAME label.
+Lusot sa Usok ("slip through the smoke") is a working title. Like Lipad-Iwas, it was made as a project of its own,
+and its files are copied here unchanged.
+
+- **The play.** A fire breaks out at school. The player, a student on the school's fire safety team, moves through one
+  smoky floor seen from above: drag on the left side of the screen to move, and use the SPRAY, CRAWL and DODGE buttons
+  and the action button. To finish well: sound the fire alarm, call 911 and say what, where and who, lead everyone
+  found, and reach an exit. Fire and smoke spread from tile to tile, and the habits are part of the play: crawl low
+  under smoke, feel a door before opening it, close doors behind you, short bursts at the base of a small fire, no
+  water on an electrical fire, and stop, drop and roll. A fire too big for the extinguisher stops the game with three
+  choices: call the firefighters, use the fire hose, or find another way. Getting out earns 1 star, with the alarm
+  and the 911 call 2, and with everyone led out 3.
+- **Two levels, both for ages 10 to 15.** *Easy*: a canteen fire on the ground floor, 4 people, a one-question 911
+  call and a yellow arrow to the next mission. *Difficult*: an electrical fire in the computer room on the second
+  floor and a second fire in the supply room, 6 people, thicker smoke and a three-question call. Both levels carry
+  the pink label (`levelAges: ['older', 'older']`), because the game has a spreading fire, smoke that hurts, an
+  extinguisher and a fire hose, and a role that a younger player should share with a grown-up. A player under 10
+  starts either level with a grown-up, and the grown-up check offers no Easy instead.
+- **Under Act Fast.** The whole game happens during the fire.
+- **Real life first.** The intro, the briefing and the results all say that in real life, kids get out first and tell
+  a grown-up, and the results end with "once you're out, stay out".
+- **In the library** it plays in a frame as `games/lusot-sa-usok.html?embed=1&level=easy|hard&sound=0|1&voice=0|1`
+  (`frameVoice`). It opens at the briefing with the level from the library's intro and no level picker. The library
+  reads Bayani's lines, the 911 dispatcher, How to play and the results aloud (`say` and `hush`, with 911 said as
+  "9 1 1"). A mission ends with Play again and Back to the library, and the pause sheet goes back to the briefing.
+  The Library button on the briefing, Back to the library and "Take a break" send `exit`. It asks for no names and
+  keeps nothing on the device.
+- **Held sideways.** The game is drawn for a phone held sideways (844 by 390). On a phone held upright it shows "Turn
+  your phone sideways", with "Play this way anyway" for a smaller picture. The app sets no orientation lock, so the
+  phone can be turned.
+- **On its own** (`npm run test:games` writes `games/standalone/Lusot-sa-Usok.html`) it opens at its About page, with a
+  level picker on the briefing and Next floor after Easy, and saves the best stars on the device.
+
+| Part | Where |
+| --- | --- |
+| The game, copied unchanged from its own project's `src/` | `games/lusot-sa-usok/`: `page.html` (the same slots as Lipad-Iwas), `style.css`, `engine.js` (the rules: the two floors, fire and smoke, the player, people, doors, the 911 call, the firefighters, results), `draw.js` and `app.js` |
+| Build | `PAGES` in `scripts/build-games.mjs` (with `SOLO_FILES`) writes `public/games/lusot-sa-usok.html` (not committed) |
+| Card, intro, levels | the `lusot` entry in `src/data.js` |
+| Tests | `games/tests/lusot-sa-usok.test.cjs` (`npm run test:games`): the floors, the 911 call, the test player (`lusot-sa-usok-bot.cjs`, from the game's project) on both levels, a whole Easy mission in the library's copy, and the single file |
+
+To update either game, copy the five files from its project's `src/` into its folder here (and the test helper from
+its `tests/` when it changes). The pages are the same in both places, so nothing else needs changing.
+
 ## Credits on the info tags
 
 Every game's info tag (the **i** button) starts with the notice **Subject for code and
@@ -472,7 +554,8 @@ BAYANIHanda in Settings shows the library's credit.
 
 **Affiliations.** Wherever Edward Andrew A. Dionido's name appears in the credits (every
 info tag, Behind BAYANIHanda, the About sheets of the order games, Weather Studio, Handa vs.
-Hazard and Bayanihan Mode, and the presenter's tour script), a small cap icon beside it opens a
+Hazard and Bayanihan Mode, the About pages of Lipad-Iwas and Lusot sa Usok in their single
+files, and the presenter's tour script), a small cap icon beside it opens a
 note headed Affiliations when tapped: MS Environmental Science (Ongoing), College of Professional
 and Graduate Studies, De La Salle University Dasmariñas. Tapping it again hides it. These
 affiliations are listed once, by name, in `games/shared/people.json`. The app shell reads that
@@ -564,6 +647,12 @@ works, collected through teachers with parents' consent:
 - **Bayanihan Mode is a test game,** with a working title. It needs the same review as Handa
   vs. Hazard, and a pilot with groups of 2 to 4 players to check how long turns take and
   whether the balance feels right.
+- **Lipad-Iwas and Lusot sa Usok are test games,** with working titles not yet checked
+  against other programs. They need EA's review, a pilot with players (ages 6 to 15 for
+  Lipad-Iwas, 10 to 15 for Lusot sa Usok), and a check by the validators of the Hazard
+  Cards and their PAGASA and PHIVOLCS wording, and of Lusot sa Usok's fire safety habits
+  and 911 call. On Android, their lines show on screen with no voice (the WebView has no
+  speech).
 - **Not yet tested on a phone.** Everything was checked in Chromium at phone (412×915)
   and tablet (1280×800) sizes, with software WebGL.
 

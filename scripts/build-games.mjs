@@ -1,6 +1,7 @@
 // Builds the games that open in a frame inside the library, from games/: the order games (Quake in Order and the two
-// first aid games), and the test games that are whole pages of their own, Weather Studio, Handa vs. Hazard and
-// Bayanihan Mode (games/<id>/page.html, see PAGES below). The order games share one engine:
+// first aid games), and the test games that are whole pages of their own, Weather Studio, Handa vs. Hazard,
+// Bayanihan Mode, Lipad-Iwas and Lusot sa Usok (games/<id>/page.html, see PAGES below). The order games share one
+// engine:
 //
 //   node scripts/build-games.mjs [--standalone]
 //
@@ -35,12 +36,17 @@ const standalone = process.argv.includes('--standalone');
 const shared = join(root, 'games', 'shared');
 
 // Games that are whole pages of their own, not built from the order-game template: the build fills in their fonts
-// (<!--@FONTS-->) and the credits icon (<!--@PEOPLE-->) and copies them. Weather Studio (a test game) is one. scripts: code files of the game's own that the
-// page takes in at a slot (Bayanihan Mode keeps its rules in engine.js, so its tests and balance check can run them).
+// (<!--@FONTS-->) and the credits icon (<!--@PEOPLE-->) and copies them. Weather Studio (a test game) is one. scripts:
+// files of the game's own that the page takes in at a slot (Bayanihan Mode keeps its rules in engine.js, so its tests
+// and balance check can run them). Lipad-Iwas and Lusot sa Usok come from projects of their own, whose src/ files are
+// copied here unchanged: the styles, the rules, the pictures and the screens, one slot each.
+const SOLO_FILES = { '/*@CSS*/': 'style.css', '/*@ENGINE*/': 'engine.js', '/*@DRAW*/': 'draw.js', '/*@APP*/': 'app.js' };
 const PAGES = [
   { id: 'weather-studio', src: 'page.html', name: 'Weather-Studio.html' },
   { id: 'handa-vs-hazard', src: 'page.html', name: 'Handa-vs-Hazard.html' },
   { id: 'bayanihan-mode', src: 'page.html', name: 'Bayanihan-Mode.html', scripts: { '/*@ENGINE*/': 'engine.js' } },
+  { id: 'lipad-iwas', src: 'page.html', name: 'Lipad-Iwas.html', scripts: SOLO_FILES },
+  { id: 'lusot-sa-usok', src: 'page.html', name: 'Lusot-sa-Usok.html', scripts: SOLO_FILES },
 ];
 
 // parts: more shared code a game needs (the first aid games share their room)
