@@ -347,6 +347,47 @@ export const G = [
     note: 'This is a test game, so it may change after we try it with players. Play all together or in two teams; teams need 2 or 4 players. A bigger group needs more Handa, and the board always shows how much.',
     remind: 'For every hazard, know what to do before, during and after, and help your neighbors get ready too.',
   },
+  // Lipad-Iwas (Nov 2026), a test game: tap to fly Maya the messenger bird through four hazard worlds (a typhoon, a
+  // flood, a strong quake by the sea and a restless volcano) and warn every home in time. A bump opens a Hazard Card,
+  // and its twelve cards cover before, during and after each hazard, so it shows under all four pillars (pillars,
+  // byPillar), like Handa vs. Hazard. Easy is for ages 6 to 10 and Difficult for 10 to 15 (levelAges). The game is
+  // copied unchanged from its own project into games/lipad-iwas/ and built into public/games/ by
+  // scripts/build-games.mjs; frameVoice passes the voice setting. Lipad-Iwas is a working title.
+  {
+    id: 'lipad', p: 'prep', pillars: ['mit', 'prep', 'resp', 'rec'], test: true, name: 'Lipad-Iwas', icon: '🐦',
+    frame: 'games/lipad-iwas.html', frameModes: ['easy', 'hard'], frameVoice: true, levelAges: ['young', 'older'],
+    short: 'Tap to fly Maya the messenger bird past the hazards and warn every home in time.',
+    byPillar: {
+      mit: 'Hazard Cards that stop dangers early, like tying down loose things before a typhoon and fastening heavy furniture to the wall.',
+      prep: 'Fly ahead of the typhoon, the flood, the tsunami or the eruption, warn every home in time, and catch go bag items.',
+      resp: 'Hazard Cards for when the hazard hits, like staying out of floodwater and going to high ground right after a strong quake by the sea.',
+      rec: 'Hazard Cards for after, like keeping away from fallen power lines, damaged buildings and lahar.',
+    },
+    desc: 'Fly Maya the messenger bird through four hazard worlds: a typhoon, a flood, a strong quake by the sea and a restless volcano. Dodge the dangers, warn every home in time, and learn from every bump with a Hazard Card.',
+    badge: ['Early Warning', '🐦'], modesLabel: 'Pick a level',
+    modes: [['🙂', 'Easy', 'Wide gaps and a slower flight, with a tall warning zone over each home.'], ['🎯', 'Difficult', 'Faster, with narrower gaps and a twist in each world: gusts, rising water or aftershocks.']],
+    steps: [['1', 'Tap to fly', 'Tap anywhere to make Maya flap up. When you stop, she glides down.'], ['2', 'Dodge', 'Fly through the gaps. A yellow ! at the edge means something is about to blow in or fall.'], ['3', 'Warn', 'Fly low over each home with a yellow ! to warn the family inside.'], ['4', 'Learn', 'A bump shows a Hazard Card with a safety tip. Reach the evacuation center to finish the world.']],
+    tip: 'A warning helps only when it reaches every home in time. Fly low over each home to warn it, and catch three go bag items for a shield.',
+    note: 'This is a test game, so it may change after we try it with players. Every world is open here. The warnings follow PAGASA and PHIVOLCS; the places and families are made up.',
+    remind: 'When PAGASA, PHIVOLCS or your barangay gives a warning, listen with a grown-up, get your go bag, and leave early when you are told to.',
+  },
+  // Lusot sa Usok (Nov 2026), a test game: a school fire escape seen from above, best with the phone held sideways.
+  // The whole game happens during the fire, so it stays under Act Fast. Both levels are for ages 10 to 15 (levelAges):
+  // a spreading fire with smoke that hurts, an extinguisher and a fire hose, and a role (a student trained for the
+  // school's fire safety team) that a younger player should share with a grown-up. Copied unchanged from its own
+  // project into games/lusot-sa-usok/; frameVoice passes the voice setting. Lusot sa Usok is a working title.
+  {
+    id: 'lusot', p: 'resp', test: true, name: 'Lusot sa Usok', icon: '🚒',
+    frame: 'games/lusot-sa-usok.html', frameModes: ['easy', 'hard'], frameVoice: true, levelAges: ['older', 'older'],
+    short: 'Find a safe way out of a smoky school floor: sound the alarm, call 911 and lead everyone out.',
+    desc: 'A fire breaks out at school. As a student on the school\'s fire safety team, crawl low under the smoke, feel doors before you open them, sound the alarm, call 911, and lead everyone you find to an exit.',
+    badge: ['Smoke Smart', '🚒'], modesLabel: 'Pick a level',
+    modes: [['🙂', 'Easy', 'A canteen fire on the ground floor, 4 people to lead, and a yellow arrow to the next mission.'], ['🎯', 'Difficult', 'An electrical fire on the second floor, 6 people, thicker smoke and a three-part 911 call.']],
+    steps: [['1', 'Move and crawl', 'Drag on the left side of the screen to move. In smoke, tap CRAWL: the air is cleaner near the floor.'], ['2', 'Alarm and 911', 'Pull the red fire alarm, then call 911 from the phone and say what, where and who.'], ['3', 'Small or big?', 'Short bursts at the base put out a small fire. For a big one, call the firefighters, use the fire hose (never on electric fires), or find another way.'], ['4', 'Lead everyone out', 'Walk up to each person so they follow you, and reach a green exit. Once you are out, stay out.']],
+    tip: 'Smoke rises, so the cleanest air is near the floor. Crawl low, feel a door before you open it, and never go back inside.',
+    note: 'This is a test game, so it may change after we try it with players. Turn the phone sideways to play. In real life, kids get out first and tell a grown-up; here you play a student trained for the school\'s fire safety team.',
+    remind: 'If there is a fire, get out fast, stay low under smoke, and call 911 once you are safe. Once you are out, stay out.',
+  },
   ...STORIES,
 ];
 
@@ -359,7 +400,7 @@ export const inPillar = (g, pid) => (g && g.pillars ? g.pillars.indexOf(pid) >= 
 
 // Age labels (EA, October 2026). Every game and story is for ages 6 to 10; the Difficult level of the games
 // that have Easy and Difficult (levelAges on the game, one band per level, in the order of its modes) is for
-// ages 10 to 15. A player younger than a level's band plays it with a grown-up: the library asks for one
+// ages 10 to 15. Lusot sa Usok is for ages 10 to 15 at both levels. A player younger than a level's band plays it with a grown-up: the library asks for one
 // before it starts (the grown-up check in Overlays.jsx). Until a player's date of birth is known, only the
 // 10 to 15 levels ask. The age comes from the player's details (src/profiles.js).
 export const AGE = {
